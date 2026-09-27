@@ -1,0 +1,64 @@
+name: travella
+description: "Travella Tour & Travel - Explore a Brighter World"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Navigation
+  go_router: ^14.6.2
+
+  # State Management
+  flutter_bloc: ^9.0.0
+  bloc: ^9.0.0
+  equatable: ^2.0.7
+
+  # Supabase
+  supabase_flutter: ^2.9.0
+
+  # UI & Animations
+  animate_do: ^3.3.4
+  visibility_detector: ^0.4.0+2
+  shimmer: ^3.0.0
+  cached_network_image: ^3.4.1
+  flutter_svg: ^2.0.16
+  lottie: ^3.1.3
+
+  # Utils
+  intl: ^0.20.2
+  shared_preferences: ^2.3.5
+  url_launcher: ^6.3.1
+  logger: ^2.4.0
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  http: ^1.2.2
+  rxdart: ^0.28.0
+
+  # Icons
+  cupertino_icons: ^1.0.8
+  font_awesome_flutter: ^10.8.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+    - assets/fonts/
+

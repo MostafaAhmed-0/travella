@@ -1,0 +1,72 @@
+/// App-wide constants for Travella Tour & Travel
+class AppConstants {
+  AppConstants._();
+
+  // App Info
+  static const String appName = 'Travella';
+  static const String appTagline = 'Explore a Brighter World';
+  static const String appFullName = 'Travella Tour & Travel';
+  static const String appVersion = '1.0.0';
+
+  // Contact Info
+  static const String appEmail = 'info@travella.com';
+  static const String appPhone = '+1 (800) TRAVELLA';
+  static const String appAddress = 'Your City, Country';
+  static const String appWhatsapp = '+1234567890';
+
+  // Social Links
+  static const String instagramUrl = 'https://instagram.com/travella';
+  static const String facebookUrl = 'https://facebook.com/travella';
+  static const String twitterUrl = 'https://twitter.com/travella';
+  static const String youtubeUrl = 'https://youtube.com/travella';
+
+  // Supabase (to be filled from environment)
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://your-project.supabase.co',
+  );
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: 'your-anon-key',
+  );
+
+  // Storage Buckets
+  static const String destinationsBucket = 'destinations';
+  static const String toursBucket = 'tours';
+  static const String hotelsBucket = 'hotels';
+  static const String galleryBucket = 'gallery';
+  static const String blogsBucket = 'blogs';
+  static const String avatarsBucket = 'avatars';
+
+  // Pagination
+  static const int defaultPageSize = 12;
+  static const int searchDebounceMs = 400;
+
+  // Animation Durations
+  static const int fastAnimationMs = 200;
+  static const int normalAnimationMs = 400;
+  static const int slowAnimationMs = 700;
+  static const int pageTransitionMs = 500;
+
+  // UI Sizes
+  static const double navbarHeight = 80.0;
+  static const double footerHeight = 320.0;
+  static const double heroMinHeight = 600.0;
+  static const double sectionPaddingVertical = 96.0;
+  static const double sectionPaddingHorizontal = 24.0;
+  static const double maxContentWidth = 1280.0;
+  static const double cardBorderRadius = 16.0;
+  static const double buttonBorderRadius = 12.0;
+  static const double inputBorderRadius = 12.0;
+
+  // Breakpoints (must be in sync with AppBreakpoints)
+  static const double mobileBreakpoint = 600.0;
+  static const double tabletBreakpoint = 1024.0;
+  static const double desktopBreakpoint = 1280.0;
+
+  // Cache Keys
+  static const String themeKey = 'app_theme';
+  static const String localeKey = 'app_locale';
+  static const String userKey = 'user_data';
+  static const String tokenKey = 'auth_token';
+}
