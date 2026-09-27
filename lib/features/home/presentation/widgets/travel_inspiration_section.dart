@@ -7,7 +7,7 @@ import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/animations/animation_widgets.dart';
 import '../../../../data/models/blog_model.dart';
-import '../../../../data/repositories/hajj_umrah_repository.dart';
+import '../../../../data/repositories/blog_repository.dart';
 
 class TravelInspirationSection extends StatefulWidget {
   const TravelInspirationSection({super.key});
@@ -18,7 +18,7 @@ class TravelInspirationSection extends StatefulWidget {
 }
 
 class _TravelInspirationSectionState extends State<TravelInspirationSection> {
-  final BlogRepository _repository = const BlogRepository();
+  final BlogRepository _repository = BlogRepository();
   List<BlogModel> _blogs = [];
   bool _isLoading = true;
 
@@ -29,7 +29,7 @@ class _TravelInspirationSectionState extends State<TravelInspirationSection> {
   }
 
   Future<void> _loadBlogs() async {
-    final list = await _repository.getBlogs();
+    final list = await _repository.getFeaturedArticles();
     if (mounted) {
       setState(() {
         _blogs = list;

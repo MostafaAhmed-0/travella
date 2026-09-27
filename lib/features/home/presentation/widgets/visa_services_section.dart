@@ -17,7 +17,7 @@ class VisaServicesSection extends StatefulWidget {
 }
 
 class _VisaServicesSectionState extends State<VisaServicesSection> {
-  final VisaRepository _repository = const VisaRepository();
+  final VisaRepository _repository = VisaRepository();
   List<VisaCountryModel> _countries = [];
   bool _isLoading = true;
   int _selectedCountryIndex = 0;
@@ -29,7 +29,7 @@ class _VisaServicesSectionState extends State<VisaServicesSection> {
   }
 
   Future<void> _loadVisaData() async {
-    final list = await _repository.getVisaCountries();
+    final list = await _repository.getPopularCountries();
     if (mounted) {
       setState(() {
         _countries = list;
@@ -43,6 +43,7 @@ class _VisaServicesSectionState extends State<VisaServicesSection> {
     final hPad = AppBreakpoints.horizontalPadding(context);
     final isMobile = AppBreakpoints.isMobile(context);
     final isDesktop = AppBreakpoints.isDesktop(context);
+    final features = _repository.getFeatures();
 
     return Container(
       color: AppColors.surfaceLight,
@@ -71,9 +72,9 @@ class _VisaServicesSectionState extends State<VisaServicesSection> {
                 crossAxisSpacing: 20,
                 mainAxisSpacing: 20,
               ),
-              itemCount: VisaRepository.features.length,
+              itemCount: features.length,
               itemBuilder: (context, i) {
-                final feat = VisaRepository.features[i];
+                final feat = features[i];
                 return ScaleInOnScroll(
                   delay: Duration(milliseconds: i * 60),
                   child: Container(
@@ -309,7 +310,7 @@ class _VisaServicesSectionState extends State<VisaServicesSection> {
                     const Icon(Icons.check_circle_rounded, color: AppColors.gold, size: 14),
                     const SizedBox(width: 6),
                     Text(
-                      req,
+                      req.requirement,
                       style: AppTextStyles.bodySM.copyWith(color: AppColors.white),
                     ),
                   ],

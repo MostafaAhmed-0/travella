@@ -17,7 +17,7 @@ class DomesticToursSection extends StatefulWidget {
 }
 
 class _DomesticToursSectionState extends State<DomesticToursSection> {
-  final TourRepository _repository = const TourRepository();
+  final TourRepository _repository = TourRepository();
   List<TourModel> _tours = [];
   bool _isLoading = true;
 

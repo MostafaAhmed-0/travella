@@ -1,17 +1,100 @@
-enum TourType { domestic, international }
+import 'package:equatable/equatable.dart';
 
-/// Model representing a package tour
-class TourModel {
+/// Enum representing tour types supported by Travella
+enum TourType {
+  domestic,
+  international,
+  hajj,
+  umrah;
+
+  static TourType fromString(String? value) {
+    switch (value?.toLowerCase()) {
+      case 'domestic':
+        return TourType.domestic;
+      case 'international':
+        return TourType.international;
+      case 'hajj':
+        return TourType.hajj;
+      case 'umrah':
+        return TourType.umrah;
+      default:
+        return TourType.domestic;
+    }
+  }
+
+  String toDbString() {
+    switch (this) {
+      case TourType.domestic:
+        return 'domestic';
+      case TourType.international:
+        return 'international';
+      case TourType.hajj:
+        return 'hajj';
+      case TourType.umrah:
+        return 'umrah';
+    }
+  }
+}
+
+/// Model representing auxiliary tour gallery images
+class TourImageModel extends Equatable {
+  final String id;
+  final String tourId;
+  final String imageUrl;
+  final int sortOrder;
+
+  const TourImageModel({
+    required this.id,
+    required this.tourId,
+    required this.imageUrl,
+    this.sortOrder = 0,
+  });
+
+  factory TourImageModel.fromJson(Map<String, dynamic> json) {
+    return TourImageModel(
+      id: json['id'] as String? ?? '',
+      tourId: json['tour_id'] as String? ?? '',
+      imageUrl: json['image_url'] as String? ?? '',
+      sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'tour_id': tourId,
+      'image_url': imageUrl,
+      'sort_order': sortOrder,
+    };
+  }
+
+  @override
+  List<Object?> get props => [id, tourId, imageUrl, sortOrder];
+}
+
+/// Model representing a tour package matching Supabase public.tours table
+class TourModel extends Equatable {
   final String id;
   final String title;
-  final String destination;
-  final String country;
-  final TourType type;
+  final String? titleAr;
   final String description;
-  final String imageUrl;
+  final String? descriptionAr;
+  final String? destinationId;
+  final TourType type;
+  final String duration;
   final double price;
   final double? originalPrice;
-  final String durationDays;
+  final String currency;
+  final String imageUrl;
+  final bool featured;
+  final bool active;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final List<TourImageModel> tourImages;
+
+  // Additional UI fields for rich presentation
+  final String destination;
+  final String country;
   final double rating;
   final int reviewsCount;
   final List<String> highlights;
@@ -22,14 +105,23 @@ class TourModel {
   const TourModel({
     required this.id,
     required this.title,
-    required this.destination,
-    required this.country,
-    required this.type,
+    this.titleAr,
     required this.description,
-    required this.imageUrl,
+    this.descriptionAr,
+    this.destinationId,
+    required this.type,
+    required this.duration,
     required this.price,
     this.originalPrice,
-    required this.durationDays,
+    this.currency = 'USD',
+    required this.imageUrl,
+    this.featured = false,
+    this.active = true,
+    this.createdAt,
+    this.updatedAt,
+    this.tourImages = const [],
+    this.destination = '',
+    this.country = '',
     this.rating = 4.9,
     this.reviewsCount = 48,
     this.highlights = const [],
@@ -38,23 +130,62 @@ class TourModel {
     this.badge,
   });
 
+  /// Backward-compatibility getter for widgets using `durationDays`
+  String get durationDays => duration;
+
+  /// Localized title helper
+  String localizedTitle(bool isArabic) {
+    if (isArabic && titleAr != null && titleAr!.isNotEmpty) {
+      return titleAr!;
+    }
+    return title;
+  }
+
+  /// Localized description helper
+  String localizedDescription(bool isArabic) {
+    if (isArabic && descriptionAr != null && descriptionAr!.isNotEmpty) {
+      return descriptionAr!;
+    }
+    return description;
+  }
+
   factory TourModel.fromJson(Map<String, dynamic> json) {
+    List<TourImageModel> images = [];
+    if (json['tour_images'] != null && json['tour_images'] is List) {
+      images = (json['tour_images'] as List)
+          .map((e) => TourImageModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+
     return TourModel(
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? '',
-      destination: json['destination'] as String? ?? '',
-      country: json['country'] as String? ?? '',
-      type: (json['type'] == 'domestic') ? TourType.domestic : TourType.international,
+      titleAr: json['title_ar'] as String?,
       description: json['description'] as String? ?? '',
-      imageUrl: json['image_url'] as String? ?? '',
+      descriptionAr: json['description_ar'] as String?,
+      destinationId: json['destination_id'] as String?,
+      type: TourType.fromString(json['type'] as String?),
+      duration: json['duration'] as String? ?? json['duration_days'] as String? ?? '5 Days / 4 Nights',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       originalPrice: (json['original_price'] as num?)?.toDouble(),
-      durationDays: json['duration_days'] as String? ?? '5 Days / 4 Nights',
+      currency: json['currency'] as String? ?? 'USD',
+      imageUrl: json['image_url'] as String? ?? '',
+      featured: (json['featured'] as bool?) ?? false,
+      active: (json['active'] as bool?) ?? true,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'].toString())
+          : null,
+      tourImages: images,
+      destination: json['destination'] as String? ?? '',
+      country: json['country'] as String? ?? '',
       rating: (json['rating'] as num?)?.toDouble() ?? 4.9,
       reviewsCount: (json['reviews_count'] as num?)?.toInt() ?? 0,
-      highlights: (json['highlights'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      included: (json['included'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      isSpecialOffer: json['is_special_offer'] as bool? ?? false,
+      highlights: (json['highlights'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [],
+      included: (json['included'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [],
+      isSpecialOffer: (json['is_special_offer'] as bool?) ?? false,
       badge: json['badge'] as String?,
     );
   }
@@ -63,20 +194,92 @@ class TourModel {
     return {
       'id': id,
       'title': title,
-      'destination': destination,
-      'country': country,
-      'type': type == TourType.domestic ? 'domestic' : 'international',
+      'title_ar': titleAr,
       'description': description,
-      'image_url': imageUrl,
+      'description_ar': descriptionAr,
+      'destination_id': destinationId,
+      'type': type.toDbString(),
+      'duration': duration,
       'price': price,
-      'original_price': originalPrice,
-      'duration_days': durationDays,
-      'rating': rating,
-      'reviews_count': reviewsCount,
-      'highlights': highlights,
-      'included': included,
-      'is_special_offer': isSpecialOffer,
-      'badge': badge,
+      'currency': currency,
+      'image_url': imageUrl,
+      'featured': featured,
+      'active': active,
+      if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
+      if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
     };
   }
+
+  TourModel copyWith({
+    String? id,
+    String? title,
+    String? titleAr,
+    String? description,
+    String? descriptionAr,
+    String? destinationId,
+    TourType? type,
+    String? duration,
+    double? price,
+    double? originalPrice,
+    String? currency,
+    String? imageUrl,
+    bool? featured,
+    bool? active,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    List<TourImageModel>? tourImages,
+    String? destination,
+    String? country,
+    double? rating,
+    int? reviewsCount,
+    List<String>? highlights,
+    List<String>? included,
+    bool? isSpecialOffer,
+    String? badge,
+  }) {
+    return TourModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      titleAr: titleAr ?? this.titleAr,
+      description: description ?? this.description,
+      descriptionAr: descriptionAr ?? this.descriptionAr,
+      destinationId: destinationId ?? this.destinationId,
+      type: type ?? this.type,
+      duration: duration ?? this.duration,
+      price: price ?? this.price,
+      originalPrice: originalPrice ?? this.originalPrice,
+      currency: currency ?? this.currency,
+      imageUrl: imageUrl ?? this.imageUrl,
+      featured: featured ?? this.featured,
+      active: active ?? this.active,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      tourImages: tourImages ?? this.tourImages,
+      destination: destination ?? this.destination,
+      country: country ?? this.country,
+      rating: rating ?? this.rating,
+      reviewsCount: reviewsCount ?? this.reviewsCount,
+      highlights: highlights ?? this.highlights,
+      included: included ?? this.included,
+      isSpecialOffer: isSpecialOffer ?? this.isSpecialOffer,
+      badge: badge ?? this.badge,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        title,
+        titleAr,
+        description,
+        descriptionAr,
+        destinationId,
+        type,
+        duration,
+        price,
+        currency,
+        imageUrl,
+        featured,
+        active,
+      ];
 }

@@ -7,7 +7,10 @@ class SupabaseService {
   SupabaseService._();
 
   static final Logger _logger = Logger(
-    printer: PrettyPrinter(methodCount: 0, dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart),
+    printer: PrettyPrinter(
+      methodCount: 0,
+      dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
+    ),
     level: Level.info,
   );
 
@@ -47,11 +50,11 @@ class SupabaseService {
     return client.storage.from(bucket).getPublicUrl(path);
   }
 
-  static String getDestinationImageUrl(String path) =>
-      getPublicUrl(AppConstants.destinationsBucket, path);
-
   static String getTourImageUrl(String path) =>
       getPublicUrl(AppConstants.toursBucket, path);
+
+  static String getDestinationImageUrl(String path) =>
+      getPublicUrl(AppConstants.destinationsBucket, path);
 
   static String getHotelImageUrl(String path) =>
       getPublicUrl(AppConstants.hotelsBucket, path);
@@ -62,17 +65,22 @@ class SupabaseService {
   static String getBlogImageUrl(String path) =>
       getPublicUrl(AppConstants.blogsBucket, path);
 
+  static String getPartnerLogoUrl(String path) =>
+      getPublicUrl(AppConstants.partnersBucket, path);
+
   // ── Table Names ────────────────────────────────────────────────────────────
+  static const String tableProfiles = 'profiles';
   static const String tableDestinations = 'destinations';
   static const String tableTours = 'tours';
+  static const String tableTourImages = 'tour_images';
   static const String tableHotels = 'hotels';
-  static const String tableVisas = 'visas';
+  static const String tableVisaServices = 'visa_services';
+  static const String tableVisaRequirements = 'visa_requirements';
   static const String tableBookings = 'bookings';
-  static const String tableTestimonials = 'testimonials';
-  static const String tableBlogs = 'blogs';
   static const String tableGallery = 'gallery';
-  static const String tableUsers = 'profiles';
-  static const String tableSettings = 'settings';
+  static const String tableBlogs = 'blogs';
+  static const String tableTestimonials = 'testimonials';
+  static const String tablePartners = 'partners';
 
   // ── Error Handler ──────────────────────────────────────────────────────────
   static String handleError(Object e) {

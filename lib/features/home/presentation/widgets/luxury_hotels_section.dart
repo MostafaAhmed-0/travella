@@ -17,7 +17,7 @@ class LuxuryHotelsSection extends StatefulWidget {
 }
 
 class _LuxuryHotelsSectionState extends State<LuxuryHotelsSection> {
-  final HotelRepository _repository = const HotelRepository();
+  final HotelRepository _repository = HotelRepository();
   List<HotelModel> _hotels = [];
   bool _isLoading = true;
 

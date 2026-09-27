@@ -18,7 +18,7 @@ class InternationalToursSection extends StatefulWidget {
 }
 
 class _InternationalToursSectionState extends State<InternationalToursSection> {
-  final TourRepository _repository = const TourRepository();
+  final TourRepository _repository = TourRepository();
   final ScrollController _scrollController = ScrollController();
   List<TourModel> _tours = [];
   bool _isLoading = true;

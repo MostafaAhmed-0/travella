@@ -19,7 +19,7 @@ class FeaturedDestinationsSection extends StatefulWidget {
 
 class _FeaturedDestinationsSectionState
     extends State<FeaturedDestinationsSection> {
-  final DestinationRepository _repository = const DestinationRepository();
+  final DestinationRepository _repository = DestinationRepository();
   String _selectedCategory = 'All';
   List<DestinationModel> _destinations = [];
   bool _isLoading = true;

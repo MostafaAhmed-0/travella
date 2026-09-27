@@ -5,7 +5,7 @@ import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/animations/animation_widgets.dart';
 import '../../../../data/models/blog_model.dart';
-import '../../../../data/repositories/hajj_umrah_repository.dart';
+import '../../../../data/repositories/gallery_repository.dart';
 
 class GallerySection extends StatefulWidget {
   const GallerySection({super.key});
@@ -15,7 +15,7 @@ class GallerySection extends StatefulWidget {
 }
 
 class _GallerySectionState extends State<GallerySection> {
-  final GalleryRepository _repository = const GalleryRepository();
+  final GalleryRepository _repository = GalleryRepository();
   List<GalleryItemModel> _items = [];
   bool _isLoading = true;
 

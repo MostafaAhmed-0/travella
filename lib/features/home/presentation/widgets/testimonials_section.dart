@@ -5,7 +5,7 @@ import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/animations/animation_widgets.dart';
 import '../../../../data/models/testimonial_model.dart';
-import '../../../../data/repositories/hajj_umrah_repository.dart';
+import '../../../../data/repositories/testimonial_repository.dart';
 
 class TestimonialsSection extends StatefulWidget {
   const TestimonialsSection({super.key});
@@ -15,7 +15,7 @@ class TestimonialsSection extends StatefulWidget {
 }
 
 class _TestimonialsSectionState extends State<TestimonialsSection> {
-  final TestimonialRepository _repository = const TestimonialRepository();
+  final TestimonialRepository _repository = TestimonialRepository();
   List<TestimonialModel> _testimonials = [];
   int _currentIndex = 0;
   final PageController _pageController = PageController();
@@ -33,7 +33,7 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
   }
 
   Future<void> _loadTestimonials() async {
-    final list = await _repository.getTestimonials();
+    final list = await _repository.getFeaturedTestimonials();
     if (mounted) {
       setState(() {
         _testimonials = list;

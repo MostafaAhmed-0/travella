@@ -20,23 +20,34 @@ class AppConstants {
   static const String twitterUrl = 'https://twitter.com/travella';
   static const String youtubeUrl = 'https://youtube.com/travella';
 
-  // Supabase (to be filled from environment)
+  // Supabase
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'https://your-project.supabase.co',
+    defaultValue: 'https://gusemyjhonjvgafqaafb.supabase.co',
   );
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: 'your-anon-key',
+    defaultValue: 'sb_publishable_NvLGwYeGiqZInT8Vuy_b3Q_d4JC254Z',
   );
 
-  // Storage Buckets
-  static const String destinationsBucket = 'destinations';
-  static const String toursBucket = 'tours';
-  static const String hotelsBucket = 'hotels';
-  static const String galleryBucket = 'gallery';
-  static const String blogsBucket = 'blogs';
-  static const String avatarsBucket = 'avatars';
+  // Storage Buckets (Canonical bucket IDs in Supabase)
+  static const String tourImagesBucket = 'tour-images';
+  static const String toursBucket = 'tour-images';
+
+  static const String destinationImagesBucket = 'destination-images';
+  static const String destinationsBucket = 'destination-images';
+
+  static const String hotelImagesBucket = 'hotel-images';
+  static const String hotelsBucket = 'hotel-images';
+
+  static const String galleryImagesBucket = 'gallery-images';
+  static const String galleryBucket = 'gallery-images';
+
+  static const String blogImagesBucket = 'blog-images';
+  static const String blogsBucket = 'blog-images';
+
+  static const String partnerLogosBucket = 'partner-logos';
+  static const String partnersBucket = 'partner-logos';
 
   // Pagination
   static const int defaultPageSize = 12;
