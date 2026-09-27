@@ -59,17 +59,26 @@ class AppRoutes {
   static const String adminVisa = '/admin/visa';
   static const String adminVisaName = 'admin-visa';
 
+  static const String adminHajjUmrah = '/admin/hajj-umrah';
+  static const String adminHajjUmrahName = 'admin-hajj-umrah';
+
   static const String adminGallery = '/admin/gallery';
   static const String adminGalleryName = 'admin-gallery';
-
-  static const String adminBookings = '/admin/bookings';
-  static const String adminBookingsName = 'admin-bookings';
 
   static const String adminBlog = '/admin/blog';
   static const String adminBlogName = 'admin-blog';
 
   static const String adminTestimonials = '/admin/testimonials';
   static const String adminTestimonialsName = 'admin-testimonials';
+
+  static const String adminPartners = '/admin/partners';
+  static const String adminPartnersName = 'admin-partners';
+
+  static const String adminBookings = '/admin/bookings';
+  static const String adminBookingsName = 'admin-bookings';
+
+  static const String adminCustomers = '/admin/customers';
+  static const String adminCustomersName = 'admin-customers';
 
   static const String adminSettings = '/admin/settings';
   static const String adminSettingsName = 'admin-settings';

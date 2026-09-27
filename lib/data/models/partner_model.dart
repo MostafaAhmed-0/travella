@@ -41,6 +41,24 @@ class PartnerModel extends Equatable {
     };
   }
 
+  PartnerModel copyWith({
+    String? id,
+    String? name,
+    String? logoUrl,
+    String? website,
+    bool? active,
+    String? category,
+  }) {
+    return PartnerModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      logoUrl: logoUrl ?? this.logoUrl,
+      website: website ?? this.website,
+      active: active ?? this.active,
+      category: category ?? this.category,
+    );
+  }
+
   @override
   List<Object?> get props => [id, name, logoUrl, website, active];
 }

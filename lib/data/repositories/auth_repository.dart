@@ -9,6 +9,8 @@ abstract class AuthRepository {
     required String password,
   });
 
+  Future<void> sendPasswordResetEmail(String email);
+
   Future<void> signOut();
 
   Future<ProfileModel?> getCurrentProfile();
@@ -62,6 +64,11 @@ class AuthRepositoryImpl implements AuthRepository {
       // If error occurs, rethrow with clean message
       throw Exception(e.toString().replaceAll('Exception: ', ''));
     }
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _dataSource.sendPasswordResetEmail(email);
   }
 
   @override

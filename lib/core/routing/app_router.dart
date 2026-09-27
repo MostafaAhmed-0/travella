@@ -7,8 +7,20 @@ import 'route_transitions.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
 import '../../features/admin/presentation/pages/admin_shell_page.dart';
+import '../../features/admin/presentation/pages/admin_dashboard_overview_page.dart';
+import '../../features/admin/presentation/pages/admin_tours_page.dart';
+import '../../features/admin/presentation/pages/admin_destinations_page.dart';
+import '../../features/admin/presentation/pages/admin_hotels_page.dart';
+import '../../features/admin/presentation/pages/admin_visa_page.dart';
+import '../../features/admin/presentation/pages/admin_hajj_umrah_page.dart';
+import '../../features/admin/presentation/pages/admin_gallery_page.dart';
+import '../../features/admin/presentation/pages/admin_blogs_page.dart';
+import '../../features/admin/presentation/pages/admin_testimonials_page.dart';
+import '../../features/admin/presentation/pages/admin_partners_page.dart';
+import '../../features/admin/presentation/pages/admin_bookings_page.dart';
+import '../../features/admin/presentation/pages/admin_customers_page.dart';
+import '../../features/admin/presentation/pages/admin_settings_page.dart';
 import '../../features/destinations/presentation/pages/destinations_page.dart';
 import '../../features/domestic_tours/presentation/pages/domestic_tours_page.dart';
 import '../../features/international_tours/presentation/pages/international_tours_page.dart';
@@ -43,7 +55,7 @@ class AppRouter {
 
   static GoRouter createRouter(AuthCubit authCubit) {
     return GoRouter(
-      initialLocation: AppRoutes.home,
+      initialLocation: AppRoutes.login,
       debugLogDiagnostics: false,
       refreshListenable: GoRouterRefreshStream(authCubit.stream),
       errorBuilder: (context, state) => const NotFoundPage(),
@@ -56,10 +68,8 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.home,
           name: AppRoutes.homeName,
-          pageBuilder: (context, state) => buildPageTransition(
-            key: state.pageKey,
-            child: const HomePage(),
-          ),
+          pageBuilder: (context, state) =>
+              buildPageTransition(key: state.pageKey, child: const HomePage()),
         ),
         GoRoute(
           path: AppRoutes.destinations,
@@ -120,10 +130,8 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.blog,
           name: AppRoutes.blogName,
-          pageBuilder: (context, state) => buildPageTransition(
-            key: state.pageKey,
-            child: const BlogsPage(),
-          ),
+          pageBuilder: (context, state) =>
+              buildPageTransition(key: state.pageKey, child: const BlogsPage()),
         ),
         GoRoute(
           path: AppRoutes.contact,
@@ -146,10 +154,8 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.login,
           name: AppRoutes.loginName,
-          pageBuilder: (context, state) => buildPageTransition(
-            key: state.pageKey,
-            child: const LoginPage(),
-          ),
+          pageBuilder: (context, state) =>
+              buildPageTransition(key: state.pageKey, child: const LoginPage()),
         ),
 
         // ── Admin Shell ─────────────────────────────────────────────────────
@@ -161,7 +167,7 @@ class AppRouter {
               name: AppRoutes.adminDashboardName,
               pageBuilder: (context, state) => buildPageTransition(
                 key: state.pageKey,
-                child: const AdminDashboardPage(),
+                child: const AdminDashboardOverviewPage(),
               ),
             ),
             GoRoute(
@@ -169,7 +175,7 @@ class AppRouter {
               name: AppRoutes.adminToursName,
               pageBuilder: (context, state) => buildPageTransition(
                 key: state.pageKey,
-                child: const AdminDashboardPage(),
+                child: const AdminToursPage(),
               ),
             ),
             GoRoute(
@@ -177,7 +183,7 @@ class AppRouter {
               name: AppRoutes.adminDestinationsName,
               pageBuilder: (context, state) => buildPageTransition(
                 key: state.pageKey,
-                child: const AdminDashboardPage(),
+                child: const AdminDestinationsPage(),
               ),
             ),
             GoRoute(
@@ -185,7 +191,7 @@ class AppRouter {
               name: AppRoutes.adminHotelsName,
               pageBuilder: (context, state) => buildPageTransition(
                 key: state.pageKey,
-                child: const AdminDashboardPage(),
+                child: const AdminHotelsPage(),
               ),
             ),
             GoRoute(
@@ -193,7 +199,15 @@ class AppRouter {
               name: AppRoutes.adminVisaName,
               pageBuilder: (context, state) => buildPageTransition(
                 key: state.pageKey,
-                child: const AdminDashboardPage(),
+                child: const AdminVisaPage(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.adminHajjUmrah,
+              name: AppRoutes.adminHajjUmrahName,
+              pageBuilder: (context, state) => buildPageTransition(
+                key: state.pageKey,
+                child: const AdminHajjUmrahPage(),
               ),
             ),
             GoRoute(
@@ -201,15 +215,7 @@ class AppRouter {
               name: AppRoutes.adminGalleryName,
               pageBuilder: (context, state) => buildPageTransition(
                 key: state.pageKey,
-                child: const AdminDashboardPage(),
-              ),
-            ),
-            GoRoute(
-              path: AppRoutes.adminBookings,
-              name: AppRoutes.adminBookingsName,
-              pageBuilder: (context, state) => buildPageTransition(
-                key: state.pageKey,
-                child: const AdminDashboardPage(),
+                child: const AdminGalleryPage(),
               ),
             ),
             GoRoute(
@@ -217,7 +223,7 @@ class AppRouter {
               name: AppRoutes.adminBlogName,
               pageBuilder: (context, state) => buildPageTransition(
                 key: state.pageKey,
-                child: const AdminDashboardPage(),
+                child: const AdminBlogsPage(),
               ),
             ),
             GoRoute(
@@ -225,7 +231,31 @@ class AppRouter {
               name: AppRoutes.adminTestimonialsName,
               pageBuilder: (context, state) => buildPageTransition(
                 key: state.pageKey,
-                child: const AdminDashboardPage(),
+                child: const AdminTestimonialsPage(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.adminPartners,
+              name: AppRoutes.adminPartnersName,
+              pageBuilder: (context, state) => buildPageTransition(
+                key: state.pageKey,
+                child: const AdminPartnersPage(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.adminBookings,
+              name: AppRoutes.adminBookingsName,
+              pageBuilder: (context, state) => buildPageTransition(
+                key: state.pageKey,
+                child: const AdminBookingsPage(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.adminCustomers,
+              name: AppRoutes.adminCustomersName,
+              pageBuilder: (context, state) => buildPageTransition(
+                key: state.pageKey,
+                child: const AdminCustomersPage(),
               ),
             ),
             GoRoute(
@@ -233,7 +263,7 @@ class AppRouter {
               name: AppRoutes.adminSettingsName,
               pageBuilder: (context, state) => buildPageTransition(
                 key: state.pageKey,
-                child: const AdminDashboardPage(),
+                child: const AdminSettingsPage(),
               ),
             ),
           ],

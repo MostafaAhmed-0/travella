@@ -88,6 +88,9 @@ class GalleryRepository {
   Future<GalleryModel> createGalleryItem(GalleryModel item) =>
       _remoteDataSource.createGalleryItem(item);
 
+  Future<GalleryModel> updateGalleryItem(GalleryModel item) =>
+      _remoteDataSource.updateGalleryItem(item);
+
   Future<void> deleteGalleryItem(String id) =>
       _remoteDataSource.deleteGalleryItem(id);
 }

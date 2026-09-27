@@ -50,6 +50,7 @@ class AppColors {
   static const Color warningLight = Color(0xFFFEF3C7);
   static const Color error = Color(0xFFEF4444);
   static const Color errorLight = Color(0xFFFEE2E2);
+  static const Color coral = Color(0xFFFF6B6B);
   static const Color info = Color(0xFF3B82F6);
   static const Color infoLight = Color(0xFFDBEAFE);
 

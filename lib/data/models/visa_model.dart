@@ -158,6 +158,46 @@ class VisaServiceModel extends Equatable {
     };
   }
 
+  VisaServiceModel copyWith({
+    String? id,
+    String? country,
+    String? countryAr,
+    String? visaType,
+    String? description,
+    String? descriptionAr,
+    String? processingTime,
+    double? price,
+    bool? active,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    List<VisaRequirementModel>? requirements,
+    String? region,
+    String? flagEmoji,
+    String? validity,
+    String? iconUrl,
+    bool? isPopular,
+  }) {
+    return VisaServiceModel(
+      id: id ?? this.id,
+      country: country ?? this.country,
+      countryAr: countryAr ?? this.countryAr,
+      visaType: visaType ?? this.visaType,
+      description: description ?? this.description,
+      descriptionAr: descriptionAr ?? this.descriptionAr,
+      processingTime: processingTime ?? this.processingTime,
+      price: price ?? this.price,
+      active: active ?? this.active,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      requirements: requirements ?? this.requirements,
+      region: region ?? this.region,
+      flagEmoji: flagEmoji ?? this.flagEmoji,
+      validity: validity ?? this.validity,
+      iconUrl: iconUrl ?? this.iconUrl,
+      isPopular: isPopular ?? this.isPopular,
+    );
+  }
+
   @override
   List<Object?> get props => [
         id,

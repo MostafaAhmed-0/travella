@@ -59,6 +59,9 @@ class PartnerRepository {
   Future<PartnerModel> createPartner(PartnerModel partner) =>
       _remoteDataSource.createPartner(partner);
 
+  Future<PartnerModel> updatePartner(PartnerModel partner) =>
+      _remoteDataSource.updatePartner(partner);
+
   Future<void> deletePartner(String id) =>
       _remoteDataSource.deletePartner(id);
 }

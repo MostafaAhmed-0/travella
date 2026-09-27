@@ -5,6 +5,7 @@ import '../services/supabase_service.dart';
 abstract class GalleryRemoteDataSource {
   Future<List<GalleryModel>> getGalleryItems({String? category, bool? featuredOnly});
   Future<GalleryModel> createGalleryItem(GalleryModel item);
+  Future<GalleryModel> updateGalleryItem(GalleryModel item);
   Future<void> deleteGalleryItem(String id);
 }
 
@@ -40,6 +41,22 @@ class GalleryRemoteDataSourceImpl implements GalleryRemoteDataSource {
       final response = await _client
           .from(SupabaseService.tableGallery)
           .insert(map)
+          .select()
+          .single();
+      return GalleryModel.fromJson(response);
+    } catch (e) {
+      throw Exception(SupabaseService.handleError(e));
+    }
+  }
+
+  @override
+  Future<GalleryModel> updateGalleryItem(GalleryModel item) async {
+    try {
+      final map = item.toJson()..remove('id');
+      final response = await _client
+          .from(SupabaseService.tableGallery)
+          .update(map)
+          .eq('id', item.id)
           .select()
           .single();
       return GalleryModel.fromJson(response);

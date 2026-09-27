@@ -16,6 +16,8 @@ abstract class AuthRemoteDataSource {
 
   Session? getCurrentSession();
 
+  Future<void> sendPasswordResetEmail(String email);
+
   Stream<AuthState> get authStateChanges;
 }
 
@@ -75,6 +77,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Session? getCurrentSession() {
     return _client.auth.currentSession;
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _client.auth.resetPasswordForEmail(email.trim());
+    } catch (e) {
+      throw Exception(SupabaseService.handleError(e));
+    }
   }
 
   @override
