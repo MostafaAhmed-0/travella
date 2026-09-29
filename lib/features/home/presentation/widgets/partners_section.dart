@@ -88,33 +88,45 @@ class _PartnersSectionState extends State<PartnersSection>
           // Infinite Ticker
           SizedBox(
             height: 52,
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final itemWidth = 220.0;
-                    final totalWidth = partnerNames.length * itemWidth;
-                    final offset = _controller.value * totalWidth;
+            child: ClipRect(
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      const itemWidth = 220.0;
+                      const itemMargin = 24.0; // 12px left + 12px right
+                      final singleSetWidth =
+                          partnerNames.length * (itemWidth + itemMargin);
+                      final offset = _controller.value * singleSetWidth;
 
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Transform.translate(
+                      return OverflowBox(
+                        minWidth: 0.0,
+                        maxWidth: double.infinity,
+                        minHeight: 0.0,
+                        maxHeight: 52.0,
+                        alignment: Alignment.centerLeft,
+                        child: Transform.translate(
                           offset: Offset(-offset, 0),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              ...partnerNames.map((name) => _buildPartnerChip(name, itemWidth)),
-                              ...partnerNames.map((name) => _buildPartnerChip(name, itemWidth)),
-                              ...partnerNames.map((name) => _buildPartnerChip(name, itemWidth)),
+                              ...partnerNames.map(
+                                  (name) => _buildPartnerChip(name, itemWidth)),
+                              ...partnerNames.map(
+                                  (name) => _buildPartnerChip(name, itemWidth)),
+                              ...partnerNames.map(
+                                  (name) => _buildPartnerChip(name, itemWidth)),
+                              ...partnerNames.map(
+                                  (name) => _buildPartnerChip(name, itemWidth)),
                             ],
                           ),
                         ),
-                      ],
-                    );
-                  },
-                );
-              },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ],
