@@ -38,6 +38,8 @@ class AppRoutes {
 
   static const String booking = '/booking';
   static const String bookingName = 'booking';
+  static const String bookingWithTourId = '/booking/:tourId';
+  static const String bookingWithTourIdName = 'booking-tour';
 
   static const String tourDetails = '/tours/:id';
   static const String tourDetailsName = 'tour-details';

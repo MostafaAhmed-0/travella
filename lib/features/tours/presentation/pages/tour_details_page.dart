@@ -854,14 +854,14 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
 
           // Book Now CTA
           TravellaButton(
-            label: 'Book This Tour',
+            label: 'Book Now',
             variant: TravellaButtonVariant.primary,
             fullWidth: true,
             trailingIcon: Icons.arrow_forward_rounded,
             onPressed: () {
               context.goNamed(
-                AppRoutes.bookingName,
-                queryParameters: {'tourId': tour.id, 'tourTitle': tour.title},
+                AppRoutes.bookingWithTourIdName,
+                pathParameters: {'tourId': tour.id},
               );
             },
           ),

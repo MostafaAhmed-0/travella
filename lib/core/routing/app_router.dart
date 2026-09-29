@@ -153,6 +153,19 @@ class AppRouter {
               child: BookingPage(preselectedTourId: tourId),
             );
           },
+          routes: [
+            GoRoute(
+              path: ':tourId',
+              name: AppRoutes.bookingWithTourIdName,
+              pageBuilder: (context, state) {
+                final tourId = state.pathParameters['tourId'];
+                return buildPageTransition(
+                  key: state.pageKey,
+                  child: BookingPage(preselectedTourId: tourId),
+                );
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: AppRoutes.tourDetails,

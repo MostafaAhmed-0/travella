@@ -390,25 +390,43 @@ class _TourCardState extends State<_TourCard> {
                                 ),
                               ],
                             ),
-                            ElevatedButton(
-                              onPressed: () => context.goNamed(
-                                AppRoutes.tourDetailsName,
-                                pathParameters: {'id': tour.id},
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: _isHovered ? AppColors.gold : AppColors.navy,
-                                foregroundColor: _isHovered ? AppColors.navyDark : AppColors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                elevation: 0,
-                              ),
-                              child: Text(
-                                'View Details',
-                                style: AppTextStyles.labelMD.copyWith(
-                                  color: _isHovered ? AppColors.navyDark : AppColors.white,
-                                  fontWeight: FontWeight.w700,
+                            Row(
+                              children: [
+                                OutlinedButton(
+                                  onPressed: () => context.goNamed(
+                                    AppRoutes.tourDetailsName,
+                                    pathParameters: {'id': tour.id},
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColors.navyDark,
+                                    side: const BorderSide(color: AppColors.borderLight),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                  child: const Text('Details', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                                 ),
-                              ),
+                                const SizedBox(width: 8),
+                                ElevatedButton(
+                                  onPressed: () => context.goNamed(
+                                    AppRoutes.bookingWithTourIdName,
+                                    pathParameters: {'tourId': tour.id},
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: _isHovered ? AppColors.gold : AppColors.royalBlue,
+                                    foregroundColor: _isHovered ? AppColors.navyDark : AppColors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    elevation: 0,
+                                  ),
+                                  child: const Text(
+                                    'Book Now',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),

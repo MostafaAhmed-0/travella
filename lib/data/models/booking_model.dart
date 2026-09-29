@@ -155,6 +155,17 @@ class BookingModel extends Equatable {
     );
   }
 
+  String get bookingReference {
+    if (id.isEmpty) {
+      return 'TRV-${DateTime.now().millisecondsSinceEpoch.toRadixString(16).toUpperCase()}';
+    }
+    final cleanId = id.replaceAll('-', '').toUpperCase();
+    if (cleanId.length >= 8) {
+      return 'TRV-${cleanId.substring(0, 8)}';
+    }
+    return 'TRV-$cleanId';
+  }
+
   @override
   List<Object?> get props => [
         id,
