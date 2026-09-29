@@ -5,8 +5,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
+import '../../../../core/localization/app_locales.dart';
+import '../../../../core/localization/app_translations.dart';
 
-/// Shared App Navbar for all public pages with responsive mobile drawer overlay
+/// Shared App Navbar for all public pages with bilingual support & responsive drawer
 class AppNavbar extends StatefulWidget {
   final String currentRoute;
 
@@ -17,19 +19,6 @@ class AppNavbar extends StatefulWidget {
 }
 
 class _AppNavbarState extends State<AppNavbar> {
-  static const _navItems = [
-    ('Home', AppRoutes.home, AppRoutes.homeName, Icons.home_rounded),
-    ('Destinations', AppRoutes.destinations, AppRoutes.destinationsName, Icons.place_rounded),
-    ('Domestic Tours', AppRoutes.domesticTours, AppRoutes.domesticToursName, Icons.landscape_rounded),
-    ('International', AppRoutes.internationalTours, AppRoutes.internationalToursName, Icons.public_rounded),
-    ('Visa Services', AppRoutes.visaServices, AppRoutes.visaServicesName, Icons.assignment_outlined),
-    ('Hotels', AppRoutes.hotels, AppRoutes.hotelsName, Icons.hotel_rounded),
-    ('Hajj & Umrah', AppRoutes.hajjUmrah, AppRoutes.hajjUmrahName, Icons.mosque_rounded),
-    ('Gallery', AppRoutes.gallery, AppRoutes.galleryName, Icons.photo_library_outlined),
-    ('Blog', AppRoutes.blog, AppRoutes.blogName, Icons.article_outlined),
-    ('Contact', AppRoutes.contact, AppRoutes.contactName, Icons.contact_support_outlined),
-  ];
-
   void _openMobileDrawer(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -37,7 +26,6 @@ class _AppNavbarState extends State<AppNavbar> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => _MobileNavDrawer(
         currentRoute: widget.currentRoute,
-        navItems: _navItems,
       ),
     );
   }
@@ -45,7 +33,20 @@ class _AppNavbarState extends State<AppNavbar> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
-    final isMobileOrTablet = screenWidth < 1140;
+    final isMobileOrTablet = screenWidth < 1200;
+
+    final navItems = [
+      (context.tr('nav_home'), AppRoutes.home, AppRoutes.homeName, Icons.home_rounded),
+      (context.tr('nav_destinations'), AppRoutes.destinations, AppRoutes.destinationsName, Icons.place_rounded),
+      (context.tr('nav_domestic_tours'), AppRoutes.domesticTours, AppRoutes.domesticToursName, Icons.landscape_rounded),
+      (context.tr('nav_international_tours'), AppRoutes.internationalTours, AppRoutes.internationalToursName, Icons.public_rounded),
+      (context.tr('nav_visa_services'), AppRoutes.visaServices, AppRoutes.visaServicesName, Icons.assignment_outlined),
+      (context.tr('nav_hotels'), AppRoutes.hotels, AppRoutes.hotelsName, Icons.hotel_rounded),
+      (context.tr('nav_hajj_umrah'), AppRoutes.hajjUmrah, AppRoutes.hajjUmrahName, Icons.mosque_rounded),
+      (context.tr('nav_gallery'), AppRoutes.gallery, AppRoutes.galleryName, Icons.photo_library_outlined),
+      (context.tr('nav_blog'), AppRoutes.blog, AppRoutes.blogName, Icons.article_outlined),
+      (context.tr('nav_contact'), AppRoutes.contact, AppRoutes.contactName, Icons.contact_support_outlined),
+    ];
 
     return Container(
       color: AppColors.surfaceNavbar,
@@ -86,19 +87,19 @@ class _AppNavbarState extends State<AppNavbar> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'TRAVELLA',
+                      context.tr('app_name'),
                       style: AppTextStyles.h6.copyWith(
                         color: AppColors.white,
-                        letterSpacing: 1.5,
+                        letterSpacing: context.isArabic ? 0.0 : 1.5,
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
                       ),
                     ),
                     Text(
-                      'TOUR & TRAVEL',
+                      context.tr('app_tagline'),
                       style: AppTextStyles.labelSM.copyWith(
                         color: AppColors.gold,
-                        letterSpacing: 1.5,
+                        letterSpacing: context.isArabic ? 0.0 : 1.5,
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
                       ),
@@ -112,36 +113,42 @@ class _AppNavbarState extends State<AppNavbar> {
 
           if (!isMobileOrTablet) ...[
             // Desktop nav items
-            ..._navItems.take(8).map((item) => _NavItem(
+            ...navItems.take(8).map((item) => _NavItem(
                   label: item.$1,
                   isActive: widget.currentRoute == item.$2,
                   onTap: () => context.goNamed(item.$3),
                 )),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
+            // Language Switcher Button
+            const LanguageSwitchButton(isDark: true),
+            const SizedBox(width: 12),
+            // Book Now CTA
             TravellaButton(
-              label: 'Book Now',
+              label: context.tr('nav_book_now'),
               variant: TravellaButtonVariant.gold,
               size: TravellaButtonSize.sm,
               leadingIcon: Icons.calendar_month_rounded,
               onPressed: () => context.goNamed(AppRoutes.bookingName),
             ),
           ] else ...[
-            // Mobile/Tablet Quick Book & Menu Toggle
+            // Mobile/Tablet Quick Actions: Language Switcher + Book Now + Menu Icon
+            const LanguageSwitchButton(isDark: true, isCompact: true),
+            const SizedBox(width: 8),
             TravellaButton(
-              label: 'Book Now',
+              label: context.tr('nav_book_now'),
               variant: TravellaButtonVariant.gold,
               size: TravellaButtonSize.sm,
               onPressed: () => context.goNamed(AppRoutes.bookingName),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             IconButton(
               onPressed: () => _openMobileDrawer(context),
               icon: const Icon(
                 Icons.menu_rounded,
                 color: AppColors.white,
-                size: 28,
+                size: 26,
               ),
-              tooltip: 'Navigation Menu',
+              tooltip: context.tr('nav_menu'),
             ),
           ],
         ],
@@ -210,11 +217,9 @@ class _NavItemState extends State<_NavItem> {
 
 class _MobileNavDrawer extends StatelessWidget {
   final String currentRoute;
-  final List<(String, String, String, IconData)> navItems;
 
   const _MobileNavDrawer({
     required this.currentRoute,
-    required this.navItems,
   });
 
   Future<void> _openWhatsApp() async {
@@ -228,8 +233,21 @@ class _MobileNavDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final height = MediaQuery.sizeOf(context).height;
 
+    final navItems = [
+      (context.tr('nav_home'), AppRoutes.home, AppRoutes.homeName, Icons.home_rounded),
+      (context.tr('nav_destinations'), AppRoutes.destinations, AppRoutes.destinationsName, Icons.place_rounded),
+      (context.tr('nav_domestic_tours'), AppRoutes.domesticTours, AppRoutes.domesticToursName, Icons.landscape_rounded),
+      (context.tr('nav_international_tours'), AppRoutes.internationalTours, AppRoutes.internationalToursName, Icons.public_rounded),
+      (context.tr('nav_visa_services'), AppRoutes.visaServices, AppRoutes.visaServicesName, Icons.assignment_outlined),
+      (context.tr('nav_hotels'), AppRoutes.hotels, AppRoutes.hotelsName, Icons.hotel_rounded),
+      (context.tr('nav_hajj_umrah'), AppRoutes.hajjUmrah, AppRoutes.hajjUmrahName, Icons.mosque_rounded),
+      (context.tr('nav_gallery'), AppRoutes.gallery, AppRoutes.galleryName, Icons.photo_library_outlined),
+      (context.tr('nav_blog'), AppRoutes.blog, AppRoutes.blogName, Icons.article_outlined),
+      (context.tr('nav_contact'), AppRoutes.contact, AppRoutes.contactName, Icons.contact_support_outlined),
+    ];
+
     return Container(
-      height: height * 0.82,
+      height: height * 0.84,
       decoration: const BoxDecoration(
         color: AppColors.navyDark,
         borderRadius: BorderRadius.only(
@@ -263,7 +281,7 @@ class _MobileNavDrawer extends StatelessWidget {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        'TRAVELLA MENU',
+                        '${context.tr('app_name')} ${context.tr('nav_menu')}',
                         style: AppTextStyles.h6.copyWith(
                           color: AppColors.white,
                           fontWeight: FontWeight.bold,
@@ -272,9 +290,15 @@ class _MobileNavDrawer extends StatelessWidget {
                       ),
                     ],
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded, color: AppColors.white),
+                  Row(
+                    children: [
+                      const LanguageSwitchButton(isDark: true, isCompact: true),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close_rounded, color: AppColors.white),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -333,7 +357,7 @@ class _MobileNavDrawer extends StatelessWidget {
               child: Column(
                 children: [
                   TravellaButton(
-                    label: 'Book a Tour / Custom Itinerary',
+                    label: context.tr('nav_book_now'),
                     variant: TravellaButtonVariant.gold,
                     fullWidth: true,
                     leadingIcon: Icons.calendar_month_rounded,
@@ -346,9 +370,9 @@ class _MobileNavDrawer extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: _openWhatsApp,
                     icon: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF25D366), size: 18),
-                    label: const Text(
-                      'Chat on WhatsApp',
-                      style: TextStyle(color: Color(0xFF25D366), fontWeight: FontWeight.bold),
+                    label: Text(
+                      context.tr('whatsapp_btn_label'),
+                      style: const TextStyle(color: Color(0xFF25D366), fontWeight: FontWeight.bold),
                     ),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 46),

@@ -56,7 +56,7 @@ class AppRouter {
 
   static GoRouter createRouter(AuthCubit authCubit) {
     return GoRouter(
-      initialLocation: AppRoutes.home,
+      initialLocation: AppRoutes.login,
       debugLogDiagnostics: false,
       refreshListenable: GoRouterRefreshStream(authCubit.stream),
       errorBuilder: (context, state) => const NotFoundPage(),

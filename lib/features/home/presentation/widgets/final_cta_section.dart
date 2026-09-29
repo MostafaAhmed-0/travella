@@ -6,6 +6,7 @@ import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/animations/animation_widgets.dart';
+import '../../../../core/localization/app_translations.dart';
 
 class FinalCtaSection extends StatelessWidget {
   const FinalCtaSection({super.key});
@@ -51,25 +52,25 @@ class FinalCtaSection extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SectionBadge(
-                    text: 'Explore A Brighter World',
+                    text: context.tr('cta_badge'),
                     color: AppColors.gold.withValues(alpha: 0.15),
                     textColor: AppColors.gold,
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Ready To Explore\nA Brighter World?',
+                    context.tr('cta_title'),
                     style: (isMobile ? AppTextStyles.h1 : AppTextStyles.displayLG).copyWith(
                       color: AppColors.white,
-                      height: 1.15,
+                      height: 1.18,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Your dream journey starts here. Speak with a dedicated travel designer or plan your customized itinerary today.',
+                    context.tr('cta_subtitle'),
                     style: AppTextStyles.bodyXL.copyWith(
                       color: AppColors.textOnDarkMuted,
-                      height: 1.5,
+                      height: 1.6,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -82,14 +83,14 @@ class FinalCtaSection extends StatelessWidget {
                     alignment: WrapAlignment.center,
                     children: [
                       TravellaButton(
-                        label: 'Plan Your Trip',
+                        label: context.tr('cta_plan_trip'),
                         variant: TravellaButtonVariant.gold,
                         size: TravellaButtonSize.lg,
                         trailingIcon: Icons.arrow_forward_rounded,
                         onPressed: () => context.goNamed(AppRoutes.bookingName),
                       ),
                       TravellaButton(
-                        label: 'Contact Travel Expert',
+                        label: context.tr('cta_contact_expert'),
                         variant: TravellaButtonVariant.secondary,
                         size: TravellaButtonSize.lg,
                         leadingIcon: Icons.support_agent_rounded,

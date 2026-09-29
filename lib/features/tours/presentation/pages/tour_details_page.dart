@@ -5,6 +5,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
+import '../../../../core/localization/app_translations.dart';
 import '../../../../data/models/tour_model.dart';
 import '../../../../data/repositories/tour_repository.dart';
 import '../../../../shared/presentation/widgets/app_navbar.dart';
@@ -204,7 +205,7 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
               children: [
                 InkWell(
                   onTap: () => context.goNamed(AppRoutes.homeName),
-                  child: Text('Home', style: AppTextStyles.labelSM.copyWith(color: AppColors.royalBlue)),
+                  child: Text(context.tr('nav_home'), style: AppTextStyles.labelSM.copyWith(color: AppColors.royalBlue)),
                 ),
                 const SizedBox(width: 8),
                 const Icon(Icons.chevron_right_rounded, size: 16, color: AppColors.gray400),
@@ -221,10 +222,10 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
                   },
                   child: Text(
                     tour.type == TourType.domestic
-                        ? 'Domestic Tours'
+                        ? context.tr('nav_domestic_tours')
                         : tour.type == TourType.international
-                            ? 'International Tours'
-                            : 'Hajj & Umrah',
+                            ? context.tr('nav_international_tours')
+                            : context.tr('nav_hajj_umrah'),
                     style: AppTextStyles.labelSM.copyWith(color: AppColors.royalBlue),
                   ),
                 ),
@@ -233,7 +234,9 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    tour.title,
+                    context.isArabic && tour.titleAr != null && tour.titleAr!.isNotEmpty
+                        ? tour.titleAr!
+                        : tour.title,
                     style: AppTextStyles.labelSM.copyWith(color: AppColors.textSecondary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -809,7 +812,7 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
         children: [
           // Price Header
           Text(
-            'PRICE PER PERSON',
+            context.isArabic ? 'السعر للشخص الواحد' : 'PRICE PER PERSON',
             style: AppTextStyles.overline.copyWith(color: AppColors.textSecondary, letterSpacing: 1.5),
           ),
           const SizedBox(height: 6),
@@ -834,27 +837,27 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
             ],
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Includes all taxes, service fees & private guide',
-            style: TextStyle(color: AppColors.gray600, fontSize: 12),
+          Text(
+            context.isArabic ? 'شامل الضرائب، رسوم الخدمة، ومرشد سياحي خاص' : 'Includes all taxes, service fees & private guide',
+            style: const TextStyle(color: AppColors.gray600, fontSize: 12),
           ),
           const SizedBox(height: 20),
           const Divider(color: AppColors.borderLight),
           const SizedBox(height: 20),
 
           // Key Highlights summary
-          _buildSidebarFeatureRow(Icons.schedule_rounded, 'Duration', tour.duration),
+          _buildSidebarFeatureRow(Icons.schedule_rounded, context.isArabic ? 'المدة' : 'Duration', tour.duration),
           const SizedBox(height: 12),
-          _buildSidebarFeatureRow(Icons.place_rounded, 'Destination', tour.destination.isNotEmpty ? tour.destination : tour.country),
+          _buildSidebarFeatureRow(Icons.place_rounded, context.isArabic ? 'الوجهة' : 'Destination', tour.destination.isNotEmpty ? tour.destination : tour.country),
           const SizedBox(height: 12),
-          _buildSidebarFeatureRow(Icons.verified_user_rounded, 'Booking', 'Instant Confirmation'),
+          _buildSidebarFeatureRow(Icons.verified_user_rounded, context.isArabic ? 'الحجز' : 'Booking', context.isArabic ? 'تأكيد مباشر' : 'Instant Confirmation'),
           const SizedBox(height: 12),
-          _buildSidebarFeatureRow(Icons.cancel_outlined, 'Cancellation', 'Free up to 7 days before'),
+          _buildSidebarFeatureRow(Icons.cancel_outlined, context.isArabic ? 'الإلغاء' : 'Cancellation', context.isArabic ? 'مجاني حتى 7 أيام قبل السفر' : 'Free up to 7 days before'),
           const SizedBox(height: 24),
 
           // Book Now CTA
           TravellaButton(
-            label: 'Book Now',
+            label: context.tr('nav_book_now'),
             variant: TravellaButtonVariant.primary,
             fullWidth: true,
             trailingIcon: Icons.arrow_forward_rounded,
@@ -869,7 +872,7 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
 
           // Inquire Button
           TravellaButton(
-            label: 'Inquire / Custom Request',
+            label: context.isArabic ? 'استفسار / طلب مخصص' : 'Inquire / Custom Request',
             variant: TravellaButtonVariant.secondary,
             fullWidth: true,
             leadingIcon: Icons.chat_bubble_outline_rounded,
@@ -885,7 +888,7 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
                 const Icon(Icons.lock_outline_rounded, size: 14, color: AppColors.gray500),
                 const SizedBox(width: 6),
                 Text(
-                  '256-bit Secure Reservation System',
+                  context.isArabic ? 'نظام حجز آمن ومشفر 256-bit' : '256-bit Secure Reservation System',
                   style: AppTextStyles.caption.copyWith(color: AppColors.gray500),
                 ),
               ],

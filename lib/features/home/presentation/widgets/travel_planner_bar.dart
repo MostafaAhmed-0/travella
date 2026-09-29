@@ -6,6 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
+import '../../../../core/localization/app_translations.dart';
 
 enum PlannerTab { flights, hotels, tours, visa }
 
@@ -102,28 +103,28 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         children: [
           _TabButton(
             icon: Icons.flight_takeoff_rounded,
-            label: 'Flights',
+            label: context.tr('tab_flights'),
             isSelected: _selectedTab == PlannerTab.flights,
             onTap: () => setState(() => _selectedTab = PlannerTab.flights),
           ),
           const SizedBox(width: 8),
           _TabButton(
             icon: Icons.hotel_rounded,
-            label: 'Hotels',
+            label: context.tr('tab_hotels'),
             isSelected: _selectedTab == PlannerTab.hotels,
             onTap: () => setState(() => _selectedTab = PlannerTab.hotels),
           ),
           const SizedBox(width: 8),
           _TabButton(
             icon: Icons.explore_rounded,
-            label: 'Tours & Packages',
+            label: context.tr('tab_tours'),
             isSelected: _selectedTab == PlannerTab.tours,
             onTap: () => setState(() => _selectedTab = PlannerTab.tours),
           ),
           const SizedBox(width: 8),
           _TabButton(
             icon: Icons.article_rounded,
-            label: 'Visa Services',
+            label: context.tr('tab_visa'),
             isSelected: _selectedTab == PlannerTab.visa,
             onTap: () => setState(() => _selectedTab = PlannerTab.visa),
           ),
@@ -139,7 +140,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         Expanded(
           flex: 3,
           child: _FieldBox(
-            label: 'FROM',
+            label: context.tr('field_from'),
             value: _origin,
             icon: Icons.flight_takeoff_rounded,
             onTap: _showOriginPicker,
@@ -150,7 +151,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         Expanded(
           flex: 3,
           child: _FieldBox(
-            label: 'DESTINATION',
+            label: context.tr('field_destination'),
             value: _destination,
             icon: Icons.place_rounded,
             onTap: _showDestinationPicker,
@@ -161,7 +162,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         Expanded(
           flex: 3,
           child: _FieldBox(
-            label: 'DEPARTURE',
+            label: context.tr('field_departure'),
             value: _dateFormat.format(_departureDate),
             icon: Icons.calendar_today_rounded,
             onTap: () => _pickDate(isDeparture: true),
@@ -172,7 +173,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         Expanded(
           flex: 3,
           child: _FieldBox(
-            label: 'RETURN',
+            label: context.tr('field_return'),
             value: _dateFormat.format(_returnDate),
             icon: Icons.event_repeat_rounded,
             onTap: () => _pickDate(isDeparture: false),
@@ -183,8 +184,8 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         Expanded(
           flex: 3,
           child: _FieldBox(
-            label: 'TRAVELERS',
-            value: '$_adultsCount Adults${_childrenCount > 0 ? ', $_childrenCount Kids' : ''}',
+            label: context.tr('field_travelers'),
+            value: '$_adultsCount ${context.tr('adults_label')}${_childrenCount > 0 ? ', $_childrenCount ${context.tr('kids_label')}' : ''}',
             icon: Icons.people_alt_rounded,
             onTap: _showTravelersModal,
           ),
@@ -207,11 +208,11 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
               const Icon(Icons.search_rounded, size: 20, color: AppColors.navyDark),
               const SizedBox(width: 8),
               Text(
-                'Search',
+                context.tr('btn_search'),
                 style: AppTextStyles.labelLG.copyWith(
                   color: AppColors.navyDark,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
+                  letterSpacing: context.isArabic ? 0.0 : 0.5,
                 ),
               ),
             ],

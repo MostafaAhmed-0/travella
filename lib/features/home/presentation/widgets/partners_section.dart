@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
+import '../../../../core/localization/app_translations.dart';
 import '../../../../data/models/partner_model.dart';
 import '../../../../data/repositories/partner_repository.dart';
 
@@ -75,11 +76,13 @@ class _PartnersSectionState extends State<PartnersSection>
           MaxWidthContainer(
             child: Center(
               child: Text(
-                'TRUSTED BY GLOBAL AIRLINES & HOSPITALITY LEADERS',
+                context.tr('partners_title'),
                 style: AppTextStyles.overline.copyWith(
                   color: AppColors.goldLight.withValues(alpha: 0.8),
-                  letterSpacing: 2.5,
+                  letterSpacing: context.isArabic ? 0.0 : 2.5,
+                  fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),

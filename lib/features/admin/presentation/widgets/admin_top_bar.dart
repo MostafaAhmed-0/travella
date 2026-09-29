@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/localization/app_locales.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
 import 'admin_dialogs.dart';
@@ -259,6 +260,10 @@ class AdminTopBar extends StatelessWidget {
             icon: const Icon(Icons.open_in_new_rounded, size: 16, color: AppColors.gray600),
             label: const Text('Live Website', style: TextStyle(color: AppColors.gray700, fontSize: 13, fontWeight: FontWeight.w600)),
           ),
+          const SizedBox(width: 8),
+
+          // Language Switcher
+          const LanguageSwitchButton(isDark: false),
           const SizedBox(width: 8),
 
           // Notifications Button

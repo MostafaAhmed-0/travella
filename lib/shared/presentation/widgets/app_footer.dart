@@ -4,8 +4,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
+import '../../../../core/localization/app_locales.dart';
+import '../../../../core/localization/app_translations.dart';
 
-/// App footer shown on all public pages
+/// App footer shown on all public pages with full bilingual support
 class AppFooter extends StatelessWidget {
   const AppFooter({super.key});
 
@@ -22,20 +24,19 @@ class AppFooter extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Top section
-            isMobile
-                ? _MobileFooterTop()
-                : _DesktopFooterTop(),
+            isMobile ? const _MobileFooterTop() : const _DesktopFooterTop(),
             const SizedBox(height: 48),
             const Divider(color: AppColors.gray700, thickness: 1),
             const SizedBox(height: 24),
             // Bottom bar
             Wrap(
               spacing: 24,
-              runSpacing: 12,
+              runSpacing: 14,
+              crossAxisAlignment: WrapCrossAlignment.center,
               alignment: WrapAlignment.spaceBetween,
               children: [
                 Text(
-                  '© 2024 Travella Tour & Travel. All rights reserved.',
+                  '© ${DateTime.now().year} ${context.tr('app_name')} ${context.tr('app_tagline')}. ${context.tr('footer_rights')}',
                   style: AppTextStyles.bodyXS.copyWith(
                     color: AppColors.textOnDarkMuted,
                   ),
@@ -43,9 +44,17 @@ class AppFooter extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _FooterLink(label: 'Privacy Policy', onTap: () {}),
-                    const SizedBox(width: 24),
-                    _FooterLink(label: 'Terms of Service', onTap: () {}),
+                    const LanguageSwitchButton(isDark: true, isCompact: true),
+                    const SizedBox(width: 20),
+                    _FooterLink(
+                      label: context.isArabic ? 'سياسة الخصوصية' : 'Privacy Policy',
+                      onTap: () {},
+                    ),
+                    const SizedBox(width: 20),
+                    _FooterLink(
+                      label: context.isArabic ? 'شروط الخدمة' : 'Terms of Service',
+                      onTap: () {},
+                    ),
                   ],
                 ),
               ],
@@ -58,6 +67,8 @@ class AppFooter extends StatelessWidget {
 }
 
 class _DesktopFooterTop extends StatelessWidget {
+  const _DesktopFooterTop();
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -67,26 +78,31 @@ class _DesktopFooterTop extends StatelessWidget {
         const Expanded(flex: 2, child: _BrandColumn()),
         const SizedBox(width: 48),
         // Services column
-        Expanded(child: _FooterLinkColumn(
-          title: 'Services',
-          links: [
-            ('International Tours', AppRoutes.internationalToursName),
-            ('Domestic Tours', AppRoutes.domesticToursName),
-            ('Visa Services', AppRoutes.visaServicesName),
-            ('Hotels', AppRoutes.hotelsName),
-            ('Hajj & Umrah', AppRoutes.hajjUmrahName),
-          ],
-        )),
+        Expanded(
+          child: _FooterLinkColumn(
+            title: context.isArabic ? 'الخدمات والبرامج' : 'Services',
+            links: [
+              (context.tr('nav_international_tours'), AppRoutes.internationalToursName),
+              (context.tr('nav_domestic_tours'), AppRoutes.domesticToursName),
+              (context.tr('nav_visa_services'), AppRoutes.visaServicesName),
+              (context.tr('nav_hotels'), AppRoutes.hotelsName),
+              (context.tr('nav_hajj_umrah'), AppRoutes.hajjUmrahName),
+            ],
+          ),
+        ),
         // Company column
-        Expanded(child: _FooterLinkColumn(
-          title: 'Company',
-          links: [
-            ('About Us', AppRoutes.homeName),
-            ('Gallery', AppRoutes.galleryName),
-            ('Blog', AppRoutes.blogName),
-            ('Contact', AppRoutes.contactName),
-          ],
-        )),
+        Expanded(
+          child: _FooterLinkColumn(
+            title: context.isArabic ? 'روابط هامة' : 'Company',
+            links: [
+              (context.tr('nav_home'), AppRoutes.homeName),
+              (context.tr('nav_destinations'), AppRoutes.destinationsName),
+              (context.tr('nav_gallery'), AppRoutes.galleryName),
+              (context.tr('nav_blog'), AppRoutes.blogName),
+              (context.tr('nav_contact'), AppRoutes.contactName),
+            ],
+          ),
+        ),
         // Contact column
         const Expanded(child: _ContactColumn()),
       ],
@@ -95,6 +111,8 @@ class _DesktopFooterTop extends StatelessWidget {
 }
 
 class _MobileFooterTop extends StatelessWidget {
+  const _MobileFooterTop();
+
   @override
   Widget build(BuildContext context) {
     return const Column(
@@ -128,7 +146,7 @@ class _BrandColumn extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.flight_takeoff_rounded,
-                color: AppColors.navy,
+                color: AppColors.navyDark,
                 size: 20,
               ),
             ),
@@ -137,18 +155,18 @@ class _BrandColumn extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'TRAVELLA',
+                  context.tr('app_name'),
                   style: AppTextStyles.h6.copyWith(
                     color: AppColors.white,
-                    letterSpacing: 1.5,
+                    letterSpacing: context.isArabic ? 0.0 : 1.5,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 Text(
-                  'TOUR & TRAVEL',
+                  context.tr('app_tagline'),
                   style: AppTextStyles.labelSM.copyWith(
                     color: AppColors.gold,
-                    letterSpacing: 1.5,
+                    letterSpacing: context.isArabic ? 0.0 : 1.5,
                   ),
                 ),
               ],
@@ -157,8 +175,11 @@ class _BrandColumn extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'Explore a Brighter World with Travella — your premium partner for unforgettable travel experiences.',
-          style: AppTextStyles.bodySM.copyWith(color: AppColors.textOnDarkMuted),
+          context.tr('footer_about'),
+          style: AppTextStyles.bodySM.copyWith(
+            color: AppColors.textOnDarkMuted,
+            height: 1.6,
+          ),
         ),
         const SizedBox(height: 20),
         // Social icons
@@ -185,15 +206,18 @@ class _ContactColumn extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Contact',
+          context.tr('footer_contact_info'),
           style: AppTextStyles.h6.copyWith(color: AppColors.white),
         ),
         const SizedBox(height: 16),
-        _ContactItem(icon: Icons.email_rounded, text: 'info@travella.com'),
+        const _ContactItem(icon: Icons.email_rounded, text: 'info@travella.com'),
         const SizedBox(height: 10),
-        _ContactItem(icon: Icons.phone_rounded, text: '+1 (800) TRAVELLA'),
+        const _ContactItem(icon: Icons.phone_rounded, text: '+20 100 123 4567'),
         const SizedBox(height: 10),
-        _ContactItem(icon: Icons.location_on_rounded, text: 'Your City, Country'),
+        _ContactItem(
+          icon: Icons.location_on_rounded,
+          text: context.tr('footer_cairo_address'),
+        ),
       ],
     );
   }
@@ -309,7 +333,7 @@ class _SocialIconState extends State<_SocialIcon> {
           ),
           child: Icon(
             widget.icon,
-            color: _hovered ? AppColors.navy : AppColors.gray300,
+            color: _hovered ? AppColors.navyDark : AppColors.gray300,
             size: 18,
           ),
         ),

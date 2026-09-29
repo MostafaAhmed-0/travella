@@ -4,54 +4,59 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/animations/animation_widgets.dart';
+import '../../../../core/localization/app_translations.dart';
 
 class WhyTravellaSection extends StatelessWidget {
   const WhyTravellaSection({super.key});
-
-  static const _features = [
-    (
-      icon: Icons.flash_on_rounded,
-      title: 'Easy Instant Booking',
-      desc: 'Seamless end-to-end digital reservation with transparent pricing and no hidden costs.',
-      accent: AppColors.royalBlue,
-    ),
-    (
-      icon: Icons.verified_user_rounded,
-      title: 'Visa Assistance',
-      desc: 'Full consular documentation support, biometric appointment booking, and 98% approval rate.',
-      accent: AppColors.gold,
-    ),
-    (
-      icon: Icons.hotel_rounded,
-      title: 'Premium 5-Star Hotels',
-      desc: 'Handpicked luxury resorts and boutique hotels with VIP room upgrades and exclusive perks.',
-      accent: AppColors.royalBlue,
-    ),
-    (
-      icon: Icons.tune_rounded,
-      title: 'Customized Itineraries',
-      desc: 'Tailor-made itineraries crafted by personal travel advisors to match your exact desires.',
-      accent: AppColors.gold,
-    ),
-    (
-      icon: Icons.support_agent_rounded,
-      title: '24/7 VIP Concierge',
-      desc: 'Round-the-clock dedicated assistance before, during, and after your trip wherever you are.',
-      accent: AppColors.royalBlue,
-    ),
-    (
-      icon: Icons.workspace_premium_rounded,
-      title: 'Certified Travel Experts',
-      desc: 'Over 12 years of tourism excellence, IATA certification, and global destination knowledge.',
-      accent: AppColors.gold,
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
     final hPad = AppBreakpoints.horizontalPadding(context);
     final isMobile = AppBreakpoints.isMobile(context);
     final columns = isMobile ? 1 : (AppBreakpoints.isTablet(context) ? 2 : 3);
+
+    final features = [
+      (
+        icon: Icons.auto_awesome_rounded,
+        title: context.tr('feature_1_title'),
+        desc: context.tr('feature_1_desc'),
+        accent: AppColors.royalBlue,
+      ),
+      (
+        icon: Icons.support_agent_rounded,
+        title: context.tr('feature_2_title'),
+        desc: context.tr('feature_2_desc'),
+        accent: AppColors.gold,
+      ),
+      (
+        icon: Icons.verified_rounded,
+        title: context.tr('feature_3_title'),
+        desc: context.tr('feature_3_desc'),
+        accent: AppColors.royalBlue,
+      ),
+      (
+        icon: Icons.airplane_ticket_rounded,
+        title: context.tr('feature_4_title'),
+        desc: context.tr('feature_4_desc'),
+        accent: AppColors.gold,
+      ),
+      (
+        icon: Icons.hotel_rounded,
+        title: context.isArabic ? 'فنادق ومنتجعات 5 نجوم' : 'Premium 5-Star Hotels',
+        desc: context.isArabic
+            ? 'خيارات إقامة مختارة بعناية وترقيات مجانية لكبار الشخصيات.'
+            : 'Handpicked luxury resorts and boutique hotels with VIP room upgrades and exclusive perks.',
+        accent: AppColors.royalBlue,
+      ),
+      (
+        icon: Icons.workspace_premium_rounded,
+        title: context.isArabic ? 'خبراء سياحيون معتمدون' : 'Certified Travel Experts',
+        desc: context.isArabic
+            ? 'أكثر من 12 عاماً من الريادة والتميز السياحي واعتمادات IATA الدولية.'
+            : 'Over 12 years of tourism excellence, IATA certification, and global destination knowledge.',
+        accent: AppColors.gold,
+      ),
+    ];
 
     return Container(
       color: AppColors.surfaceLight,
@@ -60,10 +65,10 @@ class WhyTravellaSection extends StatelessWidget {
         child: Column(
           children: [
             SlideInOnScroll(
-              child: const SectionHeader(
-                badge: 'The Travella Standard',
-                title: 'Why Travel With Travella?',
-                subtitle: 'We combine luxury aesthetics with flawless logistics to deliver unforgettable world-class journeys.',
+              child: SectionHeader(
+                badge: context.tr('why_badge'),
+                title: context.tr('why_title'),
+                subtitle: context.tr('why_subtitle'),
                 alignment: CrossAxisAlignment.center,
               ),
             ),
@@ -77,9 +82,9 @@ class WhyTravellaSection extends StatelessWidget {
                 crossAxisSpacing: 24,
                 mainAxisSpacing: 24,
               ),
-              itemCount: _features.length,
+              itemCount: features.length,
               itemBuilder: (context, i) {
-                final item = _features[i];
+                final item = features[i];
                 return ScaleInOnScroll(
                   delay: Duration(milliseconds: i * 80),
                   child: _FeatureCard(
@@ -140,53 +145,46 @@ class _FeatureCardState extends State<_FeatureCard> {
           boxShadow: [
             BoxShadow(
               color: _isHovered
-                  ? widget.accentColor.withValues(alpha: 0.14)
+                  ? widget.accentColor.withValues(alpha: 0.15)
                   : AppColors.navy.withValues(alpha: 0.04),
-              blurRadius: _isHovered ? 32 : 16,
-              offset: Offset(0, _isHovered ? 16 : 8),
+              blurRadius: _isHovered ? 28 : 12,
+              offset: Offset(0, _isHovered ? 12 : 4),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 54,
-              height: 54,
+            Container(
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _isHovered ? widget.accentColor : widget.accentColor.withValues(alpha: 0.1),
+                color: widget.accentColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
-                boxShadow: _isHovered
-                    ? [
-                        BoxShadow(
-                          color: widget.accentColor.withValues(alpha: 0.35),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
-                        )
-                      ]
-                    : null,
               ),
               child: Icon(
                 widget.icon,
-                color: _isHovered ? AppColors.white : widget.accentColor,
+                color: widget.accentColor,
                 size: 26,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 18),
             Text(
               widget.title,
               style: AppTextStyles.h5.copyWith(color: AppColors.navyDark),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              widget.description,
-              style: AppTextStyles.bodyMD.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.5,
-              ),
-              maxLines: 3,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: Text(
+                widget.description,
+                style: AppTextStyles.bodySM.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

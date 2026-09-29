@@ -7,6 +7,7 @@ import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/animations/animation_widgets.dart';
+import '../../../../core/localization/app_translations.dart';
 import 'hero_flight_animation.dart';
 import 'travel_planner_bar.dart';
 
@@ -144,10 +145,10 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
                                         const Icon(Icons.flight_takeoff_rounded, color: AppColors.gold, size: 16),
                                         const SizedBox(width: 8),
                                         Text(
-                                          'TRAVELLA TOUR & TRAVEL',
+                                          context.tr('hero_badge'),
                                           style: AppTextStyles.overline.copyWith(
                                             color: AppColors.gold,
-                                            letterSpacing: 2.2,
+                                            letterSpacing: context.isArabic ? 0.0 : 2.2,
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -161,7 +162,7 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
                                 FadeInOnScroll(
                                   delay: const Duration(milliseconds: 150),
                                   child: Text(
-                                    'Explore A\nBrighter World',
+                                    '${context.tr('hero_title_line1')}\n${context.tr('hero_title_line2')}',
                                     style: (isMobile
                                             ? AppTextStyles.displayMD
                                             : isDesktop
@@ -169,9 +170,9 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
                                                 : AppTextStyles.displayLG)
                                         .copyWith(
                                       color: AppColors.white,
-                                      height: 1.06,
+                                      height: 1.12,
                                       fontWeight: FontWeight.w800,
-                                      letterSpacing: -1.5,
+                                      letterSpacing: context.isArabic ? 0.0 : -1.5,
                                     ),
                                   ),
                                 ),
@@ -181,10 +182,10 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
                                 FadeInOnScroll(
                                   delay: const Duration(milliseconds: 250),
                                   child: Text(
-                                    'Your journey starts here. Discover handpicked global destinations, luxury hotels, bespoke private tours, and complete visa assistance.',
+                                    context.tr('hero_subtitle'),
                                     style: (isMobile ? AppTextStyles.bodyMD : AppTextStyles.bodyXL).copyWith(
                                       color: AppColors.textOnDarkMuted,
-                                      height: 1.5,
+                                      height: 1.6,
                                     ),
                                   ),
                                 ),
@@ -198,14 +199,14 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
                                     runSpacing: 14,
                                     children: [
                                       TravellaButton(
-                                        label: 'Explore Destinations',
+                                        label: context.tr('hero_explore_btn'),
                                         variant: TravellaButtonVariant.gold,
                                         size: TravellaButtonSize.lg,
                                         trailingIcon: Icons.arrow_forward_rounded,
                                         onPressed: () => context.goNamed(AppRoutes.destinationsName),
                                       ),
                                       TravellaButton(
-                                        label: 'Plan Your Trip',
+                                        label: context.tr('hero_plan_btn'),
                                         variant: TravellaButtonVariant.secondary,
                                         size: TravellaButtonSize.lg,
                                         leadingIcon: Icons.auto_awesome_rounded,

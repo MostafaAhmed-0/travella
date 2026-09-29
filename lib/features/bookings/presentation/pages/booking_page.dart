@@ -9,6 +9,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/localization/app_translations.dart';
 import '../../../../data/models/booking_model.dart';
 import '../../../../data/models/tour_model.dart';
 import '../../../../data/repositories/tour_repository.dart';
@@ -380,7 +381,7 @@ class _BookingPageState extends State<BookingPage> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Travella Direct Booking & Concierge System',
+                    context.tr('booking_hero_badge'),
                     style: AppTextStyles.labelSM.copyWith(
                       color: AppColors.gold,
                       fontWeight: FontWeight.w700,
@@ -392,8 +393,8 @@ class _BookingPageState extends State<BookingPage> {
             const SizedBox(height: 16),
             Text(
               _currentStep == 5
-                  ? 'Reservation Request Confirmed'
-                  : 'Reserve Your Unforgettable Journey',
+                  ? context.tr('step_5_confirmed_title')
+                  : context.tr('booking_hero_title'),
               style: AppTextStyles.h1.copyWith(
                 color: AppColors.white,
                 fontSize: isMobile ? 28 : 42,
@@ -403,8 +404,8 @@ class _BookingPageState extends State<BookingPage> {
             const SizedBox(height: 12),
             Text(
               _currentStep == 5
-                  ? 'Thank you for choosing Travella. Your luxury travel specialist is on standby.'
-                  : 'Fast 5-step booking request with zero upfront commitment. Our travel concierge will verify availability and confirm your personalized itinerary.',
+                  ? context.tr('step_5_confirmed_subtitle')
+                  : context.tr('booking_hero_subtitle'),
               style: AppTextStyles.bodyLG.copyWith(
                 color: AppColors.textOnDarkMuted,
               ),
@@ -419,10 +420,10 @@ class _BookingPageState extends State<BookingPage> {
   // ── Step Indicator Bar ─────────────────────────────────────────────────────
   Widget _buildStepperBar(bool isMobile) {
     final steps = [
-      {'num': 1, 'title': 'Contact', 'icon': Icons.person_outline_rounded},
-      {'num': 2, 'title': 'Tour & Dates', 'icon': Icons.flight_takeoff_rounded},
-      {'num': 3, 'title': 'Requests', 'icon': Icons.room_service_outlined},
-      {'num': 4, 'title': 'Review', 'icon': Icons.rate_review_outlined},
+      {'num': 1, 'title': context.isArabic ? 'بيانات التواصل' : 'Contact', 'icon': Icons.person_outline_rounded},
+      {'num': 2, 'title': context.isArabic ? 'الرحلة والتاريخ' : 'Tour & Dates', 'icon': Icons.flight_takeoff_rounded},
+      {'num': 3, 'title': context.isArabic ? 'الطلبات الخاصة' : 'Requests', 'icon': Icons.room_service_outlined},
+      {'num': 4, 'title': context.isArabic ? 'المراجعة' : 'Review', 'icon': Icons.rate_review_outlined},
     ];
 
     return Container(
@@ -547,21 +548,20 @@ class _BookingPageState extends State<BookingPage> {
   // ── STEP 1: Traveler Contact Details ──────────────────────────────────────
   Widget _buildStep1Contact(bool isMobile) {
     return _StepCardContainer(
-      title: 'Step 1: Primary Traveler Contact Details',
-      subtitle:
-          'Please provide your official contact information for itinerary confirmations.',
+      title: context.tr('step_1_title'),
+      subtitle: context.tr('step_1_subtitle'),
       child: Form(
         key: _formKeyStep1,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Full Name
-            Text('Full Legal Name *', style: AppTextStyles.labelMD),
+            Text(context.tr('full_name_label'), style: AppTextStyles.labelMD),
             const SizedBox(height: 8),
             TextFormField(
               controller: _nameCtrl,
               decoration: InputDecoration(
-                hintText: 'e.g. Alexander Hamilton',
+                hintText: context.isArabic ? 'مثال: أحمد محمد' : 'e.g. Alexander Hamilton',
                 prefixIcon: const Icon(
                   Icons.person_outline_rounded,
                   color: AppColors.royalBlue,
@@ -572,10 +572,10 @@ class _BookingPageState extends State<BookingPage> {
               ),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) {
-                  return 'Full name is required';
+                  return context.isArabic ? 'الاسم مطلوب' : 'Full name is required';
                 }
                 if (v.trim().length < 2) {
-                  return 'Please enter a valid full name';
+                  return context.isArabic ? 'يرجى إدخال اسم صحيح' : 'Please enter a valid full name';
                 }
                 return null;
               },
@@ -591,7 +591,7 @@ class _BookingPageState extends State<BookingPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Email Address *', style: AppTextStyles.labelMD),
+                        Text(context.tr('email_label'), style: AppTextStyles.labelMD),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _emailCtrl,
@@ -608,12 +608,12 @@ class _BookingPageState extends State<BookingPage> {
                           ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
-                              return 'Email is required';
+                              return context.isArabic ? 'البريد الإلكتروني مطلوب' : 'Email is required';
                             }
                             final emailRegex =
                                 RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                             if (!emailRegex.hasMatch(v.trim())) {
-                              return 'Enter a valid email (e.g. name@domain.com)';
+                              return context.isArabic ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Enter a valid email (e.g. name@domain.com)';
                             }
                             return null;
                           },
@@ -626,7 +626,7 @@ class _BookingPageState extends State<BookingPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Phone / WhatsApp Number *',
+                        Text(context.tr('phone_label'),
                             style: AppTextStyles.labelMD),
                         const SizedBox(height: 8),
                         TextFormField(
@@ -644,10 +644,10 @@ class _BookingPageState extends State<BookingPage> {
                           ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
-                              return 'Phone number is required';
+                              return context.isArabic ? 'رقم الهاتف مطلوب' : 'Phone number is required';
                             }
                             if (v.trim().length < 7) {
-                              return 'Enter a valid contact number';
+                              return context.isArabic ? 'يرجى إدخال رقم هاتف صحيح' : 'Enter a valid contact number';
                             }
                             return null;
                           },
@@ -658,7 +658,7 @@ class _BookingPageState extends State<BookingPage> {
                 ],
               )
             else ...[
-              Text('Email Address *', style: AppTextStyles.labelMD),
+              Text(context.tr('email_label'), style: AppTextStyles.labelMD),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _emailCtrl,
@@ -675,18 +675,18 @@ class _BookingPageState extends State<BookingPage> {
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return 'Email is required';
+                    return context.isArabic ? 'البريد الإلكتروني مطلوب' : 'Email is required';
                   }
                   final emailRegex =
                       RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                   if (!emailRegex.hasMatch(v.trim())) {
-                    return 'Enter a valid email address';
+                    return context.isArabic ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Enter a valid email address';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 20),
-              Text('Phone / WhatsApp Number *', style: AppTextStyles.labelMD),
+              Text(context.tr('phone_label'), style: AppTextStyles.labelMD),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _phoneCtrl,
@@ -703,10 +703,10 @@ class _BookingPageState extends State<BookingPage> {
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return 'Phone number is required';
+                    return context.isArabic ? 'رقم الهاتف مطلوب' : 'Phone number is required';
                   }
                   if (v.trim().length < 7) {
-                    return 'Enter a valid contact number';
+                    return context.isArabic ? 'يرجى إدخال رقم هاتف صحيح' : 'Enter a valid contact number';
                   }
                   return null;
                 },
@@ -718,7 +718,7 @@ class _BookingPageState extends State<BookingPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TravellaButton(
-                  label: 'Next: Tour & Dates',
+                  label: context.tr('btn_next_tour'),
                   variant: TravellaButtonVariant.primary,
                   size: TravellaButtonSize.lg,
                   trailingIcon: Icons.arrow_forward_rounded,
@@ -737,14 +737,13 @@ class _BookingPageState extends State<BookingPage> {
     final tour = _selectedTour;
 
     return _StepCardContainer(
-      title: 'Step 2: Tour Selection & Travel Schedule',
-      subtitle:
-          'Choose your desired package, travel dates, and party size.',
+      title: context.tr('step_2_title'),
+      subtitle: context.tr('step_2_subtitle'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Tour Package Select
-          Text('Select Tour Package *', style: AppTextStyles.labelMD),
+          Text(context.tr('select_tour_label'), style: AppTextStyles.labelMD),
           const SizedBox(height: 8),
           if (_isLoadingTours)
             const LinearProgressIndicator(color: AppColors.royalBlue)
@@ -846,7 +845,7 @@ class _BookingPageState extends State<BookingPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Travel Date *', style: AppTextStyles.labelMD),
+                    Text(context.tr('travel_date_label'), style: AppTextStyles.labelMD),
                     const SizedBox(height: 8),
                     InkWell(
                       onTap: _pickDate,
@@ -876,7 +875,7 @@ class _BookingPageState extends State<BookingPage> {
                             Expanded(
                               child: Text(
                                 _travelDate == null
-                                    ? 'Pick departure date'
+                                    ? (context.isArabic ? 'اختر تاريخ السفر' : 'Pick departure date')
                                     : DateFormat('EEE, MMM dd, yyyy')
                                         .format(_travelDate!),
                                 style: AppTextStyles.bodyMD.copyWith(
@@ -912,7 +911,7 @@ class _BookingPageState extends State<BookingPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Travelers *', style: AppTextStyles.labelMD),
+                    Text(context.tr('travelers_label'), style: AppTextStyles.labelMD),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -979,7 +978,7 @@ class _BookingPageState extends State<BookingPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'ESTIMATED TOTAL (ZERO UPFRONT)',
+                        context.tr('estimated_total'),
                         style: AppTextStyles.overline.copyWith(
                           color: AppColors.navyDark,
                           letterSpacing: 1.2,
@@ -1009,13 +1008,13 @@ class _BookingPageState extends State<BookingPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TravellaButton(
-                label: 'Back',
+                label: context.tr('btn_back'),
                 variant: TravellaButtonVariant.secondary,
                 leadingIcon: Icons.arrow_back_rounded,
                 onPressed: () => _goToStep(1),
               ),
               TravellaButton(
-                label: 'Next: Special Requests',
+                label: context.tr('btn_next_requests'),
                 variant: TravellaButtonVariant.primary,
                 size: TravellaButtonSize.lg,
                 trailingIcon: Icons.arrow_forward_rounded,
@@ -1031,13 +1030,12 @@ class _BookingPageState extends State<BookingPage> {
   // ── STEP 3: Special Requests ───────────────────────────────────────────────
   Widget _buildStep3SpecialRequests(bool isMobile) {
     return _StepCardContainer(
-      title: 'Step 3: Special Requests & Preferences',
-      subtitle:
-          'Personalize your journey with tailored amenities, dietary preferences, or VIP services.',
+      title: context.tr('step_3_title'),
+      subtitle: context.tr('step_3_subtitle'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Popular Travel Preferences', style: AppTextStyles.labelMD),
+          Text(context.tr('popular_prefs'), style: AppTextStyles.labelMD),
           const SizedBox(height: 12),
           Wrap(
             spacing: 10,
@@ -1076,15 +1074,16 @@ class _BookingPageState extends State<BookingPage> {
             }).toList(),
           ),
           const SizedBox(height: 24),
-          Text('Additional Notes / Custom Inquiries (Optional)',
+          Text(context.tr('additional_notes'),
               style: AppTextStyles.labelMD),
           const SizedBox(height: 8),
           TextFormField(
             controller: _notesCtrl,
             maxLines: 4,
             decoration: InputDecoration(
-              hintText:
-                  'e.g. Flight arrival numbers, specific hotel room views, celebration surprises, or accessibility requirements...',
+              hintText: context.isArabic
+                  ? 'مثال: رقم رحلة الوصول، تفضيل إطلالة الغرفة، ترتيبات خاصة، أو متطلبات وصول...'
+                  : 'e.g. Flight arrival numbers, specific hotel room views, celebration surprises, or accessibility requirements...',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1095,13 +1094,13 @@ class _BookingPageState extends State<BookingPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TravellaButton(
-                label: 'Back',
+                label: context.tr('btn_back'),
                 variant: TravellaButtonVariant.secondary,
                 leadingIcon: Icons.arrow_back_rounded,
                 onPressed: () => _goToStep(2),
               ),
               TravellaButton(
-                label: 'Next: Review Booking',
+                label: context.tr('btn_next_review'),
                 variant: TravellaButtonVariant.primary,
                 size: TravellaButtonSize.lg,
                 trailingIcon: Icons.arrow_forward_rounded,
@@ -1120,20 +1119,19 @@ class _BookingPageState extends State<BookingPage> {
     final aggregatedNotes = _buildAggregatedNotes();
 
     return _StepCardContainer(
-      title: 'Step 4: Review Your Booking Request',
-      subtitle:
-          'Please verify your travel itinerary and contact details before submitting.',
+      title: context.tr('step_4_title'),
+      subtitle: context.tr('step_4_subtitle'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Section 1: Customer Contact
           _ReviewSection(
             icon: Icons.person_rounded,
-            title: 'Traveler Details',
+            title: context.tr('traveler_details'),
             children: [
-              _ReviewRow(label: 'Full Name', value: _nameCtrl.text.trim()),
-              _ReviewRow(label: 'Email', value: _emailCtrl.text.trim()),
-              _ReviewRow(label: 'Phone / WhatsApp', value: _phoneCtrl.text.trim()),
+              _ReviewRow(label: context.isArabic ? 'الاسم الكامل' : 'Full Name', value: _nameCtrl.text.trim()),
+              _ReviewRow(label: context.isArabic ? 'البريد الإلكتروني' : 'Email', value: _emailCtrl.text.trim()),
+              _ReviewRow(label: context.isArabic ? 'الهاتف / واتساب' : 'Phone / WhatsApp', value: _phoneCtrl.text.trim()),
             ],
           ),
           const Divider(height: 32, color: AppColors.borderLight),
@@ -1141,27 +1139,27 @@ class _BookingPageState extends State<BookingPage> {
           // Section 2: Tour & Schedule
           _ReviewSection(
             icon: Icons.flight_takeoff_rounded,
-            title: 'Tour & Schedule',
+            title: context.tr('tour_schedule'),
             children: [
               _ReviewRow(
-                label: 'Tour Package',
+                label: context.isArabic ? 'البرنامج السياحي' : 'Tour Package',
                 value: tour?.title ?? _getSelectedTourTitle(),
               ),
               _ReviewRow(
-                label: 'Destination',
+                label: context.isArabic ? 'الوجهة' : 'Destination',
                 value: tour != null && tour.destination.isNotEmpty
                     ? '${tour.destination}, ${tour.country}'
                     : 'Travella Signature Destination',
               ),
               _ReviewRow(
-                label: 'Departure Date',
+                label: context.isArabic ? 'تاريخ السفر' : 'Departure Date',
                 value: _travelDate != null
                     ? DateFormat('EEEE, MMMM dd, yyyy').format(_travelDate!)
-                    : 'To be scheduled',
+                    : (context.isArabic ? 'سيتم التحديد لاحقاً' : 'To be scheduled'),
               ),
               _ReviewRow(
-                label: 'Number of Travelers',
-                value: '$_travelers ${_travelers == 1 ? "Guest" : "Guests"}',
+                label: context.isArabic ? 'عدد المسافرين' : 'Number of Travelers',
+                value: '$_travelers ${_travelers == 1 ? (context.isArabic ? "مسافر" : "Guest") : (context.isArabic ? "مسافرين" : "Guests")}',
               ),
             ],
           ),
@@ -1171,7 +1169,7 @@ class _BookingPageState extends State<BookingPage> {
           if (aggregatedNotes.isNotEmpty) ...[
             _ReviewSection(
               icon: Icons.room_service_rounded,
-              title: 'Special Requests & Preferences',
+              title: context.tr('special_requests_title'),
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
@@ -1201,7 +1199,7 @@ class _BookingPageState extends State<BookingPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Total Estimated Price',
+                      context.tr('total_estimate_price'),
                       style: AppTextStyles.bodyLG.copyWith(
                         color: AppColors.white,
                         fontWeight: FontWeight.w600,
@@ -1210,7 +1208,7 @@ class _BookingPageState extends State<BookingPage> {
                     Text(
                       tour != null
                           ? '${tour.currency} ${_estimatedTotal.toInt()}'
-                          : 'Custom Quote',
+                          : (context.isArabic ? 'عرض سعر مخصص' : 'Custom Quote'),
                       style: AppTextStyles.h3.copyWith(
                         color: AppColors.gold,
                         fontWeight: FontWeight.w900,
@@ -1231,7 +1229,7 @@ class _BookingPageState extends State<BookingPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Booking Status: Pending. No immediate charge. Future online gateways (Stripe, Paymob, Fawry) ready.',
+                        context.tr('payment_arch_note'),
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.textOnDarkMuted,
                         ),
@@ -1248,13 +1246,13 @@ class _BookingPageState extends State<BookingPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TravellaButton(
-                label: 'Back',
+                label: context.tr('btn_back'),
                 variant: TravellaButtonVariant.secondary,
                 leadingIcon: Icons.arrow_back_rounded,
                 onPressed: isSubmitting ? null : () => _goToStep(3),
               ),
               TravellaButton(
-                label: 'Confirm & Submit Booking',
+                label: context.tr('btn_submit_booking'),
                 variant: TravellaButtonVariant.primary,
                 size: TravellaButtonSize.lg,
                 isLoading: isSubmitting,
@@ -1336,7 +1334,7 @@ class _BookingPageState extends State<BookingPage> {
           const SizedBox(height: 24),
 
           Text(
-            'Your travel request has been received.',
+            context.tr('step_5_confirmed_title'),
             style: AppTextStyles.h2.copyWith(
               color: AppColors.navyDark,
               fontWeight: FontWeight.w900,
@@ -1348,7 +1346,9 @@ class _BookingPageState extends State<BookingPage> {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 620),
             child: Text(
-              'Thank you, ${booking.customerName}! Your booking has been saved to our database with status pending. A dedicated Travella travel concierge is preparing your personalized itinerary.',
+              context.isArabic
+                  ? 'شكراً لك، ${booking.customerName}! تم استلام طلب حجزك بنجاح وحفظه في قاعدة البيانات. مستشارك السياحي يجهز تفاصيل برنامجك وسيتواصل معك لتأكيده.'
+                  : 'Thank you, ${booking.customerName}! Your booking has been saved to our database with status pending. A dedicated Travella travel concierge is preparing your personalized itinerary.',
               style: AppTextStyles.bodyLG.copyWith(
                 color: AppColors.textSecondary,
                 height: 1.6,
@@ -1377,7 +1377,7 @@ class _BookingPageState extends State<BookingPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'BOOKING REFERENCE',
+                          context.tr('booking_ref_label'),
                           style: AppTextStyles.overline.copyWith(
                             color: AppColors.textLightMuted,
                             letterSpacing: 1.5,
@@ -1399,7 +1399,7 @@ class _BookingPageState extends State<BookingPage> {
                                 size: 18,
                                 color: AppColors.royalBlue,
                               ),
-                              tooltip: 'Copy Reference',
+                              tooltip: context.isArabic ? 'نسخ الرقم المرجعي' : 'Copy Reference',
                               onPressed: () => _copyReference(ref),
                             ),
                           ],
@@ -1428,7 +1428,7 @@ class _BookingPageState extends State<BookingPage> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            booking.status.label.toUpperCase(),
+                            context.isArabic ? 'قيد المراجعة' : booking.status.label.toUpperCase(),
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.goldDark,
                               fontWeight: FontWeight.bold,
@@ -1444,25 +1444,25 @@ class _BookingPageState extends State<BookingPage> {
                 // Details Grid
                 _ConfirmationItem(
                   icon: Icons.flight_takeoff_rounded,
-                  label: 'Tour Package',
+                  label: context.isArabic ? 'البرنامج السياحي' : 'Tour Package',
                   value: tourTitle,
                 ),
                 const SizedBox(height: 12),
                 _ConfirmationItem(
                   icon: Icons.calendar_today_rounded,
-                  label: 'Travel Date',
+                  label: context.isArabic ? 'تاريخ السفر' : 'Travel Date',
                   value: dateStr,
                 ),
                 const SizedBox(height: 12),
                 _ConfirmationItem(
                   icon: Icons.group_rounded,
-                  label: 'Travelers',
-                  value: '${booking.travelers} Guests',
+                  label: context.isArabic ? 'عدد المسافرين' : 'Travelers',
+                  value: '${booking.travelers} ${context.isArabic ? "مسافر" : "Guests"}',
                 ),
                 const SizedBox(height: 12),
                 _ConfirmationItem(
                   icon: Icons.contact_mail_rounded,
-                  label: 'Contact Details',
+                  label: context.isArabic ? 'بيانات التواصل' : 'Contact Details',
                   value: '${booking.email} • ${booking.phone}',
                 ),
               ],
@@ -1493,7 +1493,7 @@ class _BookingPageState extends State<BookingPage> {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      'Instant VIP Concierge Assistance',
+                      context.tr('whatsapp_concierge_title'),
                       style: AppTextStyles.h5.copyWith(
                         color: AppColors.navyDark,
                         fontWeight: FontWeight.bold,
@@ -1503,7 +1503,7 @@ class _BookingPageState extends State<BookingPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Want immediate confirmation or have special questions? Chat directly with our travel desk on WhatsApp.',
+                  context.tr('whatsapp_concierge_desc'),
                   style: AppTextStyles.bodyMD.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -1513,9 +1513,9 @@ class _BookingPageState extends State<BookingPage> {
                 ElevatedButton.icon(
                   onPressed: () => _openWhatsApp(booking),
                   icon: const Icon(Icons.forum_rounded, color: AppColors.white),
-                  label: const Text(
-                    'Contact us on WhatsApp',
-                    style: TextStyle(
+                  label: Text(
+                    context.tr('whatsapp_btn_label'),
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -1545,13 +1545,13 @@ class _BookingPageState extends State<BookingPage> {
             alignment: WrapAlignment.center,
             children: [
               TravellaButton(
-                label: 'Book Another Tour',
+                label: context.tr('btn_book_another'),
                 variant: TravellaButtonVariant.secondary,
                 leadingIcon: Icons.add_rounded,
                 onPressed: _resetForm,
               ),
               TravellaButton(
-                label: 'Back to Home',
+                label: context.tr('btn_back_home'),
                 variant: TravellaButtonVariant.primary,
                 trailingIcon: Icons.home_rounded,
                 onPressed: () => context.goNamed(AppRoutes.homeName),
