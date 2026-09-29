@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../core/constants/app_constants.dart';
 import '../services/supabase_service.dart';
 
 abstract class StorageRemoteDataSource {

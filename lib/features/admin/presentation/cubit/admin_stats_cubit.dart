@@ -258,7 +258,6 @@ class AdminStatsCubit extends Cubit<AdminStatsState> {
       }
 
       // Compute monthly booking series for chart (last 6 months)
-      final months = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
       final List<MonthlyBookingData> monthlyData = [
         const MonthlyBookingData(month: 'May', count: 18, revenue: 14200),
         const MonthlyBookingData(month: 'Jun', count: 26, revenue: 21800),

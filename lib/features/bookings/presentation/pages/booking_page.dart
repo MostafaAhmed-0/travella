@@ -5,7 +5,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
-import '../../../../core/animations/animation_widgets.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../shared/presentation/widgets/app_navbar.dart';
 import '../../../../shared/presentation/widgets/app_footer.dart';
@@ -263,8 +262,9 @@ class _BookingPageState extends State<BookingPage> {
                                     )
                                     .toList(),
                                 onChanged: (v) {
-                                  if (v != null)
+                                  if (v != null) {
                                     setState(() => _selectedTour = v);
+                                  }
                                 },
                                 decoration: InputDecoration(
                                   prefixIcon: const Icon(

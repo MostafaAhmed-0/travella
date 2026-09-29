@@ -476,7 +476,6 @@ class _BookingDesktopTable extends StatelessWidget {
       case BookingStatus.cancelled:
         return AppColors.error;
       case BookingStatus.pending:
-      default:
         return AppColors.goldDark;
     }
   }

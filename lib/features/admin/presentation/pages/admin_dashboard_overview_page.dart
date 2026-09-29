@@ -627,7 +627,6 @@ class _StatusPill extends StatelessWidget {
         fg = AppColors.error;
         break;
       case BookingStatus.pending:
-      default:
         bg = AppColors.gold.withValues(alpha: 0.15);
         fg = AppColors.goldDark;
         break;
