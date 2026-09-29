@@ -103,13 +103,20 @@ class BookingModel extends Equatable {
     );
   }
 
+  static bool isValidUuid(String? id) {
+    if (id == null || id.trim().isEmpty) return false;
+    final uuidRegex = RegExp(
+        r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+    return uuidRegex.hasMatch(id.trim());
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'customer_name': customerName,
       'email': email,
       'phone': phone,
-      'tour_id': tourId,
+      'tour_id': isValidUuid(tourId) ? tourId!.trim() : null,
       if (travelDate != null)
         'travel_date':
             "${travelDate!.year.toString().padLeft(4, '0')}-${travelDate!.month.toString().padLeft(2, '0')}-${travelDate!.day.toString().padLeft(2, '0')}",

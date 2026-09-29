@@ -145,10 +145,14 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.booking,
           name: AppRoutes.bookingName,
-          pageBuilder: (context, state) => buildPageTransition(
-            key: state.pageKey,
-            child: const BookingPage(),
-          ),
+          pageBuilder: (context, state) {
+            final tourId = state.uri.queryParameters['tourId'] ??
+                (state.extra is String ? state.extra as String : null);
+            return buildPageTransition(
+              key: state.pageKey,
+              child: BookingPage(preselectedTourId: tourId),
+            );
+          },
         ),
         GoRoute(
           path: AppRoutes.tourDetails,

@@ -19,12 +19,13 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
   Future<BookingModel> createBooking(BookingModel booking) async {
     try {
       final map = booking.toJson()..remove('id');
-      final response = await _client
+      // Insert without .select() so the anon role doesn't need SELECT permission.
+      // Supabase RLS only blocks the read-back, not the actual insert.
+      await _client
           .from(SupabaseService.tableBookings)
-          .insert(map)
-          .select('*, tours(title)')
-          .single();
-      return BookingModel.fromJson(response);
+          .insert(map);
+      // Return a copy of the booking with createdAt stamped — no DB round-trip needed.
+      return booking.copyWith(createdAt: DateTime.now());
     } catch (e) {
       throw Exception(SupabaseService.handleError(e));
     }

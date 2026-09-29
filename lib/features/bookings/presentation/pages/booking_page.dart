@@ -6,13 +6,20 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/routing/app_routes.dart';
+import '../../../../data/models/tour_model.dart';
+import '../../../../data/repositories/tour_repository.dart';
 import '../../../../shared/presentation/widgets/app_navbar.dart';
 import '../../../../shared/presentation/widgets/app_footer.dart';
 import '../cubit/booking_cubit.dart';
 import '../cubit/booking_state.dart';
 
 class BookingPage extends StatefulWidget {
-  const BookingPage({super.key});
+  final String? preselectedTourId;
+
+  const BookingPage({
+    super.key,
+    this.preselectedTourId,
+  });
 
   @override
   State<BookingPage> createState() => _BookingPageState();
@@ -24,22 +31,43 @@ class _BookingPageState extends State<BookingPage> {
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
+  final TourRepository _tourRepository = TourRepository();
+
   DateTime? _travelDate;
   int _travelers = 2;
-  String _selectedTour = 'Hurghada Red Sea Adventure';
+  String? _selectedTourId;
+  List<TourModel> _tours = [];
+  bool _isLoadingTours = true;
 
-  final List<String> _popularTours = [
-    'Hurghada Red Sea Adventure',
-    'Sharm El Sheikh Sinai Safari',
-    'Royal Nile Cruise: Aswan to Luxor',
-    'Siwa Eco-Lodge & Salt Lakes',
-    'Grand Istanbul & Ottoman Palaces',
-    'Romantic Paris & Versailles',
-    'Dubai Ultimate Luxury & Safari',
-    'Maldives Overwater Luxury Escape',
-    'VIP Diamond Umrah Package',
-    'Royal Platinum Hajj Package',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _selectedTourId = widget.preselectedTourId;
+    _loadTours();
+  }
+
+  Future<void> _loadTours() async {
+    try {
+      final list = await _tourRepository.getAllTours(activeOnly: true);
+      if (mounted) {
+        setState(() {
+          _tours = list;
+          _isLoadingTours = false;
+          if (_selectedTourId == null || !_tours.any((t) => t.id == _selectedTourId)) {
+            if (_tours.isNotEmpty) {
+              _selectedTourId = _tours.first.id;
+            }
+          }
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingTours = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -80,12 +108,19 @@ class _BookingPageState extends State<BookingPage> {
         customerName: _nameCtrl.text.trim(),
         email: _emailCtrl.text.trim(),
         phone: _phoneCtrl.text.trim(),
-        tourId: _selectedTour,
+        tourId: _selectedTourId,
         travelDate: _travelDate,
         travelers: _travelers,
         notes: _notesCtrl.text.trim(),
       );
     }
+  }
+
+  String _getSelectedTourTitle() {
+    if (_selectedTourId == null) return 'Selected Tour';
+    final match = _tours.where((t) => t.id == _selectedTourId);
+    if (match.isNotEmpty) return match.first.title;
+    return 'Selected Tour';
   }
 
   @override
@@ -140,9 +175,10 @@ class _BookingPageState extends State<BookingPage> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            'CONCIERGE TRAVEL BOOKING',
+                            'VIP Travel Booking Concierge',
                             style: AppTextStyles.labelSM.copyWith(
-                              color: AppColors.goldLight,
+                              color: AppColors.gold,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
@@ -180,6 +216,7 @@ class _BookingPageState extends State<BookingPage> {
                   child: BlocConsumer<BookingCubit, BookingState>(
                     listener: (context, state) {
                       if (state is BookingSubmittedSuccess) {
+                        final tourTitle = _getSelectedTourTitle();
                         showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
@@ -201,7 +238,7 @@ class _BookingPageState extends State<BookingPage> {
                               ],
                             ),
                             content: Text(
-                              'Thank you, ${_nameCtrl.text.trim()}! Your booking request for $_selectedTour has been recorded into our system. Our travel advisor will reach out to you at ${_emailCtrl.text.trim()} shortly.',
+                              'Thank you, ${_nameCtrl.text.trim()}! Your booking request for "$tourTitle" has been recorded into our system. Our travel advisor will reach out to you at ${_emailCtrl.text.trim()} shortly.',
                               style: AppTextStyles.bodyMD,
                             ),
                             actions: [
@@ -220,6 +257,13 @@ class _BookingPageState extends State<BookingPage> {
                                 child: const Text('Back to Home'),
                               ),
                             ],
+                          ),
+                        );
+                      } else if (state is BookingError) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(state.message),
+                            backgroundColor: AppColors.error,
                           ),
                         );
                       }
@@ -251,30 +295,46 @@ class _BookingPageState extends State<BookingPage> {
                                 style: AppTextStyles.h5,
                               ),
                               const SizedBox(height: 12),
-                              DropdownButtonFormField<String>(
-                                value: _selectedTour,
-                                items: _popularTours
-                                    .map(
-                                      (t) => DropdownMenuItem(
-                                        value: t,
-                                        child: Text(t),
-                                      ),
-                                    )
-                                    .toList(),
-                                onChanged: (v) {
-                                  if (v != null) {
-                                    setState(() => _selectedTour = v);
-                                  }
-                                },
-                                decoration: InputDecoration(
-                                  prefixIcon: const Icon(
-                                    Icons.flight_takeoff_rounded,
-                                  ),
-                                  border: OutlineInputBorder(
+                              if (_isLoadingTours)
+                                const LinearProgressIndicator(color: AppColors.royalBlue)
+                              else if (_tours.isEmpty)
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.lightGray,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
+                                  child: const Text('Custom Tour Consultation'),
+                                )
+                              else
+                                DropdownButtonFormField<String>(
+                                  initialValue: _selectedTourId,
+                                  isExpanded: true,
+                                  items: _tours
+                                      .map(
+                                        (t) => DropdownMenuItem(
+                                          value: t.id,
+                                          child: Text(
+                                            '${t.title} (${t.currency} ${t.price.toInt()})',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (v) {
+                                    if (v != null) {
+                                      setState(() => _selectedTourId = v);
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    prefixIcon: const Icon(
+                                      Icons.flight_takeoff_rounded,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
                                 ),
-                              ),
                               const SizedBox(height: 24),
 
                               Text(
@@ -296,8 +356,8 @@ class _BookingPageState extends State<BookingPage> {
                                 ),
                                 validator: (v) =>
                                     (v == null || v.trim().isEmpty)
-                                    ? 'Please enter your name'
-                                    : null,
+                                        ? 'Please enter your name'
+                                        : null,
                               ),
                               const SizedBox(height: 16),
                               Row(
@@ -320,8 +380,8 @@ class _BookingPageState extends State<BookingPage> {
                                       ),
                                       validator: (v) =>
                                           (v == null || !v.contains('@'))
-                                          ? 'Valid email required'
-                                          : null,
+                                              ? 'Valid email required'
+                                              : null,
                                     ),
                                   ),
                                   const SizedBox(width: 16),
@@ -343,8 +403,8 @@ class _BookingPageState extends State<BookingPage> {
                                       ),
                                       validator: (v) =>
                                           (v == null || v.trim().isEmpty)
-                                          ? 'Phone is required'
-                                          : null,
+                                              ? 'Phone is required'
+                                              : null,
                                     ),
                                   ),
                                 ],
@@ -371,27 +431,25 @@ class _BookingPageState extends State<BookingPage> {
                                           border: Border.all(
                                             color: AppColors.borderLight,
                                           ),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: Row(
                                           children: [
                                             const Icon(
-                                              Icons.calendar_month_rounded,
+                                              Icons.calendar_today_rounded,
+                                              size: 18,
                                               color: AppColors.royalBlue,
                                             ),
                                             const SizedBox(width: 10),
                                             Text(
                                               _travelDate == null
-                                                  ? 'Choose Departure Date'
+                                                  ? 'Select Travel Date'
                                                   : '${_travelDate!.day}/${_travelDate!.month}/${_travelDate!.year}',
-                                              style: AppTextStyles.bodyMD
-                                                  .copyWith(
-                                                    color: _travelDate == null
-                                                        ? AppColors.gray500
-                                                        : AppColors.navyDark,
-                                                  ),
+                                              style: AppTextStyles.bodyMD.copyWith(
+                                                color: _travelDate == null
+                                                    ? AppColors.textLightMuted
+                                                    : AppColors.textPrimary,
+                                              ),
                                             ),
                                           ],
                                         ),
