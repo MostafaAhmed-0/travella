@@ -56,7 +56,7 @@ class AppRouter {
 
   static GoRouter createRouter(AuthCubit authCubit) {
     return GoRouter(
-      initialLocation: AppRoutes.login,
+      initialLocation: AppRoutes.home,
       debugLogDiagnostics: false,
       refreshListenable: GoRouterRefreshStream(authCubit.stream),
       errorBuilder: (context, state) => const NotFoundPage(),
@@ -146,7 +146,8 @@ class AppRouter {
           path: AppRoutes.booking,
           name: AppRoutes.bookingName,
           pageBuilder: (context, state) {
-            final tourId = state.uri.queryParameters['tourId'] ??
+            final tourId =
+                state.uri.queryParameters['tourId'] ??
                 (state.extra is String ? state.extra as String : null);
             return buildPageTransition(
               key: state.pageKey,

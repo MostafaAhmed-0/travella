@@ -32,11 +32,21 @@ class _HeroFlightAnimationState extends State<HeroFlightAnimation>
       duration: const Duration(seconds: 4),
     )..repeat(reverse: true);
 
-    // Flight path and airplane travel loop
+    // Flight path and airplane travel loop with natural pause
     _flightController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3200),
-    )..forward();
+      duration: const Duration(milliseconds: 3600),
+    );
+    _flightController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (mounted) {
+            _flightController.forward(from: 0.0);
+          }
+        });
+      }
+    });
+    _flightController.forward();
 
     // Stardust floating particles loop
     _particleController = AnimationController(
