@@ -6,8 +6,8 @@ import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/animations/animation_widgets.dart';
-import '../../../../data/models/hajj_umrah_model.dart';
-import '../../../../data/repositories/hajj_umrah_repository.dart';
+import '../../../../data/models/tour_model.dart';
+import '../../../../data/repositories/tour_repository.dart';
 
 class HajjUmrahSection extends StatefulWidget {
   const HajjUmrahSection({super.key});
@@ -17,9 +17,10 @@ class HajjUmrahSection extends StatefulWidget {
 }
 
 class _HajjUmrahSectionState extends State<HajjUmrahSection> {
-  final HajjUmrahRepository _repository = const HajjUmrahRepository();
-  List<HajjUmrahPackageModel> _packages = [];
+  final TourRepository _repository = TourRepository();
+  List<TourModel> _packages = [];
   bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -28,12 +29,26 @@ class _HajjUmrahSectionState extends State<HajjUmrahSection> {
   }
 
   Future<void> _loadPackages() async {
-    final list = await _repository.getPackages();
-    if (mounted) {
-      setState(() {
-        _packages = list;
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final list = await _repository.getHajjUmrahTours(activeOnly: true);
+      if (mounted) {
+        setState(() {
+          _packages = list.take(3).toList();
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -67,6 +82,38 @@ class _HajjUmrahSectionState extends State<HajjUmrahSection> {
                   child: CircularProgressIndicator(color: AppColors.gold),
                 ),
               )
+            else if (_errorMessage != null)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.error_outline_rounded, color: AppColors.gold, size: 40),
+                      const SizedBox(height: 12),
+                      Text('Failed to load pilgrimage packages', style: AppTextStyles.h5.copyWith(color: AppColors.white)),
+                      const SizedBox(height: 12),
+                      TravellaButton(
+                        label: 'Retry',
+                        variant: TravellaButtonVariant.gold,
+                        onPressed: _loadPackages,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (_packages.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(48),
+                  child: Column(
+                    children: [
+                      Icon(Icons.mosque_outlined, color: AppColors.gray400, size: 48),
+                      SizedBox(height: 12),
+                      Text('No Hajj & Umrah packages available at the moment.', style: TextStyle(color: AppColors.textOnDarkMuted)),
+                    ],
+                  ),
+                ),
+              )
             else
               GridView.builder(
                 shrinkWrap: true,
@@ -81,7 +128,7 @@ class _HajjUmrahSectionState extends State<HajjUmrahSection> {
                 itemBuilder: (context, i) {
                   return ScaleInOnScroll(
                     delay: Duration(milliseconds: i * 100),
-                    child: _HajjUmrahCard(package: _packages[i]),
+                    child: _HajjUmrahCard(tour: _packages[i]),
                   );
                 },
               ),
@@ -118,8 +165,8 @@ class _HajjUmrahSectionState extends State<HajjUmrahSection> {
 }
 
 class _HajjUmrahCard extends StatefulWidget {
-  final HajjUmrahPackageModel package;
-  const _HajjUmrahCard({required this.package});
+  final TourModel tour;
+  const _HajjUmrahCard({required this.tour});
 
   @override
   State<_HajjUmrahCard> createState() => _HajjUmrahCardState();
@@ -130,242 +177,242 @@ class _HajjUmrahCardState extends State<_HajjUmrahCard> {
 
   @override
   Widget build(BuildContext context) {
-    final pkg = widget.package;
+    final tour = widget.tour;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        transform: Matrix4.translationValues(0.0, _isHovered ? -8.0 : 0.0, 0.0),
-        decoration: BoxDecoration(
-          color: AppColors.navyMedium,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: _isHovered
-                ? AppColors.gold
-                : AppColors.gold.withValues(alpha: 0.25),
-            width: _isHovered ? 2.0 : 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
+    return GestureDetector(
+      onTap: () => context.goNamed(
+        AppRoutes.tourDetailsName,
+        pathParameters: {'id': tour.id},
+      ),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          transform: Matrix4.translationValues(0.0, _isHovered ? -8.0 : 0.0, 0.0),
+          decoration: BoxDecoration(
+            color: AppColors.navyMedium,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
               color: _isHovered
-                  ? AppColors.gold.withValues(alpha: 0.22)
-                  : Colors.black.withValues(alpha: 0.3),
-              blurRadius: _isHovered ? 36 : 16,
-              offset: Offset(0, _isHovered ? 14 : 8),
+                  ? AppColors.gold
+                  : AppColors.gold.withValues(alpha: 0.25),
+              width: _isHovered ? 2.0 : 1.0,
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image Banner
-              SizedBox(
-                height: 180,
-                width: double.infinity,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    AnimatedScale(
-                      scale: _isHovered ? 1.05 : 1.0,
-                      duration: const Duration(milliseconds: 400),
-                      child: Image.network(
-                        pkg.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: AppColors.navyDark,
-                          child: const Icon(Icons.mosque_rounded, color: AppColors.gold),
+            boxShadow: [
+              BoxShadow(
+                color: _isHovered
+                    ? AppColors.gold.withValues(alpha: 0.22)
+                    : Colors.black.withValues(alpha: 0.3),
+                blurRadius: _isHovered ? 36 : 16,
+                offset: Offset(0, _isHovered ? 14 : 8),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image Banner
+                SizedBox(
+                  height: 180,
+                  width: double.infinity,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      AnimatedScale(
+                        scale: _isHovered ? 1.05 : 1.0,
+                        duration: const Duration(milliseconds: 400),
+                        child: Image.network(
+                          tour.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: AppColors.navyDark,
+                            child: const Icon(Icons.mosque_rounded, color: AppColors.gold),
+                          ),
                         ),
                       ),
-                    ),
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.3),
-                            Colors.transparent,
-                            AppColors.navyMedium,
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 14,
-                      left: 14,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      DecoratedBox(
                         decoration: BoxDecoration(
-                          color: AppColors.navyDark.withValues(alpha: 0.9),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.gold.withValues(alpha: 0.4)),
-                        ),
-                        child: Text(
-                          pkg.category,
-                          style: AppTextStyles.labelSM.copyWith(color: AppColors.gold),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.3),
+                              Colors.transparent,
+                              AppColors.navyMedium,
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    if (pkg.badge != null)
                       Positioned(
                         top: 14,
-                        right: 14,
+                        left: 14,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: AppColors.gold,
+                            color: AppColors.navyDark.withValues(alpha: 0.9),
                             borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppColors.gold.withValues(alpha: 0.4)),
                           ),
                           child: Text(
-                            pkg.badge!,
-                            style: AppTextStyles.labelSM.copyWith(
-                              color: AppColors.navyDark,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            tour.type.name.toUpperCase(),
+                            style: AppTextStyles.labelSM.copyWith(color: AppColors.gold),
                           ),
                         ),
                       ),
-                  ],
-                ),
-              ),
-
-              // Package Details
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(22),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        pkg.title,
-                        style: AppTextStyles.h4.copyWith(color: AppColors.white),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        pkg.subtitle,
-                        style: AppTextStyles.bodySM.copyWith(color: AppColors.textOnDarkMuted),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Hotel & Distance Info
-                      _buildHotelInfoRow(Icons.hotel_rounded, 'Makkah: ${pkg.makkahHotel}', pkg.makkahDistance),
-                      const SizedBox(height: 8),
-                      _buildHotelInfoRow(Icons.hotel_rounded, 'Madinah: ${pkg.madinahHotel}', pkg.madinahDistance),
-
-                      const SizedBox(height: 16),
-                      Text(
-                        'Key Inclusions:',
-                        style: AppTextStyles.labelSM.copyWith(color: AppColors.goldLight),
-                      ),
-                      const SizedBox(height: 6),
-                      ...pkg.inclusions.take(3).map((inc) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.check_circle_rounded, color: AppColors.gold, size: 14),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  inc,
-                                  style: AppTextStyles.bodySM.copyWith(color: AppColors.white),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-
-                      const Spacer(),
-                      const Divider(color: AppColors.dividerDark, height: 16),
-
-                      // Price & Button
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'PACKAGE FROM',
-                                style: AppTextStyles.overline.copyWith(
-                                  color: AppColors.goldLight,
-                                  fontSize: 9,
-                                ),
-                              ),
-                              Text(
-                                '\$${pkg.price.toInt()}',
-                                style: AppTextStyles.h4.copyWith(
-                                  color: AppColors.gold,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
-                          ElevatedButton(
-                            onPressed: () => context.goNamed(AppRoutes.hajjUmrahName),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.gold,
-                              foregroundColor: AppColors.navyDark,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              elevation: 0,
+                      if (tour.badge != null)
+                        Positioned(
+                          top: 14,
+                          right: 14,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: AppColors.gold,
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              'Inquire Now',
-                              style: AppTextStyles.labelMD.copyWith(
+                              tour.badge!,
+                              style: AppTextStyles.labelSM.copyWith(
                                 color: AppColors.navyDark,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
                     ],
                   ),
                 ),
-              ),
-            ],
+
+                // Package Details
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(22),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          tour.title,
+                          style: AppTextStyles.h4.copyWith(color: AppColors.white),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          tour.description,
+                          style: AppTextStyles.bodySM.copyWith(color: AppColors.textOnDarkMuted),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Destination and duration
+                        Row(
+                          children: [
+                            const Icon(Icons.place_rounded, color: AppColors.gold, size: 16),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${tour.destination}, ${tour.country}',
+                              style: AppTextStyles.labelSM.copyWith(color: AppColors.white),
+                            ),
+                            const Spacer(),
+                            const Icon(Icons.schedule_rounded, color: AppColors.goldLight, size: 14),
+                            const SizedBox(width: 4),
+                            Text(
+                              tour.durationDays,
+                              style: AppTextStyles.labelSM.copyWith(color: AppColors.goldLight),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+                        if (tour.included.isNotEmpty) ...[
+                          Text(
+                            'Key Inclusions:',
+                            style: AppTextStyles.labelSM.copyWith(color: AppColors.goldLight),
+                          ),
+                          const SizedBox(height: 6),
+                          ...tour.included.take(3).map((inc) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.check_circle_rounded, color: AppColors.gold, size: 14),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      inc,
+                                      style: AppTextStyles.bodySM.copyWith(color: AppColors.white),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ],
+
+                        const Spacer(),
+                        const Divider(color: AppColors.dividerDark, height: 16),
+
+                        // Price & Button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'PACKAGE FROM',
+                                  style: AppTextStyles.overline.copyWith(
+                                    color: AppColors.goldLight,
+                                    fontSize: 9,
+                                  ),
+                                ),
+                                Text(
+                                  '${tour.currency} ${tour.price.toInt()}',
+                                  style: AppTextStyles.h4.copyWith(
+                                    color: AppColors.gold,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            ElevatedButton(
+                              onPressed: () => context.goNamed(
+                                AppRoutes.tourDetailsName,
+                                pathParameters: {'id': tour.id},
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.gold,
+                                foregroundColor: AppColors.navyDark,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                'View Package',
+                                style: AppTextStyles.labelMD.copyWith(
+                                  color: AppColors.navyDark,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildHotelInfoRow(IconData icon, String hotel, String distance) {
-    return Row(
-      children: [
-        Icon(icon, color: AppColors.gold, size: 16),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                hotel,
-                style: AppTextStyles.labelSM.copyWith(color: AppColors.white),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                distance,
-                style: AppTextStyles.bodySM.copyWith(color: AppColors.goldLight, fontSize: 11),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

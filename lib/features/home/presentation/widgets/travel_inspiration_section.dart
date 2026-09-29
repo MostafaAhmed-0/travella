@@ -21,6 +21,7 @@ class _TravelInspirationSectionState extends State<TravelInspirationSection> {
   final BlogRepository _repository = BlogRepository();
   List<BlogModel> _blogs = [];
   bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -29,12 +30,26 @@ class _TravelInspirationSectionState extends State<TravelInspirationSection> {
   }
 
   Future<void> _loadBlogs() async {
-    final list = await _repository.getFeaturedArticles();
-    if (mounted) {
-      setState(() {
-        _blogs = list;
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final list = await _repository.getFeaturedArticles();
+      if (mounted) {
+        setState(() {
+          _blogs = list;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -62,7 +77,7 @@ class _TravelInspirationSectionState extends State<TravelInspirationSection> {
                       subtitle: 'Insider guides, destination tips, and curated travel narratives from our globe-trotting editors.',
                     ),
                   ),
-                  if (!isMobile)
+                  if (!isMobile && _blogs.isNotEmpty)
                     TravellaButton(
                       label: 'Read All Articles',
                       variant: TravellaButtonVariant.secondary,
@@ -79,6 +94,38 @@ class _TravelInspirationSectionState extends State<TravelInspirationSection> {
                 child: Padding(
                   padding: EdgeInsets.all(48),
                   child: CircularProgressIndicator(color: AppColors.royalBlue),
+                ),
+              )
+            else if (_errorMessage != null)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.error_outline_rounded, color: AppColors.royalBlue, size: 40),
+                      const SizedBox(height: 12),
+                      Text('Failed to load travel inspiration', style: AppTextStyles.h5.copyWith(color: AppColors.navyDark)),
+                      const SizedBox(height: 12),
+                      TravellaButton(
+                        label: 'Retry',
+                        variant: TravellaButtonVariant.primary,
+                        onPressed: _loadBlogs,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (_blogs.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(48),
+                  child: Column(
+                    children: [
+                      Icon(Icons.article_outlined, color: AppColors.gray400, size: 48),
+                      SizedBox(height: 12),
+                      Text('No articles published yet.', style: TextStyle(color: AppColors.textSecondary)),
+                    ],
+                  ),
                 ),
               )
             else
@@ -100,7 +147,7 @@ class _TravelInspirationSectionState extends State<TravelInspirationSection> {
                 },
               ),
 
-            if (isMobile) ...[
+            if (isMobile && _blogs.isNotEmpty) ...[
               const SizedBox(height: 32),
               TravellaButton(
                 label: 'Read All Articles',

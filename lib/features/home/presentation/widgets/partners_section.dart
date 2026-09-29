@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
+import '../../../../data/models/partner_model.dart';
+import '../../../../data/repositories/partner_repository.dart';
 
 class PartnersSection extends StatefulWidget {
   const PartnersSection({super.key});
@@ -12,9 +14,11 @@ class PartnersSection extends StatefulWidget {
 
 class _PartnersSectionState extends State<PartnersSection>
     with SingleTickerProviderStateMixin {
+  final PartnerRepository _repository = PartnerRepository();
   late final AnimationController _controller;
+  List<PartnerModel> _partners = [];
 
-  static const _partners = [
+  static const _defaultNames = [
     'Emirates Airlines',
     'Qatar Airways',
     'Turkish Airlines',
@@ -34,6 +38,20 @@ class _PartnersSectionState extends State<PartnersSection>
       vsync: this,
       duration: const Duration(seconds: 28),
     )..repeat();
+    _loadPartners();
+  }
+
+  Future<void> _loadPartners() async {
+    try {
+      final list = await _repository.getPartners(activeOnly: true);
+      if (mounted && list.isNotEmpty) {
+        setState(() {
+          _partners = list;
+        });
+      }
+    } catch (_) {
+      // Keep defaults
+    }
   }
 
   @override
@@ -45,6 +63,9 @@ class _PartnersSectionState extends State<PartnersSection>
   @override
   Widget build(BuildContext context) {
     final isMobile = AppBreakpoints.isMobile(context);
+    final partnerNames = _partners.isNotEmpty
+        ? _partners.map((p) => p.name).toList()
+        : _defaultNames;
 
     return Container(
       color: AppColors.navyDark,
@@ -73,7 +94,7 @@ class _PartnersSectionState extends State<PartnersSection>
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     final itemWidth = 220.0;
-                    final totalWidth = _partners.length * itemWidth;
+                    final totalWidth = partnerNames.length * itemWidth;
                     final offset = _controller.value * totalWidth;
 
                     return Stack(
@@ -83,9 +104,9 @@ class _PartnersSectionState extends State<PartnersSection>
                           offset: Offset(-offset, 0),
                           child: Row(
                             children: [
-                              ..._partners.map((name) => _buildPartnerChip(name, itemWidth)),
-                              ..._partners.map((name) => _buildPartnerChip(name, itemWidth)),
-                              ..._partners.map((name) => _buildPartnerChip(name, itemWidth)),
+                              ...partnerNames.map((name) => _buildPartnerChip(name, itemWidth)),
+                              ...partnerNames.map((name) => _buildPartnerChip(name, itemWidth)),
+                              ...partnerNames.map((name) => _buildPartnerChip(name, itemWidth)),
                             ],
                           ),
                         ),

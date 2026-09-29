@@ -23,6 +23,8 @@ class _InternationalToursSectionState extends State<InternationalToursSection> {
   List<TourModel> _tours = [];
   bool _isLoading = true;
 
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -36,12 +38,26 @@ class _InternationalToursSectionState extends State<InternationalToursSection> {
   }
 
   Future<void> _loadTours() async {
-    final list = await _repository.getInternationalTours();
-    if (mounted) {
-      setState(() {
-        _tours = list;
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final list = await _repository.getInternationalTours(activeOnly: true);
+      if (mounted) {
+        setState(() {
+          _tours = list;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -88,7 +104,7 @@ class _InternationalToursSectionState extends State<InternationalToursSection> {
                         onDark: true,
                       ),
                     ),
-                    if (!isMobile)
+                    if (!isMobile && _tours.isNotEmpty)
                       Row(
                         children: [
                           _CarouselNavBtn(
@@ -115,6 +131,38 @@ class _InternationalToursSectionState extends State<InternationalToursSection> {
               child: Padding(
                 padding: EdgeInsets.all(48),
                 child: CircularProgressIndicator(color: AppColors.gold),
+              ),
+            )
+          else if (_errorMessage != null)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  children: [
+                    const Icon(Icons.error_outline_rounded, color: AppColors.gold, size: 40),
+                    const SizedBox(height: 12),
+                    Text('Failed to load international tours', style: AppTextStyles.h5.copyWith(color: AppColors.white)),
+                    const SizedBox(height: 12),
+                    TravellaButton(
+                      label: 'Retry',
+                      variant: TravellaButtonVariant.gold,
+                      onPressed: _loadTours,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else if (_tours.isEmpty)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(48),
+                child: Column(
+                  children: [
+                    Icon(Icons.public_off_rounded, color: AppColors.gray400, size: 48),
+                    SizedBox(height: 12),
+                    Text('No international tours available at the moment.', style: TextStyle(color: AppColors.textOnDarkMuted)),
+                  ],
+                ),
               ),
             )
           else
@@ -196,216 +244,226 @@ class _InternationalTourCardState extends State<_InternationalTourCard> {
   Widget build(BuildContext context) {
     final tour = widget.tour;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        transform: Matrix4.translationValues(0.0, _isHovered ? -8.0 : 0.0, 0.0),
-        decoration: BoxDecoration(
-          color: AppColors.navyMedium,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: _isHovered
-                ? AppColors.gold.withValues(alpha: 0.7)
-                : AppColors.white.withValues(alpha: 0.1),
-            width: _isHovered ? 1.5 : 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
+    return GestureDetector(
+      onTap: () => context.goNamed(
+        AppRoutes.tourDetailsName,
+        pathParameters: {'id': tour.id},
+      ),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          transform: Matrix4.translationValues(0.0, _isHovered ? -8.0 : 0.0, 0.0),
+          decoration: BoxDecoration(
+            color: AppColors.navyMedium,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
               color: _isHovered
-                  ? AppColors.gold.withValues(alpha: 0.2)
-                  : Colors.black.withValues(alpha: 0.25),
-              blurRadius: _isHovered ? 32 : 16,
-              offset: Offset(0, _isHovered ? 14 : 8),
+                  ? AppColors.gold.withValues(alpha: 0.7)
+                  : AppColors.white.withValues(alpha: 0.1),
+              width: _isHovered ? 1.5 : 1.0,
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image container
-              SizedBox(
-                height: 190,
-                width: double.infinity,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    AnimatedScale(
-                      scale: _isHovered ? 1.06 : 1.0,
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.easeOutCubic,
-                      child: Image.network(
-                        tour.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: AppColors.navyDark,
-                          child: const Icon(Icons.image_not_supported_outlined, color: AppColors.gray400),
+            boxShadow: [
+              BoxShadow(
+                color: _isHovered
+                    ? AppColors.gold.withValues(alpha: 0.2)
+                    : Colors.black.withValues(alpha: 0.25),
+                blurRadius: _isHovered ? 32 : 16,
+                offset: Offset(0, _isHovered ? 14 : 8),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image container
+                SizedBox(
+                  height: 190,
+                  width: double.infinity,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      AnimatedScale(
+                        scale: _isHovered ? 1.06 : 1.0,
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeOutCubic,
+                        child: Image.network(
+                          tour.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: AppColors.navyDark,
+                            child: const Icon(Icons.image_not_supported_outlined, color: AppColors.gray400),
+                          ),
                         ),
                       ),
-                    ),
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.4),
-                            Colors.transparent,
-                            AppColors.navyMedium,
-                          ],
-                          stops: const [0.0, 0.4, 1.0],
-                        ),
-                      ),
-                    ),
-                    // Destination tag
-                    Positioned(
-                      top: 14,
-                      left: 14,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      DecoratedBox(
                         decoration: BoxDecoration(
-                          color: AppColors.navyDark.withValues(alpha: 0.85),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.white.withValues(alpha: 0.15)),
-                        ),
-                        child: Text(
-                          '${tour.destination}, ${tour.country}',
-                          style: AppTextStyles.labelSM.copyWith(color: AppColors.goldLight),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.4),
+                              Colors.transparent,
+                              AppColors.navyMedium,
+                            ],
+                            stops: const [0.0, 0.4, 1.0],
+                          ),
                         ),
                       ),
-                    ),
-                    if (tour.badge != null)
+                      // Destination tag
                       Positioned(
                         top: 14,
-                        right: 14,
+                        left: 14,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: AppColors.gold,
+                            color: AppColors.navyDark.withValues(alpha: 0.85),
                             borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppColors.white.withValues(alpha: 0.15)),
                           ),
                           child: Text(
-                            tour.badge!,
-                            style: AppTextStyles.labelSM.copyWith(
-                              color: AppColors.navyDark,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            '${tour.destination}, ${tour.country}',
+                            style: AppTextStyles.labelSM.copyWith(color: AppColors.goldLight),
                           ),
                         ),
                       ),
-                  ],
-                ),
-              ),
-
-              // Body content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Rating & Duration
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.schedule_rounded, size: 14, color: AppColors.textOnDarkMuted),
-                              const SizedBox(width: 4),
-                              Text(
-                                tour.durationDays,
-                                style: AppTextStyles.labelSM.copyWith(color: AppColors.textOnDarkMuted),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              const Icon(Icons.star_rounded, size: 16, color: AppColors.gold),
-                              const SizedBox(width: 3),
-                              Text(
-                                '${tour.rating}',
-                                style: AppTextStyles.labelSM.copyWith(
-                                  color: AppColors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Title
-                      Text(
-                        tour.title,
-                        style: AppTextStyles.h5.copyWith(color: AppColors.white),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Description
-                      Text(
-                        tour.description,
-                        style: AppTextStyles.bodySM.copyWith(color: AppColors.textOnDarkMuted),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-
-                      const Spacer(),
-                      const Divider(color: AppColors.dividerDark, height: 16),
-
-                      // Price & Action
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'PRICE PER PERSON',
-                                style: AppTextStyles.overline.copyWith(
-                                  color: AppColors.goldLight,
-                                  fontSize: 9,
-                                ),
-                              ),
-                              Text(
-                                '\$${tour.price.toInt()}',
-                                style: AppTextStyles.h4.copyWith(
-                                  color: AppColors.white,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
-                          ElevatedButton(
-                            onPressed: () => context.goNamed(AppRoutes.bookingName),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.gold,
-                              foregroundColor: AppColors.navyDark,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              elevation: 0,
+                      if (tour.badge != null)
+                        Positioned(
+                          top: 14,
+                          right: 14,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: AppColors.gold,
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              'Book Now',
-                              style: AppTextStyles.labelMD.copyWith(
+                              tour.badge!,
+                              style: AppTextStyles.labelSM.copyWith(
                                 color: AppColors.navyDark,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
                     ],
                   ),
                 ),
-              ),
-            ],
+
+                // Body content
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Rating & Duration
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.schedule_rounded, size: 14, color: AppColors.textOnDarkMuted),
+                                const SizedBox(width: 4),
+                                Text(
+                                  tour.durationDays,
+                                  style: AppTextStyles.labelSM.copyWith(color: AppColors.textOnDarkMuted),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Icon(Icons.star_rounded, size: 16, color: AppColors.gold),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '${tour.rating}',
+                                  style: AppTextStyles.labelSM.copyWith(
+                                    color: AppColors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Title
+                        Text(
+                          tour.title,
+                          style: AppTextStyles.h5.copyWith(color: AppColors.white),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Description
+                        Text(
+                          tour.description,
+                          style: AppTextStyles.bodySM.copyWith(color: AppColors.textOnDarkMuted),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        const Spacer(),
+                        const Divider(color: AppColors.dividerDark, height: 16),
+
+                        // Price & Action
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'FROM',
+                                  style: AppTextStyles.overline.copyWith(
+                                    color: AppColors.goldLight,
+                                    fontSize: 9,
+                                  ),
+                                ),
+                                Text(
+                                  '${tour.currency} ${tour.price.toInt()}',
+                                  style: AppTextStyles.h4.copyWith(
+                                    color: AppColors.white,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            ElevatedButton(
+                              onPressed: () => context.goNamed(
+                                AppRoutes.tourDetailsName,
+                                pathParameters: {'id': tour.id},
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.gold,
+                                foregroundColor: AppColors.navyDark,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                'View Tour',
+                                style: AppTextStyles.labelMD.copyWith(
+                                  color: AppColors.navyDark,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

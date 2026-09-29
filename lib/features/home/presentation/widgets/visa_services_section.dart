@@ -22,6 +22,8 @@ class _VisaServicesSectionState extends State<VisaServicesSection> {
   bool _isLoading = true;
   int _selectedCountryIndex = 0;
 
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -29,12 +31,26 @@ class _VisaServicesSectionState extends State<VisaServicesSection> {
   }
 
   Future<void> _loadVisaData() async {
-    final list = await _repository.getPopularCountries();
-    if (mounted) {
-      setState(() {
-        _countries = list;
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final list = await _repository.getPopularCountries();
+      if (mounted) {
+        setState(() {
+          _countries = list;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -133,7 +149,36 @@ class _VisaServicesSectionState extends State<VisaServicesSection> {
             const SizedBox(height: 60),
 
             // ── Interactive Country Explorer ───────────────────────────────
-            if (!_isLoading && _countries.isNotEmpty) ...[
+            if (_isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: CircularProgressIndicator(color: AppColors.royalBlue),
+                ),
+              )
+            else if (_errorMessage != null)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.error_outline_rounded, color: AppColors.royalBlue, size: 36),
+                      const SizedBox(height: 8),
+                      Text('Unable to load visa destinations', style: AppTextStyles.h6),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: _loadVisaData,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.royalBlue,
+                          foregroundColor: AppColors.white,
+                        ),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (_countries.isNotEmpty) ...[
               SlideInOnScroll(
                 child: Container(
                   width: double.infinity,

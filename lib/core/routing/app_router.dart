@@ -31,6 +31,7 @@ import '../../features/gallery/presentation/pages/gallery_page.dart';
 import '../../features/blogs/presentation/pages/blogs_page.dart';
 import '../../features/contact/presentation/pages/contact_page.dart';
 import '../../features/bookings/presentation/pages/booking_page.dart';
+import '../../features/tours/presentation/pages/tour_details_page.dart';
 import '../../shared/presentation/pages/not_found_page.dart';
 
 /// Helper to bridge Stream/Cubit with GoRouter's refreshListenable
@@ -148,6 +149,17 @@ class AppRouter {
             key: state.pageKey,
             child: const BookingPage(),
           ),
+        ),
+        GoRoute(
+          path: AppRoutes.tourDetails,
+          name: AppRoutes.tourDetailsName,
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'] ?? '';
+            return buildPageTransition(
+              key: state.pageKey,
+              child: TourDetailsPage(tourId: id),
+            );
+          },
         ),
 
         // ── Auth Routes ─────────────────────────────────────────────────────

@@ -45,10 +45,12 @@ class AppColors {
 
   // ── Semantic Colors ────────────────────────────────────────────────────────
   static const Color success = Color(0xFF10B981);
+  static const Color successGreen = success;
   static const Color successLight = Color(0xFFD1FAE5);
   static const Color warning = Color(0xFFF59E0B);
   static const Color warningLight = Color(0xFFFEF3C7);
   static const Color error = Color(0xFFEF4444);
+  static const Color errorRed = error;
   static const Color errorLight = Color(0xFFFEE2E2);
   static const Color coral = Color(0xFFFF6B6B);
   static const Color info = Color(0xFF3B82F6);

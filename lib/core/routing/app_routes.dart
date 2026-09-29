@@ -39,6 +39,9 @@ class AppRoutes {
   static const String booking = '/booking';
   static const String bookingName = 'booking';
 
+  static const String tourDetails = '/tours/:id';
+  static const String tourDetailsName = 'tour-details';
+
   // ── Auth ───────────────────────────────────────────────────────────────────
   static const String login = '/login';
   static const String loginName = 'login';

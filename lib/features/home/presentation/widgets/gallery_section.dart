@@ -18,6 +18,7 @@ class _GallerySectionState extends State<GallerySection> {
   final GalleryRepository _repository = GalleryRepository();
   List<GalleryItemModel> _items = [];
   bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -26,16 +27,31 @@ class _GallerySectionState extends State<GallerySection> {
   }
 
   Future<void> _loadGallery() async {
-    final list = await _repository.getGalleryItems();
-    if (mounted) {
-      setState(() {
-        _items = list;
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final list = await _repository.getGalleryItems();
+      if (mounted) {
+        setState(() {
+          _items = list;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
   void _openLightbox(int initialIndex) {
+    if (_items.isEmpty) return;
     showDialog(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.95),
@@ -73,6 +89,41 @@ class _GallerySectionState extends State<GallerySection> {
                 child: Padding(
                   padding: EdgeInsets.all(48),
                   child: CircularProgressIndicator(color: AppColors.royalBlue),
+                ),
+              )
+            else if (_errorMessage != null)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.error_outline_rounded, color: AppColors.royalBlue, size: 40),
+                      const SizedBox(height: 12),
+                      Text('Failed to load gallery', style: AppTextStyles.h5.copyWith(color: AppColors.navyDark)),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        onPressed: _loadGallery,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.royalBlue,
+                          foregroundColor: AppColors.white,
+                        ),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (_items.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(48),
+                  child: Column(
+                    children: [
+                      Icon(Icons.photo_library_outlined, color: AppColors.gray400, size: 48),
+                      SizedBox(height: 12),
+                      Text('No gallery images available at the moment.', style: TextStyle(color: AppColors.textSecondary)),
+                    ],
+                  ),
                 ),
               )
             else

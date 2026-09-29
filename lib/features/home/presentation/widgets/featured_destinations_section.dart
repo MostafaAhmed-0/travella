@@ -32,6 +32,8 @@ class _FeaturedDestinationsSectionState
     'Exotic',
   ];
 
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -39,14 +41,29 @@ class _FeaturedDestinationsSectionState
   }
 
   Future<void> _loadDestinations() async {
-    final list = await _repository.getDestinations(
-      region: _selectedCategory == 'All' ? null : _selectedCategory,
-    );
-    if (mounted) {
-      setState(() {
-        _destinations = list;
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final list = await _repository.getDestinations(
+        featuredOnly: true,
+        region: _selectedCategory == 'All' ? null : _selectedCategory,
+      );
+      if (mounted) {
+        setState(() {
+          _destinations = list;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -141,6 +158,38 @@ class _FeaturedDestinationsSectionState
                 child: Padding(
                   padding: EdgeInsets.all(48),
                   child: CircularProgressIndicator(color: AppColors.royalBlue),
+                ),
+              )
+            else if (_errorMessage != null)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.error_outline_rounded, color: AppColors.errorRed, size: 40),
+                      const SizedBox(height: 12),
+                      Text('Failed to load featured destinations', style: AppTextStyles.h5),
+                      const SizedBox(height: 12),
+                      TravellaButton(
+                        label: 'Retry',
+                        variant: TravellaButtonVariant.primary,
+                        onPressed: _loadDestinations,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (_destinations.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(48),
+                  child: Column(
+                    children: [
+                      Icon(Icons.place_outlined, color: AppColors.gray400, size: 48),
+                      SizedBox(height: 12),
+                      Text('No featured destinations available at the moment.', style: TextStyle(color: AppColors.textSecondary)),
+                    ],
+                  ),
                 ),
               )
             else

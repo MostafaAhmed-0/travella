@@ -17,6 +17,8 @@ class TestimonialsSection extends StatefulWidget {
 class _TestimonialsSectionState extends State<TestimonialsSection> {
   final TestimonialRepository _repository = TestimonialRepository();
   List<TestimonialModel> _testimonials = [];
+  bool _isLoading = true;
+  String? _errorMessage;
   int _currentIndex = 0;
   final PageController _pageController = PageController();
 
@@ -33,15 +35,31 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
   }
 
   Future<void> _loadTestimonials() async {
-    final list = await _repository.getFeaturedTestimonials();
-    if (mounted) {
-      setState(() {
-        _testimonials = list;
-      });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final list = await _repository.getFeaturedTestimonials();
+      if (mounted) {
+        setState(() {
+          _testimonials = list;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
   void _nextTestimonial() {
+    if (_testimonials.isEmpty) return;
     if (_currentIndex < _testimonials.length - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 350),
@@ -57,6 +75,7 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
   }
 
   void _prevTestimonial() {
+    if (_testimonials.isEmpty) return;
     if (_currentIndex > 0) {
       _pageController.previousPage(
         duration: const Duration(milliseconds: 350),
@@ -86,9 +105,46 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
             ),
             const SizedBox(height: 48),
 
-            if (_testimonials.isEmpty)
-              const Center(child: CircularProgressIndicator(color: AppColors.royalBlue))
-            else
+            if (_isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(48),
+                  child: CircularProgressIndicator(color: AppColors.royalBlue),
+                ),
+              )
+            else if (_errorMessage != null)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.error_outline_rounded, color: AppColors.royalBlue, size: 40),
+                      const SizedBox(height: 12),
+                      Text('Failed to load testimonials', style: AppTextStyles.h5.copyWith(color: AppColors.navyDark)),
+                      const SizedBox(height: 12),
+                      TravellaButton(
+                        label: 'Retry',
+                        variant: TravellaButtonVariant.primary,
+                        onPressed: _loadTestimonials,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (_testimonials.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(48),
+                  child: Column(
+                    children: [
+                      Icon(Icons.rate_review_outlined, color: AppColors.gray400, size: 48),
+                      SizedBox(height: 12),
+                      Text('No traveler reviews available yet.', style: TextStyle(color: AppColors.textSecondary)),
+                    ],
+                  ),
+                ),
+              )
+            else ...[
               SizedBox(
                 height: isMobile ? 380 : 300,
                 child: PageView.builder(
@@ -101,41 +157,41 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
                   },
                 ),
               ),
+              const SizedBox(height: 28),
 
-            const SizedBox(height: 28),
-
-            // Carousel Navigation Dots & Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
-                  onPressed: _prevTestimonial,
-                ),
-                const SizedBox(width: 12),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(_testimonials.length, (index) {
-                    final isSelected = _currentIndex == index;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: isSelected ? 28 : 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: isSelected ? AppColors.gold : AppColors.gray300,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    );
-                  }),
-                ),
-                const SizedBox(width: 12),
-                IconButton(
-                  icon: const Icon(Icons.arrow_forward_rounded, color: AppColors.navy),
-                  onPressed: _nextTestimonial,
-                ),
-              ],
-            ),
+              // Carousel Navigation Dots & Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
+                    onPressed: _prevTestimonial,
+                  ),
+                  const SizedBox(width: 12),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(_testimonials.length, (index) {
+                      final isSelected = _currentIndex == index;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: isSelected ? 28 : 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppColors.gold : AppColors.gray300,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(width: 12),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_forward_rounded, color: AppColors.navy),
+                    onPressed: _nextTestimonial,
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

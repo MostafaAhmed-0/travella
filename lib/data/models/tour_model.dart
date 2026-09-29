@@ -72,6 +72,52 @@ class TourImageModel extends Equatable {
   List<Object?> get props => [id, tourId, imageUrl, sortOrder];
 }
 
+/// Model representing an itinerary day/step
+class TourItineraryItem extends Equatable {
+  final int day;
+  final String title;
+  final String description;
+  final List<String> activities;
+
+  const TourItineraryItem({
+    required this.day,
+    required this.title,
+    required this.description,
+    this.activities = const [],
+  });
+
+  factory TourItineraryItem.fromJson(dynamic json) {
+    if (json is Map<String, dynamic>) {
+      return TourItineraryItem(
+        day: (json['day'] as num?)?.toInt() ?? 1,
+        title: json['title'] as String? ?? '',
+        description: json['description'] as String? ?? '',
+        activities: (json['activities'] as List<dynamic>?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            const [],
+      );
+    } else if (json is String) {
+      return TourItineraryItem(
+        day: 1,
+        title: json,
+        description: '',
+      );
+    }
+    return const TourItineraryItem(day: 1, title: '', description: '');
+  }
+
+  Map<String, dynamic> toJson() => {
+        'day': day,
+        'title': title,
+        'description': description,
+        'activities': activities,
+      };
+
+  @override
+  List<Object?> get props => [day, title, description, activities];
+}
+
 /// Model representing a tour package matching Supabase public.tours table
 class TourModel extends Equatable {
   final String id;
@@ -99,6 +145,8 @@ class TourModel extends Equatable {
   final int reviewsCount;
   final List<String> highlights;
   final List<String> included;
+  final List<String> excluded;
+  final List<TourItineraryItem> itinerary;
   final bool isSpecialOffer;
   final String? badge;
 
@@ -126,6 +174,8 @@ class TourModel extends Equatable {
     this.reviewsCount = 48,
     this.highlights = const [],
     this.included = const [],
+    this.excluded = const [],
+    this.itinerary = const [],
     this.isSpecialOffer = false,
     this.badge,
   });
@@ -157,6 +207,28 @@ class TourModel extends Equatable {
           .toList();
     }
 
+    List<String> highlightsList = [];
+    if (json['highlights'] != null && json['highlights'] is List) {
+      highlightsList = (json['highlights'] as List).map((e) => e.toString()).toList();
+    }
+
+    List<String> includedList = [];
+    if (json['included'] != null && json['included'] is List) {
+      includedList = (json['included'] as List).map((e) => e.toString()).toList();
+    }
+
+    List<String> excludedList = [];
+    if (json['excluded'] != null && json['excluded'] is List) {
+      excludedList = (json['excluded'] as List).map((e) => e.toString()).toList();
+    }
+
+    List<TourItineraryItem> itineraryList = [];
+    if (json['itinerary'] != null && json['itinerary'] is List) {
+      itineraryList = (json['itinerary'] as List)
+          .map((e) => TourItineraryItem.fromJson(e))
+          .toList();
+    }
+
     return TourModel(
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? '',
@@ -165,7 +237,9 @@ class TourModel extends Equatable {
       descriptionAr: json['description_ar'] as String?,
       destinationId: json['destination_id'] as String?,
       type: TourType.fromString(json['type'] as String?),
-      duration: json['duration'] as String? ?? json['duration_days'] as String? ?? '5 Days / 4 Nights',
+      duration: json['duration'] as String? ??
+          json['duration_days'] as String? ??
+          '5 Days / 4 Nights',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       originalPrice: (json['original_price'] as num?)?.toDouble(),
       currency: json['currency'] as String? ?? 'USD',
@@ -183,8 +257,10 @@ class TourModel extends Equatable {
       country: json['country'] as String? ?? '',
       rating: (json['rating'] as num?)?.toDouble() ?? 4.9,
       reviewsCount: (json['reviews_count'] as num?)?.toInt() ?? 0,
-      highlights: (json['highlights'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [],
-      included: (json['included'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [],
+      highlights: highlightsList,
+      included: includedList,
+      excluded: excludedList,
+      itinerary: itineraryList,
       isSpecialOffer: (json['is_special_offer'] as bool?) ?? false,
       badge: json['badge'] as String?,
     );
@@ -234,6 +310,8 @@ class TourModel extends Equatable {
     int? reviewsCount,
     List<String>? highlights,
     List<String>? included,
+    List<String>? excluded,
+    List<TourItineraryItem>? itinerary,
     bool? isSpecialOffer,
     String? badge,
   }) {
@@ -261,6 +339,8 @@ class TourModel extends Equatable {
       reviewsCount: reviewsCount ?? this.reviewsCount,
       highlights: highlights ?? this.highlights,
       included: included ?? this.included,
+      excluded: excluded ?? this.excluded,
+      itinerary: itinerary ?? this.itinerary,
       isSpecialOffer: isSpecialOffer ?? this.isSpecialOffer,
       badge: badge ?? this.badge,
     );
