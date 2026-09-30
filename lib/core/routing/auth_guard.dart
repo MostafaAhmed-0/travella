@@ -38,22 +38,28 @@ class RoleGuard {
     final isAdminRoute = currentPath.startsWith('/admin');
     final isLoginRoute = currentPath == AppRoutes.login;
 
+    // While auth is still initializing, don't redirect anywhere
+    if (state is AuthInitial || state is AuthLoading) {
+      return null;
+    }
+
+    // /login is always accessible when not authenticated
+    if (isLoginRoute) {
+      // Only redirect away from login if already authenticated as admin
+      if (state is Authenticated && state.hasAdminAccess) {
+        return AppRoutes.adminDashboard;
+      }
+      return null;
+    }
+
     // Protecting /admin routes
     if (isAdminRoute) {
       if (state is! Authenticated) {
-        // Not logged in -> redirect to login
         return AppRoutes.login;
       }
-
       if (!state.hasAdminAccess) {
-        // Logged in as regular user without admin/staff role -> redirect to login
         return AppRoutes.login;
       }
-    }
-
-    // Redirect already logged-in admin away from /login
-    if (isLoginRoute && state is Authenticated && state.hasAdminAccess) {
-      return AppRoutes.adminDashboard;
     }
 
     return null;
