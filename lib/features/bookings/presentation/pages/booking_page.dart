@@ -1805,8 +1805,8 @@ class _BookingPageState extends State<BookingPage> {
             constraints: const BoxConstraints(maxWidth: 620),
             child: Text(
               context.isArabic
-                  ? 'شكراً لك، ${booking.customerName}! تم استلام طلب حجزك بنجاح وحفظه في قاعدة البيانات. مستشارك السياحي يجهز تفاصيل برنامجك وسيتواصل معك لتأكيده.'
-                  : 'Thank you, ${booking.customerName}! Your booking has been saved to our database with status pending. A dedicated Travella travel concierge is preparing your personalized itinerary.',
+                  ? 'شكراً لك، ${booking.customerName}! تم إرسال طلب حجزك بنجاح وحفظه في النظام بحالة "قيد المراجعة". سيقوم مستشارك السياحي بالتواصل مع حضرتك في أقرب وقت لتأكيد الحجز ومراجعة كافة التفاصيل.'
+                  : 'Thank you, ${booking.customerName}! Your booking request has been submitted successfully and is currently pending review. A dedicated travel advisor will contact you shortly to confirm your reservation and finalize the itinerary.',
               style: AppTextStyles.bodyLG.copyWith(
                 color: AppColors.textSecondary,
                 height: 1.6,

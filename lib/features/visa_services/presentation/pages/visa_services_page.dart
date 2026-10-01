@@ -686,13 +686,13 @@ class _VisaApplicationModalState extends State<_VisaApplicationModal> {
             const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 56),
             const SizedBox(height: 16),
             Text(
-              isArabic ? 'تم استلام طلب التأشيرة بنجاح!' : 'Visa Request Received Successfully!',
+              isArabic ? 'تم إرسال طلب التأشيرة بنجاح' : 'Visa Application Request Submitted!',
               style: AppTextStyles.h4.copyWith(color: AppColors.navyDark),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              isArabic ? 'رقم مرجع الملف الخاص بك:' : 'Your visa application reference number:',
+              isArabic ? 'رقم الطلب المرجعي:' : 'Your visa application reference number:',
               style: const TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 8),
@@ -715,8 +715,8 @@ class _VisaApplicationModalState extends State<_VisaApplicationModal> {
             const SizedBox(height: 16),
             Text(
               isArabic
-                  ? 'سيتواصل معك مستشار التأشيرات لمراجعة مستنداتك وتحديد موعد السفارة أو التقديم الإلكتروني.'
-                  : 'A dedicated visa specialist will contact you to review your checklist and schedule your embassy appointment.',
+                  ? 'تم استلام طلبك بنجاح، وسيقوم مستشار التأشيرات بالتواصل مع حضرتك لمراجعة المستندات واستكمال الإجراءات.'
+                  : 'Your request has been received. A dedicated visa specialist will contact you shortly to review your documents and proceed with the application.',
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),

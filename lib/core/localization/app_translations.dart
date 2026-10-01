@@ -186,9 +186,9 @@ class AppTranslations {
           'Booking Status: Pending. No immediate charge. Future online gateways (Stripe, Paymob, Fawry) ready.',
       'btn_submit_booking': 'Confirm & Submit Booking',
 
-      'step_5_confirmed_title': 'Your travel request has been received.',
+      'step_5_confirmed_title': 'Booking Request Submitted Successfully',
       'step_5_confirmed_subtitle':
-          'Thank you! Your booking has been saved to our database with status pending. A dedicated Travella travel concierge is preparing your personalized itinerary.',
+          'Thank you! Your booking request has been submitted and is currently pending review. A dedicated travel advisor will contact you shortly to confirm your reservation and review itinerary details.',
       'booking_ref_label': 'BOOKING REFERENCE',
       'status_pending': 'PENDING',
       'whatsapp_btn_label': 'Contact us on WhatsApp',
@@ -392,9 +392,9 @@ class AppTranslations {
           'حالة الحجز: قيد المراجعة. لا يوجد أي خصم مسبق. بوابات الدفع الإلكتروني (Stripe, Paymob, Fawry) جاهزة مستقبلاً.',
       'btn_submit_booking': 'تأكيد وإرسال طلب الحجز',
 
-      'step_5_confirmed_title': 'تم استلام طلب حجزك بنجاح.',
+      'step_5_confirmed_title': 'تم إرسال طلب الحجز بنجاح',
       'step_5_confirmed_subtitle':
-          'شكراً لاختيارك ترافيلا! تم تسجيل طلب الحجز في قاعدة بياناتنا بحالة "قيد المراجعة". مستشارك السياحي يجهز تفاصيل برنامجك وسيتواصل معك قريباً.',
+          'شكراً لاختيارك ترافيلا! تم إرسال طلب حجزك بنجاح وحفظه في النظام بحالة "قيد المراجعة". سيقوم مستشارك السياحي بالتواصل مع حضرتك في أقرب وقت لتأكيد الحجز ومراجعة تفاصيل البرنامج.',
       'booking_ref_label': 'الرقم المرجعي للحجز',
       'status_pending': 'قيد المراجعة',
       'whatsapp_btn_label': 'تواصل معنا عبر واتساب',

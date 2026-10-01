@@ -744,7 +744,7 @@ class _FlightInquiryPageState extends State<FlightInquiryPage> {
           ),
           const SizedBox(height: 24),
           Text(
-            isArabic ? 'تم استلام طلب رحلتك بنجاح!' : 'Flight Inquiry Received Successfully!',
+            isArabic ? 'تم إرسال طلب حجز الطيران بنجاح' : 'Flight Request Submitted Successfully!',
             textAlign: TextAlign.center,
             style: (isMobile ? AppTextStyles.h3 : AppTextStyles.h2).copyWith(
               color: AppColors.navyDark,
@@ -754,8 +754,8 @@ class _FlightInquiryPageState extends State<FlightInquiryPage> {
           const SizedBox(height: 12),
           Text(
             isArabic
-                ? 'شكراً لك، رقم مرجع الطلب الخاص بك هو:'
-                : 'Thank you! Your flight reservation request reference number is:',
+                ? 'شكراً لك! تم استلام طلبك بنجاح وسيتواصل معك خبير الطيران لدينا لمراجعة أفضل مسارات الرحلات والأسعار وتأكيد الحجز.'
+                : 'Thank you! Your request has been received and our flight specialist will reach out shortly with verified itinerary options and pricing.',
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyLG.copyWith(color: AppColors.textSecondary),
           ),

@@ -828,13 +828,13 @@ class _HotelBookingModalState extends State<_HotelBookingModal> {
             const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 56),
             const SizedBox(height: 16),
             Text(
-              isArabic ? 'تم تأكيد طلب حجز الفندق!' : 'Hotel Reservation Submitted!',
+              isArabic ? 'تم إرسال طلب حجز الفندق بنجاح' : 'Hotel Booking Request Submitted!',
               style: AppTextStyles.h4.copyWith(color: AppColors.navyDark),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              isArabic ? 'رقم مرجع الحجز الخاص بك:' : 'Your reservation reference number:',
+              isArabic ? 'رقم الطلب المرجعي:' : 'Your reservation reference number:',
               style: const TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 8),
@@ -857,8 +857,8 @@ class _HotelBookingModalState extends State<_HotelBookingModal> {
             const SizedBox(height: 16),
             Text(
               isArabic
-                  ? 'سيتواصل معك مدير حجز الفنادق لتأكيد الغرفة وإرسال قسيمة الفندق الإلكترونية.'
-                  : 'A Travella concierge specialist will confirm room availability and issue your hotel voucher.',
+                  ? 'تم استلام طلبك بنجاح، وسيقوم مستشار حجز الفنادق بالتواصل مع حضرتك لتأكيد توافر الغرف وإصدار قسيمة الإقامة.'
+                  : 'Your request has been received. A Travella hotel specialist will contact you shortly to confirm room availability and finalize your reservation.',
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
