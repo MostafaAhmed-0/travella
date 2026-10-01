@@ -37,6 +37,7 @@ class _AppNavbarState extends State<AppNavbar> {
 
     final navItems = [
       (context.tr('nav_home'), AppRoutes.home, AppRoutes.homeName, Icons.home_rounded),
+      (context.tr('nav_flights'), AppRoutes.flights, AppRoutes.flightsName, Icons.flight_takeoff_rounded),
       (context.tr('nav_destinations'), AppRoutes.destinations, AppRoutes.destinationsName, Icons.place_rounded),
       (context.tr('nav_domestic_tours'), AppRoutes.domesticTours, AppRoutes.domesticToursName, Icons.landscape_rounded),
       (context.tr('nav_international_tours'), AppRoutes.internationalTours, AppRoutes.internationalToursName, Icons.public_rounded),
@@ -240,6 +241,7 @@ class _MobileNavDrawer extends StatelessWidget {
 
     final navItems = [
       (context.tr('nav_home'), AppRoutes.home, AppRoutes.homeName, Icons.home_rounded),
+      (context.tr('nav_flights'), AppRoutes.flights, AppRoutes.flightsName, Icons.flight_takeoff_rounded),
       (context.tr('nav_destinations'), AppRoutes.destinations, AppRoutes.destinationsName, Icons.place_rounded),
       (context.tr('nav_domestic_tours'), AppRoutes.domesticTours, AppRoutes.domesticToursName, Icons.landscape_rounded),
       (context.tr('nav_international_tours'), AppRoutes.internationalTours, AppRoutes.internationalToursName, Icons.public_rounded),

@@ -25,7 +25,8 @@ import '../../features/destinations/presentation/pages/destinations_page.dart';
 import '../../features/domestic_tours/presentation/pages/domestic_tours_page.dart';
 import '../../features/international_tours/presentation/pages/international_tours_page.dart';
 import '../../features/visa_services/presentation/pages/visa_services_page.dart';
-import '../../features/flights/presentation/pages/flight_inquiry_page.dart';
+import '../../features/flights/presentation/pages/flights_page.dart';
+import '../../features/flights/data/models/flight_models.dart';
 import '../../features/hotels/presentation/pages/hotels_page.dart';
 import '../../features/hajj_umrah/presentation/pages/hajj_umrah_page.dart';
 import '../../features/gallery/presentation/pages/gallery_page.dart';
@@ -117,15 +118,32 @@ class AppRouter {
           ),
         ),
         GoRoute(
+          path: AppRoutes.flights,
+          name: AppRoutes.flightsName,
+          pageBuilder: (context, state) {
+            final query = state.extra is FlightSearchQuery
+                ? state.extra as FlightSearchQuery
+                : (state.uri.queryParameters.isNotEmpty
+                    ? FlightSearchQuery.fromUri(state.uri)
+                    : null);
+            return buildPageTransition(
+              key: state.pageKey,
+              child: FlightsPage(initialQuery: query),
+            );
+          },
+        ),
+        GoRoute(
           path: AppRoutes.flightInquiry,
           name: AppRoutes.flightInquiryName,
           pageBuilder: (context, state) {
-            final flightData = state.extra is FlightInquiryData
-                ? state.extra as FlightInquiryData
-                : FlightInquiryData.fromUri(state.uri);
+            final query = state.extra is FlightSearchQuery
+                ? state.extra as FlightSearchQuery
+                : (state.uri.queryParameters.isNotEmpty
+                    ? FlightSearchQuery.fromUri(state.uri)
+                    : null);
             return buildPageTransition(
               key: state.pageKey,
-              child: FlightInquiryPage(initialData: flightData),
+              child: FlightsPage(initialQuery: query),
             );
           },
         ),

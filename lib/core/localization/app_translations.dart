@@ -14,6 +14,7 @@ class AppTranslations {
 
       // Navbar & Navigation
       'nav_home': 'Home',
+      'nav_flights': 'Flights',
       'nav_destinations': 'Destinations',
       'nav_domestic_tours': 'Domestic Tours',
       'nav_international_tours': 'International',
@@ -35,6 +36,35 @@ class AppTranslations {
           'Your journey starts here. Discover handpicked global destinations, luxury hotels, bespoke private tours, and complete visa assistance.',
       'hero_explore_btn': 'Explore Destinations',
       'hero_plan_btn': 'Plan Your Trip',
+
+      // Flights Page & Features
+      'flights_badge': 'PREMIUM AIR TRAVEL DESK',
+      'flights_hero_title': 'World-Class Flights & Bespoke Routes',
+      'flights_hero_subtitle':
+          'Personalized flight booking desk offering direct airline routes, premium cabin fares, and 24/7 travel concierge assistance worldwide.',
+      'trip_round_trip': 'Round Trip',
+      'trip_one_way': 'One Way',
+      'filter_stops': 'Stops',
+      'filter_stops_any': 'Any',
+      'filter_stops_nonstop': 'Non-stop',
+      'filter_stops_1stop': '1 Stop',
+      'filter_stops_2plus': '2+ Stops',
+      'filter_airlines': 'Airlines',
+      'filter_departure_time': 'Departure Time',
+      'filter_arrival_time': 'Arrival Time',
+      'filter_price_range': 'Price Range',
+      'filter_duration': 'Flight Duration',
+      'filter_reset': 'Reset Filters',
+      'filter_sort_by': 'Sort By',
+      'flight_search_btn': 'Search Flights',
+      'flight_card_details': 'View Details',
+      'flight_card_select': 'Select / Inquire',
+      'flight_card_nonstop': 'Non-stop',
+      'flight_card_direct': 'Direct',
+      'flight_inquiry_notice': 'Verified Airline Schedule & Bespoke Quotation Desk',
+      'flight_inquiry_success_title': 'Flight Request Received',
+      'flight_inquiry_success_desc':
+          'We received your flight request. Our team will contact you with available options.',
 
       // Travel Planner Bar
       'tab_flights': 'Flights',
@@ -220,6 +250,7 @@ class AppTranslations {
 
       // Navbar & Navigation
       'nav_home': 'الرئيسية',
+      'nav_flights': 'رحلات الطيران',
       'nav_destinations': 'الوجهات',
       'nav_domestic_tours': 'رحلات مصر الداخلية',
       'nav_international_tours': 'الرحلات الدولية',
@@ -241,6 +272,35 @@ class AppTranslations {
           'رحلتك الاستثنائية تبدأ هنا. استكشف وجهات عالمية مختارة، فنادق فاخرة، رحلات خاصة مخصصة، وخدمات تأشيرات متكاملة.',
       'hero_explore_btn': 'استكشف الوجهات',
       'hero_plan_btn': 'خطط لرحلتك',
+
+      // Flights Page & Features
+      'flights_badge': 'مكتب حجوزات واستشارات الطيران الفاخر',
+      'flights_hero_title': 'رحلات طيران عالمية ومسارات مخصصة',
+      'flights_hero_subtitle':
+          'مكتب استشارات وحجوزات طيران مخصص يبحث لك عن أفضل المسارات المباشرة والدرجات الفاخرة على كبرى خطوط الطيران العالمية مع دعم 24/7.',
+      'trip_round_trip': 'ذهاب وعودة',
+      'trip_one_way': 'اتجاه واحد',
+      'filter_stops': 'عدد التوقفات',
+      'filter_stops_any': 'الكل',
+      'filter_stops_nonstop': 'مباشر فقط',
+      'filter_stops_1stop': 'توقف واحد',
+      'filter_stops_2plus': 'توقفان فأكثر',
+      'filter_airlines': 'شركات الطيران',
+      'filter_departure_time': 'وقت الإقلاع',
+      'filter_arrival_time': 'وقت الوصول',
+      'filter_price_range': 'نطاق السعر',
+      'filter_duration': 'مدة الرحلة',
+      'filter_reset': 'إعادة ضبط الفلاتر',
+      'filter_sort_by': 'الترتيب حسب',
+      'flight_search_btn': 'بحث عن رحلات الطيران',
+      'flight_card_details': 'تفاصيل الرحلة',
+      'flight_card_select': 'طلب حجز واستفسار',
+      'flight_card_nonstop': 'مباشر بدون توقف',
+      'flight_card_direct': 'مباشر',
+      'flight_inquiry_notice': 'جداول معتمدة من كبرى خطوط الطيران وعروض أسعار حصرية ومخصصة',
+      'flight_inquiry_success_title': 'تم استلام طلب حجز واستفسار الطيران',
+      'flight_inquiry_success_desc':
+          'We received your flight request. Our team will contact you with available options.',
 
       // Travel Planner Bar
       'tab_flights': 'طيران',

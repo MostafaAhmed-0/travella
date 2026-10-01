@@ -82,6 +82,7 @@ class _DesktopFooterTop extends StatelessWidget {
           child: _FooterLinkColumn(
             title: context.isArabic ? 'الخدمات والبرامج' : 'Services',
             links: [
+              (context.tr('nav_flights'), AppRoutes.flightsName),
               (context.tr('nav_international_tours'), AppRoutes.internationalToursName),
               (context.tr('nav_domestic_tours'), AppRoutes.domesticToursName),
               (context.tr('nav_visa_services'), AppRoutes.visaServicesName),
@@ -127,6 +128,7 @@ class _MobileFooterTop extends StatelessWidget {
               child: _FooterLinkColumn(
                 title: context.isArabic ? 'الخدمات والبرامج' : 'Services',
                 links: [
+                  (context.tr('nav_flights'), AppRoutes.flightsName),
                   (context.tr('nav_international_tours'), AppRoutes.internationalToursName),
                   (context.tr('nav_domestic_tours'), AppRoutes.domesticToursName),
                   (context.tr('nav_visa_services'), AppRoutes.visaServicesName),

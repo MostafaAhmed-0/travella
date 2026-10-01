@@ -8,7 +8,7 @@ import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/widgets/traveler_selector.dart';
 import '../../../../core/localization/app_translations.dart';
-import '../../../flights/presentation/pages/flight_inquiry_page.dart';
+import '../../../flights/data/models/flight_models.dart';
 
 enum PlannerTab { flights, hotels, tours, visa }
 
@@ -108,12 +108,12 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
           return;
         }
 
-        final flightData = FlightInquiryData(
+        final flightData = FlightSearchQuery(
           origin: _flightOrigin,
           destination: _flightDestination,
           departureDate: _flightDepartureDate,
           returnDate: _flightIsRoundTrip ? _flightReturnDate : null,
-          isRoundTrip: _flightIsRoundTrip,
+          tripType: _flightIsRoundTrip ? TripType.roundTrip : TripType.oneWay,
           adults: _flightTravelers.adults,
           children: _flightTravelers.children,
           childAges: _flightTravelers.childAges,
@@ -127,7 +127,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         final agesStr = _flightTravelers.childAges.join(',');
 
         final uri = Uri(
-          path: AppRoutes.flightInquiry,
+          path: AppRoutes.flights,
           queryParameters: {
             'from': _flightOrigin,
             'destination': _flightDestination,
