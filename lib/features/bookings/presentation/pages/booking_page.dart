@@ -583,77 +583,84 @@ class _BookingPageState extends State<BookingPage> {
           final isActive = _currentStep == stepNum;
           final isCompleted = _currentStep > stepNum;
 
-          return InkWell(
-            onTap: () {
-              if (stepNum < _currentStep) {
-                _goToStep(stepNum);
-              }
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              child: Row(
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isCompleted
-                          ? AppColors.success
-                          : isActive
-                          ? AppColors.royalBlue
-                          : AppColors.lightGray,
+          return Flexible(
+            child: InkWell(
+              onTap: () {
+                if (stepNum < _currentStep) {
+                  _goToStep(stepNum);
+                }
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCompleted
+                            ? AppColors.success
+                            : isActive
+                            ? AppColors.royalBlue
+                            : AppColors.lightGray,
+                      ),
+                      child: Center(
+                        child: isCompleted
+                            ? const Icon(
+                                Icons.check,
+                                color: AppColors.white,
+                                size: 18,
+                              )
+                            : Text(
+                                '$stepNum',
+                                style: TextStyle(
+                                  color: isActive
+                                      ? AppColors.white
+                                      : AppColors.textSecondary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                      ),
                     ),
-                    child: Center(
-                      child: isCompleted
-                          ? const Icon(
-                              Icons.check,
-                              color: AppColors.white,
-                              size: 18,
-                            )
-                          : Text(
-                              '$stepNum',
-                              style: TextStyle(
+                    if (!isMobile) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Step $stepNum',
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.caption.copyWith(
                                 color: isActive
-                                    ? AppColors.white
-                                    : AppColors.textSecondary,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                                    ? AppColors.royalBlue
+                                    : AppColors.textLightMuted,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                    ),
-                  ),
-                  if (!isMobile) ...[
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Step $stepNum',
-                          style: AppTextStyles.caption.copyWith(
-                            color: isActive
-                                ? AppColors.royalBlue
-                                : AppColors.textLightMuted,
-                            fontWeight: FontWeight.w600,
-                          ),
+                            Text(
+                              title,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.labelSM.copyWith(
+                                color: isActive
+                                    ? AppColors.navyDark
+                                    : AppColors.textSecondary,
+                                fontWeight: isActive
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          title,
-                          style: AppTextStyles.labelSM.copyWith(
-                            color: isActive
-                                ? AppColors.navyDark
-                                : AppColors.textSecondary,
-                            fontWeight: isActive
-                                ? FontWeight.bold
-                                : FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           );
@@ -1829,46 +1836,52 @@ class _BookingPageState extends State<BookingPage> {
               children: [
                 // Reference Header Row
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.tr('booking_ref_label'),
-                          style: AppTextStyles.overline.copyWith(
-                            color: AppColors.textLightMuted,
-                            letterSpacing: 1.5,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.tr('booking_ref_label'),
+                            style: AppTextStyles.overline.copyWith(
+                              color: AppColors.textLightMuted,
+                              letterSpacing: 1.5,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Text(
-                              ref,
-                              style: AppTextStyles.h4.copyWith(
-                                color: AppColors.royalBlueDark,
-                                fontWeight: FontWeight.w900,
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  ref,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.h4.copyWith(
+                                    color: AppColors.royalBlueDark,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
                               ),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.copy_rounded,
-                                size: 18,
-                                color: AppColors.royalBlue,
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.copy_rounded,
+                                  size: 18,
+                                  color: AppColors.royalBlue,
+                                ),
+                                tooltip: context.isArabic
+                                    ? 'نسخ الرقم المرجعي'
+                                    : 'Copy Reference',
+                                onPressed: () => _copyReference(ref),
                               ),
-                              tooltip: context.isArabic
-                                  ? 'نسخ الرقم المرجعي'
-                                  : 'Copy Reference',
-                              onPressed: () => _copyReference(ref),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
+                        horizontal: 10,
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
@@ -2143,8 +2156,8 @@ class _ReviewRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 140,
+          Flexible(
+            flex: 4,
             child: Text(
               label,
               style: AppTextStyles.bodyMD.copyWith(
@@ -2154,7 +2167,8 @@ class _ReviewRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Expanded(
+          Flexible(
+            flex: 6,
             child: Text(
               value,
               style: AppTextStyles.bodyMD.copyWith(

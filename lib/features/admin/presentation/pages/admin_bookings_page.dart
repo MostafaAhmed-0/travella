@@ -66,215 +66,240 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
       context: context,
       builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 580),
-          padding: const EdgeInsets.all(32),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 580,
+            maxHeight: MediaQuery.of(context).size.height * 0.88,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
+              // ── Fixed Header ──────────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.fromLTRB(28, 28, 16, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.royalBlue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.receipt_long_rounded,
+                            color: AppColors.royalBlue,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Booking Details',
+                              style: AppTextStyles.h4.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'Ref: ${booking.bookingReference}',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.royalBlueDark,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(ctx).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(28, 16, 28, 0),
+                child: Divider(height: 1),
+              ),
+
+              // ── Scrollable Content ────────────────────────────────────────
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(28, 16, 28, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.royalBlue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.receipt_long_rounded,
-                          color: AppColors.royalBlue,
-                          size: 24,
-                        ),
+                      _DetailRow(
+                        label: 'Booking ID',
+                        value: booking.id.isNotEmpty
+                            ? booking.id
+                            : booking.bookingReference,
                       ),
-                      const SizedBox(width: 14),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      _DetailRow(label: 'Customer Name', value: booking.customerName),
+                      _DetailRow(label: 'Email', value: booking.email),
+                      _DetailRow(label: 'Phone Number', value: booking.phone),
+                      _DetailRow(
+                        label: 'Package / Tour',
+                        value: booking.tourTitle ?? 'Direct Travel Request',
+                      ),
+                      _DetailRow(
+                        label: 'Travel Date',
+                        value: booking.travelDate != null
+                            ? DateFormat(
+                                'EEEE, MMMM dd, yyyy',
+                              ).format(booking.travelDate!)
+                            : 'Flexible / Not set',
+                      ),
+                      _DetailRow(
+                        label: 'Travelers Summary',
+                        value: booking.formattedTravelersSummary(),
+                      ),
+                      _DetailRow(
+                        label: 'Adults',
+                        value: '${booking.adultsCount} Adult${booking.adultsCount > 1 ? 's' : ''} (18+ yrs)',
+                      ),
+                      _DetailRow(
+                        label: 'Children',
+                        value: '${booking.childrenCount} Child${booking.childrenCount != 1 ? 'ren' : ''} (0-17 yrs)',
+                      ),
+                      if (booking.childrenCount > 0)
+                        _DetailRow(
+                          label: 'Child Ages',
+                          value: booking.formattedChildAges(),
+                        ),
+                      _DetailRow(
+                        label: 'Status',
+                        value: booking.status.label.toUpperCase(),
+                      ),
+                      _DetailRow(
+                        label: 'Created Date',
+                        value: booking.createdAt != null
+                            ? DateFormat(
+                                'MMM dd, yyyy HH:mm',
+                              ).format(booking.createdAt!)
+                            : 'Recent',
+                      ),
+                      if (booking.notes != null && booking.notes!.isNotEmpty)
+                        _DetailRow(
+                          label: 'Special Notes / Requests',
+                          value: booking.notes!,
+                        ),
+                      const SizedBox(height: 16),
+
+                      // Quick Action Buttons
+                      const Text(
+                        'Quick Action:',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
-                          Text(
-                            'Booking Details',
-                            style: AppTextStyles.h4.copyWith(
-                              fontWeight: FontWeight.bold,
+                          if (booking.status != BookingStatus.confirmed)
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.check_circle_rounded, size: 16),
+                              label: const Text('Confirm'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.success,
+                                foregroundColor: AppColors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                              ),
+                              onPressed: () async {
+                                Navigator.of(ctx).pop();
+                                await context.read<AdminBookingsCubit>().updateStatus(
+                                  booking.id,
+                                  BookingStatus.confirmed,
+                                );
+                              },
                             ),
-                          ),
-                          Text(
-                            'Ref: ${booking.bookingReference}',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.royalBlueDark,
-                              fontWeight: FontWeight.w700,
+                          if (booking.status != BookingStatus.completed)
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.task_alt_rounded, size: 16),
+                              label: const Text('Complete'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.royalBlue,
+                                foregroundColor: AppColors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                              ),
+                              onPressed: () async {
+                                Navigator.of(ctx).pop();
+                                await context.read<AdminBookingsCubit>().updateStatus(
+                                  booking.id,
+                                  BookingStatus.completed,
+                                );
+                              },
                             ),
-                          ),
+                          if (booking.status != BookingStatus.cancelled)
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.cancel_rounded, size: 16),
+                              label: const Text('Cancel'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.error,
+                                foregroundColor: AppColors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                              ),
+                              onPressed: () async {
+                                Navigator.of(ctx).pop();
+                                await context.read<AdminBookingsCubit>().updateStatus(
+                                  booking.id,
+                                  BookingStatus.cancelled,
+                                );
+                              },
+                            ),
                         ],
                       ),
+                      const SizedBox(height: 16),
                     ],
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(ctx).pop(),
-                  ),
-                ],
-              ),
-              const Divider(height: 28),
-              _DetailRow(
-                label: 'Booking ID',
-                value: booking.id.isNotEmpty
-                    ? booking.id
-                    : booking.bookingReference,
-              ),
-              _DetailRow(label: 'Customer Name', value: booking.customerName),
-              _DetailRow(label: 'Email', value: booking.email),
-              _DetailRow(label: 'Phone Number', value: booking.phone),
-              _DetailRow(
-                label: 'Package / Tour',
-                value: booking.tourTitle ?? 'Direct Travel Request',
-              ),
-              _DetailRow(
-                label: 'Travel Date',
-                value: booking.travelDate != null
-                    ? DateFormat(
-                        'EEEE, MMMM dd, yyyy',
-                      ).format(booking.travelDate!)
-                    : 'Flexible / Not set',
-              ),
-              _DetailRow(
-                label: 'Travelers Summary',
-                value: booking.formattedTravelersSummary(),
-              ),
-              _DetailRow(
-                label: 'Adults',
-                value: '${booking.adultsCount} Adult${booking.adultsCount > 1 ? 's' : ''} (18+ yrs)',
-              ),
-              _DetailRow(
-                label: 'Children',
-                value: '${booking.childrenCount} Child${booking.childrenCount != 1 ? 'ren' : ''} (0-17 yrs)',
-              ),
-              if (booking.childrenCount > 0)
-                _DetailRow(
-                  label: 'Child Ages',
-                  value: booking.formattedChildAges(),
                 ),
-              _DetailRow(
-                label: 'Status',
-                value: booking.status.label.toUpperCase(),
               ),
-              _DetailRow(
-                label: 'Created Date',
-                value: booking.createdAt != null
-                    ? DateFormat(
-                        'MMM dd, yyyy HH:mm',
-                      ).format(booking.createdAt!)
-                    : 'Recent',
-              ),
-              if (booking.notes != null && booking.notes!.isNotEmpty)
-                _DetailRow(
-                  label: 'Special Notes / Requests',
-                  value: booking.notes!,
-                ),
-              const SizedBox(height: 20),
 
-              // Action Buttons Row: Confirm, Cancel, Complete
-              Row(
-                children: [
-                  const Text(
-                    'Quick Action:',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                  ),
-                  const SizedBox(width: 12),
-                  if (booking.status != BookingStatus.confirmed)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.check_circle_rounded, size: 16),
-                        label: const Text('Confirm'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.success,
-                          foregroundColor: AppColors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                        onPressed: () async {
-                          Navigator.of(ctx).pop();
-                          await context.read<AdminBookingsCubit>().updateStatus(
-                            booking.id,
-                            BookingStatus.confirmed,
-                          );
-                        },
-                      ),
-                    ),
-                  if (booking.status != BookingStatus.completed)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.task_alt_rounded, size: 16),
-                        label: const Text('Complete'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.royalBlue,
-                          foregroundColor: AppColors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                        onPressed: () async {
-                          Navigator.of(ctx).pop();
-                          await context.read<AdminBookingsCubit>().updateStatus(
-                            booking.id,
-                            BookingStatus.completed,
-                          );
-                        },
-                      ),
-                    ),
-                  if (booking.status != BookingStatus.cancelled)
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.cancel_rounded, size: 16),
-                      label: const Text('Cancel'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.error,
-                        foregroundColor: AppColors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                      ),
-                      onPressed: () async {
-                        Navigator.of(ctx).pop();
-                        await context.read<AdminBookingsCubit>().updateStatus(
-                          booking.id,
-                          BookingStatus.cancelled,
-                        );
-                      },
-                    ),
-                ],
+              // ── Fixed Footer ──────────────────────────────────────────────
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 28),
+                child: Divider(height: 1),
               ),
-              const SizedBox(height: 24),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton.icon(
-                    onPressed: () => _openWhatsAppForCustomer(booking),
-                    icon: const Icon(
-                      Icons.chat_bubble_outline_rounded,
-                      color: Color(0xFF25D366),
-                    ),
-                    label: const Text(
-                      'Chat on WhatsApp',
-                      style: TextStyle(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(28, 12, 28, 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () => _openWhatsAppForCustomer(booking),
+                      icon: const Icon(
+                        Icons.chat_bubble_outline_rounded,
                         color: Color(0xFF25D366),
-                        fontWeight: FontWeight.bold,
+                      ),
+                      label: const Text(
+                        'Chat on WhatsApp',
+                        style: TextStyle(
+                          color: Color(0xFF25D366),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('Close'),
-                  ),
-                ],
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -282,6 +307,8 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
       ),
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
