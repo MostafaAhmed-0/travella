@@ -18,19 +18,60 @@ class BookingCubit extends Cubit<BookingState> {
     String? tourId,
     DateTime? travelDate,
     int travelers = 1,
+    int adultsCount = 1,
+    int childrenCount = 0,
+    List<int> childrenAges = const [],
     String? notes,
   }) async {
     emit(const BookingLoading());
     try {
+      final cleanName = customerName.trim();
+      final cleanEmail = email.trim();
+      final cleanPhone = phone.trim();
+
+      if (cleanName.isEmpty) {
+        throw Exception('Customer full name is required.');
+      }
+      if (cleanEmail.isEmpty) {
+        throw Exception('Email address is required.');
+      }
+      if (cleanPhone.isEmpty) {
+        throw Exception('Phone number is required.');
+      }
+      if (adultsCount < 1) {
+        throw Exception('At least 1 adult is required for booking.');
+      }
+      if (childrenCount < 0) {
+        throw Exception('Children count cannot be negative.');
+      }
+      if (childrenCount > 0) {
+        if (childrenAges.length != childrenCount) {
+          throw Exception('Please specify an age for each child ($childrenCount children).');
+        }
+        for (int i = 0; i < childrenAges.length; i++) {
+          final age = childrenAges[i];
+          if (age < 0 || age > 17) {
+            throw Exception('Invalid child age: $age (must be between 0 and 17).');
+          }
+        }
+      }
+
+      final totalTravelers = adultsCount + childrenCount > 0
+          ? adultsCount + childrenCount
+          : (travelers > 0 ? travelers : 1);
+
       final booking = BookingModel(
         id: '',
-        customerName: customerName.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
+        customerName: cleanName,
+        email: cleanEmail,
+        phone: cleanPhone,
         tourId: tourId,
         travelDate: travelDate,
-        travelers: travelers,
-        status: BookingStatus.pending,
+        travelers: totalTravelers,
+        adultsCount: adultsCount,
+        childrenCount: childrenCount,
+        childrenAges: childrenCount > 0 ? childrenAges : const [],
+        status: BookingStatus.pending, // Always pending on public submission
         notes: notes?.trim(),
       );
 

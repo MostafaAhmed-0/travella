@@ -436,8 +436,8 @@ class _AdminDashboardOverviewPageState
                                       vertical: 12,
                                     ),
                                     child: Text(
-                                      '${booking.travelers} Guests',
-                                      style: const TextStyle(fontSize: 13),
+                                      booking.formattedTravelersSummary(),
+                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                                     ),
                                   ),
                                   Padding(
@@ -696,11 +696,15 @@ class _RecentBookingMobileCard extends StatelessWidget {
                 booking.email,
                 style: const TextStyle(color: AppColors.gray600, fontSize: 11),
               ),
-              Text(
-                '${booking.travelers} Travelers',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11,
+              Expanded(
+                child: Text(
+                  booking.formattedTravelersSummary(),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11,
+                    color: AppColors.royalBlueDark,
+                  ),
+                  textAlign: TextAlign.end,
                 ),
               ),
             ],

@@ -105,10 +105,18 @@ CREATE TABLE IF NOT EXISTS public.bookings (
     tour_id UUID REFERENCES public.tours(id) ON DELETE SET NULL,
     travel_date DATE,
     travelers INTEGER NOT NULL DEFAULT 1,
+    adults_count INTEGER NOT NULL DEFAULT 1 CHECK (adults_count >= 1),
+    children_count INTEGER NOT NULL DEFAULT 0 CHECK (children_count >= 0),
+    children_ages JSONB DEFAULT '[]'::jsonb,
     status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled', 'completed')),
     notes TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Backwards compatibility schema migration (if table already exists)
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS adults_count INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS children_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS children_ages JSONB DEFAULT '[]'::jsonb;
 
 -- ── 9. GALLERY TABLE ──────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.gallery (
@@ -323,11 +331,16 @@ CREATE POLICY "Admins can manage visa requirements"
     USING (public.is_admin())
     WITH CHECK (public.is_admin());
 
--- 8. Bookings Policies (Public can insert booking, Staff/Admins can view and update)
+-- 8. Bookings Policies (Public can insert booking with status 'pending', Staff/Admins can view and update)
 DROP POLICY IF EXISTS "Public can create booking" ON public.bookings;
 CREATE POLICY "Public can create booking"
     ON public.bookings FOR INSERT
-    WITH CHECK (true);
+    WITH CHECK (
+        status = 'pending' AND
+        customer_name IS NOT NULL AND
+        email IS NOT NULL AND
+        phone IS NOT NULL
+    );
 
 DROP POLICY IF EXISTS "Staff and Admins can view bookings" ON public.bookings;
 CREATE POLICY "Staff and Admins can view bookings"

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/common_widgets.dart';
@@ -21,10 +22,7 @@ import '../cubit/booking_state.dart';
 class BookingPage extends StatefulWidget {
   final String? preselectedTourId;
 
-  const BookingPage({
-    super.key,
-    this.preselectedTourId,
-  });
+  const BookingPage({super.key, this.preselectedTourId});
 
   @override
   State<BookingPage> createState() => _BookingPageState();
@@ -42,7 +40,10 @@ class _BookingPageState extends State<BookingPage> {
   final TourRepository _tourRepository = TourRepository();
 
   DateTime? _travelDate;
-  int _travelers = 2;
+  int _adults = 2;
+  int _children = 0;
+  List<int?> _childAges = [];
+  String? _childAgeError;
   String? _selectedTourId;
   List<TourModel> _tours = [];
   bool _isLoadingTours = true;
@@ -117,10 +118,108 @@ class _BookingPageState extends State<BookingPage> {
     return _selectedTour?.title ?? 'Custom Travel Itinerary';
   }
 
+  int get _totalTravelers => _adults + _children;
+
   double get _estimatedTotal {
     final tour = _selectedTour;
     if (tour == null) return 0.0;
-    return tour.price * _travelers;
+    return tour.price * _totalTravelers;
+  }
+
+  String _getChildTitle(int index, bool isArabic) {
+    final childNum = index + 1;
+    if (isArabic) {
+      switch (childNum) {
+        case 1:
+          return 'سن الطفل الأول';
+        case 2:
+          return 'سن الطفل الثاني';
+        case 3:
+          return 'سن الطفل الثالث';
+        case 4:
+          return 'سن الطفل الرابع';
+        case 5:
+          return 'سن الطفل الخامس';
+        case 6:
+          return 'سن الطفل السادس';
+        case 7:
+          return 'سن الطفل السابع';
+        case 8:
+          return 'سن الطفل الثامن';
+        case 9:
+          return 'سن الطفل التاسع';
+        case 10:
+          return 'سن الطفل العاشر';
+        default:
+          return 'سن الطفل رقم $childNum';
+      }
+    } else {
+      return 'Child $childNum Age';
+    }
+  }
+
+  void _onAdultsChanged(int newAdults) {
+    if (newAdults < AppConstants.minAdults ||
+        newAdults > AppConstants.maxAdults) {
+      return;
+    }
+    setState(() {
+      _adults = newAdults;
+    });
+  }
+
+  void _onChildrenChanged(int newChildren) {
+    if (newChildren < AppConstants.minChildren ||
+        newChildren > AppConstants.maxChildren) {
+      return;
+    }
+    setState(() {
+      _children = newChildren;
+      if (_children == 0) {
+        _childAges.clear();
+        _childAgeError = null;
+      } else if (_childAges.length < _children) {
+        while (_childAges.length < _children) {
+          _childAges.add(null);
+        }
+      } else if (_childAges.length > _children) {
+        _childAges = _childAges.sublist(0, _children);
+      }
+    });
+  }
+
+  void _setChildAge(int index, int? age) {
+    if (index >= 0 && index < _childAges.length) {
+      setState(() {
+        _childAges[index] = age;
+        if (_childAgeError != null && _childAges.every((a) => a != null)) {
+          _childAgeError = null;
+        }
+      });
+    }
+  }
+
+  bool _validateChildAges() {
+    if (_children == 0) {
+      _childAgeError = null;
+      return true;
+    }
+    final hasMissing = _childAges.any(
+      (age) =>
+          age == null ||
+          age < AppConstants.minChildAge ||
+          age > AppConstants.maxChildAge,
+    );
+    if (hasMissing) {
+      setState(() {
+        _childAgeError = context.tr('child_age_missing_err');
+      });
+      return false;
+    }
+    setState(() {
+      _childAgeError = null;
+    });
+    return true;
   }
 
   Future<void> _pickDate() async {
@@ -171,6 +270,9 @@ class _BookingPageState extends State<BookingPage> {
         setState(() => _dateSelectionError = 'Please choose a travel date.');
         valid = false;
       }
+      if (!_validateChildAges()) {
+        valid = false;
+      }
       if (!valid) return;
     }
 
@@ -192,17 +294,28 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   void _submitBooking() {
+    if (!_validateChildAges()) {
+      setState(() {
+        _currentStep = 2;
+      });
+      return;
+    }
+
     final combinedNotes = _buildAggregatedNotes();
+    final validChildAges = _childAges.whereType<int>().toList();
 
     context.read<BookingCubit>().submitBooking(
-          customerName: _nameCtrl.text.trim(),
-          email: _emailCtrl.text.trim(),
-          phone: _phoneCtrl.text.trim(),
-          tourId: _selectedTourId,
-          travelDate: _travelDate,
-          travelers: _travelers,
-          notes: combinedNotes,
-        );
+      customerName: _nameCtrl.text.trim(),
+      email: _emailCtrl.text.trim(),
+      phone: _phoneCtrl.text.trim(),
+      tourId: _selectedTourId,
+      travelDate: _travelDate,
+      travelers: _totalTravelers,
+      adultsCount: _adults,
+      childrenCount: _children,
+      childrenAges: validChildAges,
+      notes: combinedNotes,
+    );
   }
 
   Future<void> _openWhatsApp(BookingModel booking) async {
@@ -211,13 +324,14 @@ class _BookingPageState extends State<BookingPage> {
     final dateStr = booking.travelDate != null
         ? DateFormat('MMMM dd, yyyy').format(booking.travelDate!)
         : 'Upcoming Date';
-    final guests = booking.travelers;
+    final guestsStr = booking.formattedTravelersSummary(isArabic: context.isArabic);
 
     final message =
-        'Hello Travella Concierge! 🌟\nI have just submitted booking inquiry reference *$ref* for *$tour* ($guests Guests on $dateStr).\nPlease confirm my itinerary details.';
+        'Hello Travella Concierge! 🌟\nI have just submitted booking inquiry reference *$ref* for *$tour* ($guestsStr on $dateStr).\nPlease confirm my itinerary details.';
 
     final uri = Uri.parse(
-        'https://wa.me/201000000000?text=${Uri.encodeComponent(message)}');
+      'https://wa.me/201000000000?text=${Uri.encodeComponent(message)}',
+    );
 
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -253,7 +367,10 @@ class _BookingPageState extends State<BookingPage> {
       _phoneCtrl.clear();
       _notesCtrl.clear();
       _selectedQuickRequests.clear();
-      _travelers = 2;
+      _adults = 2;
+      _children = 0;
+      _childAges.clear();
+      _childAgeError = null;
       _travelDate = DateTime.now().add(const Duration(days: 14));
       if (_tours.isNotEmpty) {
         _selectedTourId = _tours.first.id;
@@ -419,10 +536,26 @@ class _BookingPageState extends State<BookingPage> {
   // ── Step Indicator Bar ─────────────────────────────────────────────────────
   Widget _buildStepperBar(bool isMobile) {
     final steps = [
-      {'num': 1, 'title': context.isArabic ? 'بيانات التواصل' : 'Contact', 'icon': Icons.person_outline_rounded},
-      {'num': 2, 'title': context.isArabic ? 'الرحلة والتاريخ' : 'Tour & Dates', 'icon': Icons.flight_takeoff_rounded},
-      {'num': 3, 'title': context.isArabic ? 'الطلبات الخاصة' : 'Requests', 'icon': Icons.room_service_outlined},
-      {'num': 4, 'title': context.isArabic ? 'المراجعة' : 'Review', 'icon': Icons.rate_review_outlined},
+      {
+        'num': 1,
+        'title': context.isArabic ? 'بيانات التواصل' : 'Contact',
+        'icon': Icons.person_outline_rounded,
+      },
+      {
+        'num': 2,
+        'title': context.isArabic ? 'الرحلة والتاريخ' : 'Tour & Dates',
+        'icon': Icons.flight_takeoff_rounded,
+      },
+      {
+        'num': 3,
+        'title': context.isArabic ? 'الطلبات الخاصة' : 'Requests',
+        'icon': Icons.room_service_outlined,
+      },
+      {
+        'num': 4,
+        'title': context.isArabic ? 'المراجعة' : 'Review',
+        'icon': Icons.rate_review_outlined,
+      },
     ];
 
     return Container(
@@ -469,13 +602,16 @@ class _BookingPageState extends State<BookingPage> {
                       color: isCompleted
                           ? AppColors.success
                           : isActive
-                              ? AppColors.royalBlue
-                              : AppColors.lightGray,
+                          ? AppColors.royalBlue
+                          : AppColors.lightGray,
                     ),
                     child: Center(
                       child: isCompleted
-                          ? const Icon(Icons.check,
-                              color: AppColors.white, size: 18)
+                          ? const Icon(
+                              Icons.check,
+                              color: AppColors.white,
+                              size: 18,
+                            )
                           : Text(
                               '$stepNum',
                               style: TextStyle(
@@ -509,8 +645,9 @@ class _BookingPageState extends State<BookingPage> {
                             color: isActive
                                 ? AppColors.navyDark
                                 : AppColors.textSecondary,
-                            fontWeight:
-                                isActive ? FontWeight.bold : FontWeight.w500,
+                            fontWeight: isActive
+                                ? FontWeight.bold
+                                : FontWeight.w500,
                           ),
                         ),
                       ],
@@ -559,7 +696,9 @@ class _BookingPageState extends State<BookingPage> {
             TextFormField(
               controller: _nameCtrl,
               decoration: InputDecoration(
-                hintText: context.isArabic ? 'مثال: أحمد محمد' : 'e.g. Alexander Hamilton',
+                hintText: context.isArabic
+                    ? 'مثال: أحمد محمد'
+                    : 'e.g. Alexander Hamilton',
                 prefixIcon: const Icon(
                   Icons.person_outline_rounded,
                   color: AppColors.royalBlue,
@@ -570,10 +709,14 @@ class _BookingPageState extends State<BookingPage> {
               ),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) {
-                  return context.isArabic ? 'الاسم مطلوب' : 'Full name is required';
+                  return context.isArabic
+                      ? 'الاسم مطلوب'
+                      : 'Full name is required';
                 }
                 if (v.trim().length < 2) {
-                  return context.isArabic ? 'يرجى إدخال اسم صحيح' : 'Please enter a valid full name';
+                  return context.isArabic
+                      ? 'يرجى إدخال اسم صحيح'
+                      : 'Please enter a valid full name';
                 }
                 return null;
               },
@@ -589,7 +732,10 @@ class _BookingPageState extends State<BookingPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(context.tr('email_label'), style: AppTextStyles.labelMD),
+                        Text(
+                          context.tr('email_label'),
+                          style: AppTextStyles.labelMD,
+                        ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _emailCtrl,
@@ -606,12 +752,17 @@ class _BookingPageState extends State<BookingPage> {
                           ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
-                              return context.isArabic ? 'البريد الإلكتروني مطلوب' : 'Email is required';
+                              return context.isArabic
+                                  ? 'البريد الإلكتروني مطلوب'
+                                  : 'Email is required';
                             }
-                            final emailRegex =
-                                RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                            final emailRegex = RegExp(
+                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                            );
                             if (!emailRegex.hasMatch(v.trim())) {
-                              return context.isArabic ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Enter a valid email (e.g. name@domain.com)';
+                              return context.isArabic
+                                  ? 'يرجى إدخال بريد إلكتروني صحيح'
+                                  : 'Enter a valid email (e.g. name@domain.com)';
                             }
                             return null;
                           },
@@ -624,8 +775,10 @@ class _BookingPageState extends State<BookingPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(context.tr('phone_label'),
-                            style: AppTextStyles.labelMD),
+                        Text(
+                          context.tr('phone_label'),
+                          style: AppTextStyles.labelMD,
+                        ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _phoneCtrl,
@@ -642,10 +795,14 @@ class _BookingPageState extends State<BookingPage> {
                           ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
-                              return context.isArabic ? 'رقم الهاتف مطلوب' : 'Phone number is required';
+                              return context.isArabic
+                                  ? 'رقم الهاتف مطلوب'
+                                  : 'Phone number is required';
                             }
                             if (v.trim().length < 7) {
-                              return context.isArabic ? 'يرجى إدخال رقم هاتف صحيح' : 'Enter a valid contact number';
+                              return context.isArabic
+                                  ? 'يرجى إدخال رقم هاتف صحيح'
+                                  : 'Enter a valid contact number';
                             }
                             return null;
                           },
@@ -673,12 +830,17 @@ class _BookingPageState extends State<BookingPage> {
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return context.isArabic ? 'البريد الإلكتروني مطلوب' : 'Email is required';
+                    return context.isArabic
+                        ? 'البريد الإلكتروني مطلوب'
+                        : 'Email is required';
                   }
-                  final emailRegex =
-                      RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  final emailRegex = RegExp(
+                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                  );
                   if (!emailRegex.hasMatch(v.trim())) {
-                    return context.isArabic ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Enter a valid email address';
+                    return context.isArabic
+                        ? 'يرجى إدخال بريد إلكتروني صحيح'
+                        : 'Enter a valid email address';
                   }
                   return null;
                 },
@@ -701,10 +863,14 @@ class _BookingPageState extends State<BookingPage> {
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return context.isArabic ? 'رقم الهاتف مطلوب' : 'Phone number is required';
+                    return context.isArabic
+                        ? 'رقم الهاتف مطلوب'
+                        : 'Phone number is required';
                   }
                   if (v.trim().length < 7) {
-                    return context.isArabic ? 'يرجى إدخال رقم هاتف صحيح' : 'Enter a valid contact number';
+                    return context.isArabic
+                        ? 'يرجى إدخال رقم هاتف صحيح'
+                        : 'Enter a valid contact number';
                   }
                   return null;
                 },
@@ -768,7 +934,9 @@ class _BookingPageState extends State<BookingPage> {
                             child: Text(
                               '${t.title} (${t.destination.isNotEmpty ? t.destination : t.country})',
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -815,8 +983,11 @@ class _BookingPageState extends State<BookingPage> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline_rounded,
-                      color: AppColors.royalBlue, size: 20),
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    color: AppColors.royalBlue,
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -833,129 +1004,307 @@ class _BookingPageState extends State<BookingPage> {
           ],
           const SizedBox(height: 24),
 
-          // Date & Travelers Row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Travel Date Picker
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // Travel Date Picker
+          Text(context.tr('travel_date_label'), style: AppTextStyles.labelMD),
+          const SizedBox(height: 8),
+          InkWell(
+            onTap: _pickDate,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _dateSelectionError != null
+                      ? AppColors.error
+                      : AppColors.borderLight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: AppColors.white,
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_month_rounded,
+                    color: AppColors.royalBlue,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _travelDate == null
+                          ? (context.isArabic
+                                ? 'اختر تاريخ السفر'
+                                : 'Pick departure date')
+                          : DateFormat(
+                              'EEE, MMM dd, yyyy',
+                            ).format(_travelDate!),
+                      style: AppTextStyles.bodyMD.copyWith(
+                        color: _travelDate == null
+                            ? AppColors.textLightMuted
+                            : AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_dateSelectionError != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _dateSelectionError!,
+              style: const TextStyle(color: AppColors.error, fontSize: 12),
+            ),
+          ],
+          const SizedBox(height: 24),
+
+          // ── TRAVELERS & FAMILY BREAKDOWN ─────────────────────────────────
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.borderLight),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.navyDark.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(context.tr('travel_date_label'), style: AppTextStyles.labelMD),
-                    const SizedBox(height: 8),
-                    InkWell(
-                      onTap: _pickDate,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 15,
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.family_restroom_rounded,
+                          color: AppColors.royalBlue,
+                          size: 22,
                         ),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: _dateSelectionError != null
-                                ? AppColors.error
-                                : AppColors.borderLight,
+                        const SizedBox(width: 8),
+                        Text(
+                          context.tr('travelers_label'),
+                          style: AppTextStyles.h5.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.navyDark,
                           ),
-                          borderRadius: BorderRadius.circular(12),
-                          color: AppColors.white,
                         ),
-                        child: Row(
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.royalBlue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '$_totalTravelers ${context.isArabic ? (_totalTravelers == 1 ? "مسافر" : "مسافرين") : (_totalTravelers == 1 ? "Traveler" : "Travelers")}',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.royalBlueDark,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Divider(height: 1, color: AppColors.borderLight),
+                const SizedBox(height: 16),
+
+                // Adults Stepper Row
+                _buildTravelerStepperRow(
+                  title: context.tr('adults_count_title'),
+                  subtitle: context.tr('adults_count_subtitle'),
+                  value: _adults,
+                  minValue: AppConstants.minAdults,
+                  maxValue: AppConstants.maxAdults,
+                  onChanged: _onAdultsChanged,
+                ),
+
+                const SizedBox(height: 16),
+                const Divider(height: 1, color: AppColors.borderLight),
+                const SizedBox(height: 16),
+
+                // Children Stepper Row
+                _buildTravelerStepperRow(
+                  title: context.tr('children_count_title'),
+                  subtitle: context.tr('children_count_subtitle'),
+                  value: _children,
+                  minValue: AppConstants.minChildren,
+                  maxValue: AppConstants.maxChildren,
+                  onChanged: _onChildrenChanged,
+                ),
+
+                // Dynamic Child Age Selectors
+                if (_children > 0) ...[
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: _childAgeError != null
+                            ? AppColors.error
+                            : AppColors.royalBlue.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
                             const Icon(
-                              Icons.calendar_month_rounded,
+                              Icons.child_care_rounded,
                               color: AppColors.royalBlue,
-                              size: 20,
+                              size: 18,
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                _travelDate == null
-                                    ? (context.isArabic ? 'اختر تاريخ السفر' : 'Pick departure date')
-                                    : DateFormat('EEE, MMM dd, yyyy')
-                                        .format(_travelDate!),
-                                style: AppTextStyles.bodyMD.copyWith(
-                                  color: _travelDate == null
-                                      ? AppColors.textLightMuted
-                                      : AppColors.textPrimary,
-                                  fontWeight: FontWeight.w600,
+                                context.isArabic
+                                    ? 'تحديد سن كل طفل (مطلوب لسياسات التذاكر والإقامة الفندقية)'
+                                    : 'Specify child age (Required for ticketing & rooming)',
+                                style: AppTextStyles.bodySM.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.navyDark,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                    if (_dateSelectionError != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        _dateSelectionError!,
-                        style: const TextStyle(
-                          color: AppColors.error,
-                          fontSize: 12,
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: List.generate(_children, (index) {
+                            final currentAge = index < _childAges.length
+                                ? _childAges[index]
+                                : null;
+                            return Container(
+                              width: isMobile ? double.infinity : 220,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: currentAge == null
+                                      ? AppColors.goldDark
+                                      : AppColors.borderLight,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _getChildTitle(index, context.isArabic),
+                                    style: AppTextStyles.caption.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.navyDark,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  DropdownButtonHideUnderline(
+                                    child: DropdownButton<int>(
+                                      value: currentAge,
+                                      isExpanded: true,
+                                      hint: Text(
+                                        context.isArabic
+                                            ? 'اختر العمر'
+                                            : 'Select age',
+                                        style: AppTextStyles.bodySM.copyWith(
+                                          color: AppColors.textLightMuted,
+                                        ),
+                                      ),
+                                      icon: const Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: AppColors.royalBlue,
+                                      ),
+                                      items: List.generate(
+                                        AppConstants.maxChildAge -
+                                            AppConstants.minChildAge +
+                                            1,
+                                        (i) {
+                                          final age =
+                                              AppConstants.minChildAge + i;
+                                          String label;
+                                          if (age == 0) {
+                                            label = context.tr(
+                                              'child_infant_label',
+                                            );
+                                          } else if (age == 1) {
+                                            label =
+                                                '1 ${context.tr('child_single_year')}';
+                                          } else if (age == 2 && context.isArabic) {
+                                            label = 'سنتان (2)';
+                                          } else {
+                                            label =
+                                                '$age ${context.tr('child_plural_years')}';
+                                          }
+                                          return DropdownMenuItem<int>(
+                                            value: age,
+                                            child: Text(
+                                              label,
+                                              style: AppTextStyles.bodySM
+                                                  .copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      onChanged: (age) =>
+                                          _setChildAge(index, age),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
                         ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-
-              // Travelers Stepper
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(context.tr('travelers_label'), style: AppTextStyles.labelMD),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.borderLight),
-                        borderRadius: BorderRadius.circular(12),
-                        color: AppColors.white,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove_circle_outline_rounded),
-                            color: _travelers > 1
-                                ? AppColors.royalBlue
-                                : AppColors.gray400,
-                            onPressed: _travelers > 1
-                                ? () => setState(() => _travelers--)
-                                : null,
-                          ),
-                          Text(
-                            '$_travelers',
-                            style: AppTextStyles.h5.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.navyDark,
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.add_circle_outline_rounded),
-                            color: _travelers < 30
-                                ? AppColors.royalBlue
-                                : AppColors.gray400,
-                            onPressed: _travelers < 30
-                                ? () => setState(() => _travelers++)
-                                : null,
+                        if (_childAgeError != null) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.error_outline_rounded,
+                                color: AppColors.error,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  _childAgeError!,
+                                  style: const TextStyle(
+                                    color: AppColors.error,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ],
+                  ),
+                ],
+              ],
+            ),
           ),
 
           const SizedBox(height: 28),
@@ -967,7 +1316,9 @@ class _BookingPageState extends State<BookingPage> {
               decoration: BoxDecoration(
                 color: AppColors.gold.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.gold.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -983,7 +1334,7 @@ class _BookingPageState extends State<BookingPage> {
                         ),
                       ),
                       Text(
-                        '$_travelers x ${tour.currency} ${tour.price.toInt()} per guest',
+                        '$_totalTravelers x ${tour.currency} ${tour.price.toInt()} per guest',
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -1025,6 +1376,82 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 
+  Widget _buildTravelerStepperRow({
+    required String title,
+    required String subtitle,
+    required int value,
+    required int minValue,
+    required int maxValue,
+    required ValueChanged<int> onChanged,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: AppTextStyles.bodyMD.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navyDark,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceLight,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.remove_circle_outline_rounded),
+                iconSize: 20,
+                color: value > minValue
+                    ? AppColors.royalBlue
+                    : AppColors.gray400,
+                onPressed: value > minValue ? () => onChanged(value - 1) : null,
+              ),
+              SizedBox(
+                width: 28,
+                child: Text(
+                  '$value',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.h5.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.navyDark,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add_circle_outline_rounded),
+                iconSize: 20,
+                color: value < maxValue
+                    ? AppColors.royalBlue
+                    : AppColors.gray400,
+                onPressed: value < maxValue ? () => onChanged(value + 1) : null,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   // ── STEP 3: Special Requests ───────────────────────────────────────────────
   Widget _buildStep3SpecialRequests(bool isMobile) {
     return _StepCardContainer(
@@ -1046,7 +1473,9 @@ class _BookingPageState extends State<BookingPage> {
                 selectedColor: AppColors.royalBlue.withValues(alpha: 0.15),
                 checkmarkColor: AppColors.royalBlue,
                 labelStyle: TextStyle(
-                  color: isSelected ? AppColors.royalBlueDark : AppColors.textPrimary,
+                  color: isSelected
+                      ? AppColors.royalBlueDark
+                      : AppColors.textPrimary,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   fontSize: 13,
                 ),
@@ -1072,8 +1501,7 @@ class _BookingPageState extends State<BookingPage> {
             }).toList(),
           ),
           const SizedBox(height: 24),
-          Text(context.tr('additional_notes'),
-              style: AppTextStyles.labelMD),
+          Text(context.tr('additional_notes'), style: AppTextStyles.labelMD),
           const SizedBox(height: 8),
           TextFormField(
             controller: _notesCtrl,
@@ -1127,9 +1555,20 @@ class _BookingPageState extends State<BookingPage> {
             icon: Icons.person_rounded,
             title: context.tr('traveler_details'),
             children: [
-              _ReviewRow(label: context.isArabic ? 'الاسم الكامل' : 'Full Name', value: _nameCtrl.text.trim()),
-              _ReviewRow(label: context.isArabic ? 'البريد الإلكتروني' : 'Email', value: _emailCtrl.text.trim()),
-              _ReviewRow(label: context.isArabic ? 'الهاتف / واتساب' : 'Phone / WhatsApp', value: _phoneCtrl.text.trim()),
+              _ReviewRow(
+                label: context.isArabic ? 'الاسم الكامل' : 'Full Name',
+                value: _nameCtrl.text.trim(),
+              ),
+              _ReviewRow(
+                label: context.isArabic ? 'البريد الإلكتروني' : 'Email',
+                value: _emailCtrl.text.trim(),
+              ),
+              _ReviewRow(
+                label: context.isArabic
+                    ? 'الهاتف / واتساب'
+                    : 'Phone / WhatsApp',
+                value: _phoneCtrl.text.trim(),
+              ),
             ],
           ),
           const Divider(height: 32, color: AppColors.borderLight),
@@ -1153,12 +1592,27 @@ class _BookingPageState extends State<BookingPage> {
                 label: context.isArabic ? 'تاريخ السفر' : 'Departure Date',
                 value: _travelDate != null
                     ? DateFormat('EEEE, MMMM dd, yyyy').format(_travelDate!)
-                    : (context.isArabic ? 'سيتم التحديد لاحقاً' : 'To be scheduled'),
+                    : (context.isArabic
+                          ? 'سيتم التحديد لاحقاً'
+                          : 'To be scheduled'),
               ),
               _ReviewRow(
-                label: context.isArabic ? 'عدد المسافرين' : 'Number of Travelers',
-                value: '$_travelers ${_travelers == 1 ? (context.isArabic ? "مسافر" : "Guest") : (context.isArabic ? "مسافرين" : "Guests")}',
+                label: context.tr('travelers_count_summary'),
+                value:
+                    '$_totalTravelers ${context.isArabic ? (_totalTravelers == 1 ? "مسافر" : "مسافرين") : (_totalTravelers == 1 ? "Guest" : "Guests")} ($_adults ${context.tr('adults_count_title')}${_children > 0 ? ", $_children ${context.tr('children_count_title')}" : ""})',
               ),
+              if (_children > 0 && _childAges.isNotEmpty)
+                _ReviewRow(
+                  label: context.tr('children_ages_summary'),
+                  value: _childAges
+                      .whereType<int>()
+                      .map(
+                        (a) => a == 0
+                            ? context.tr('child_infant_label')
+                            : '$a ${a == 1 ? context.tr('child_single_year') : context.tr('child_plural_years')}',
+                      )
+                      .join(', '),
+                ),
             ],
           ),
           const Divider(height: 32, color: AppColors.borderLight),
@@ -1206,7 +1660,9 @@ class _BookingPageState extends State<BookingPage> {
                     Text(
                       tour != null
                           ? '${tour.currency} ${_estimatedTotal.toInt()}'
-                          : (context.isArabic ? 'عرض سعر مخصص' : 'Custom Quote'),
+                          : (context.isArabic
+                                ? 'عرض سعر مخصص'
+                                : 'Custom Quote'),
                       style: AppTextStyles.h3.copyWith(
                         color: AppColors.gold,
                         fontWeight: FontWeight.w900,
@@ -1266,7 +1722,8 @@ class _BookingPageState extends State<BookingPage> {
 
   // ── STEP 5: Premium Confirmation Page ──────────────────────────────────────
   Widget _buildStep5Confirmation(bool isMobile) {
-    final booking = _confirmedBooking ??
+    final booking =
+        _confirmedBooking ??
         BookingModel(
           id: 'TRV-${DateTime.now().millisecondsSinceEpoch.toRadixString(16).toUpperCase()}',
           customerName: _nameCtrl.text.trim(),
@@ -1274,7 +1731,10 @@ class _BookingPageState extends State<BookingPage> {
           phone: _phoneCtrl.text.trim(),
           tourId: _selectedTourId,
           travelDate: _travelDate,
-          travelers: _travelers,
+          travelers: _totalTravelers,
+          adultsCount: _adults,
+          childrenCount: _children,
+          childrenAges: _childAges.whereType<int>().toList(),
           status: BookingStatus.pending,
           tourTitle: _getSelectedTourTitle(),
         );
@@ -1397,7 +1857,9 @@ class _BookingPageState extends State<BookingPage> {
                                 size: 18,
                                 color: AppColors.royalBlue,
                               ),
-                              tooltip: context.isArabic ? 'نسخ الرقم المرجعي' : 'Copy Reference',
+                              tooltip: context.isArabic
+                                  ? 'نسخ الرقم المرجعي'
+                                  : 'Copy Reference',
                               onPressed: () => _copyReference(ref),
                             ),
                           ],
@@ -1426,7 +1888,9 @@ class _BookingPageState extends State<BookingPage> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            context.isArabic ? 'قيد المراجعة' : booking.status.label.toUpperCase(),
+                            context.isArabic
+                                ? 'قيد المراجعة'
+                                : booking.status.label.toUpperCase(),
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.goldDark,
                               fontWeight: FontWeight.bold,
@@ -1454,13 +1918,23 @@ class _BookingPageState extends State<BookingPage> {
                 const SizedBox(height: 12),
                 _ConfirmationItem(
                   icon: Icons.group_rounded,
-                  label: context.isArabic ? 'عدد المسافرين' : 'Travelers',
-                  value: '${booking.travelers} ${context.isArabic ? "مسافر" : "Guests"}',
+                  label: context.isArabic ? 'تفاصيل المسافرين' : 'Travelers',
+                  value: booking.formattedTravelersSummary(isArabic: context.isArabic),
                 ),
+                if (booking.hasChildren) ...[
+                  const SizedBox(height: 12),
+                  _ConfirmationItem(
+                    icon: Icons.child_care_rounded,
+                    label: context.isArabic ? 'أعمار الأطفال' : 'Child Ages',
+                    value: booking.formattedChildAges(isArabic: context.isArabic),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 _ConfirmationItem(
                   icon: Icons.contact_mail_rounded,
-                  label: context.isArabic ? 'بيانات التواصل' : 'Contact Details',
+                  label: context.isArabic
+                      ? 'بيانات التواصل'
+                      : 'Contact Details',
                   value: '${booking.email} • ${booking.phone}',
                 ),
               ],

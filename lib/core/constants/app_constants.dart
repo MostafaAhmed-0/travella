@@ -80,4 +80,14 @@ class AppConstants {
   static const String localeKey = 'app_locale';
   static const String userKey = 'user_data';
   static const String tokenKey = 'auth_token';
+
+  // Booking & Traveler Constraints
+  static const int minAdults = 1;
+  static const int maxAdults = 30;
+  static const int minChildren = 0;
+  static const int maxChildren = 20;
+  static const int minChildAge = 0; // 0 = infant / under 1 year
+  static const int maxChildAge = 17;
+  static const int defaultAdults = 2;
+  static const int defaultChildren = 0;
 }

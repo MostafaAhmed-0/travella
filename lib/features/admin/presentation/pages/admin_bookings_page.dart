@@ -51,7 +51,9 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Could not open WhatsApp for phone: ${booking.phone}'),
+            content: Text(
+              'Could not open WhatsApp for phone: ${booking.phone}',
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -116,32 +118,70 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                 ],
               ),
               const Divider(height: 28),
-              _DetailRow(label: 'Booking ID', value: booking.id.isNotEmpty ? booking.id : booking.bookingReference),
+              _DetailRow(
+                label: 'Booking ID',
+                value: booking.id.isNotEmpty
+                    ? booking.id
+                    : booking.bookingReference,
+              ),
               _DetailRow(label: 'Customer Name', value: booking.customerName),
               _DetailRow(label: 'Email', value: booking.email),
               _DetailRow(label: 'Phone Number', value: booking.phone),
-              _DetailRow(label: 'Package / Tour', value: booking.tourTitle ?? 'Direct Travel Request'),
+              _DetailRow(
+                label: 'Package / Tour',
+                value: booking.tourTitle ?? 'Direct Travel Request',
+              ),
               _DetailRow(
                 label: 'Travel Date',
                 value: booking.travelDate != null
-                    ? DateFormat('EEEE, MMMM dd, yyyy').format(booking.travelDate!)
+                    ? DateFormat(
+                        'EEEE, MMMM dd, yyyy',
+                      ).format(booking.travelDate!)
                     : 'Flexible / Not set',
               ),
-              _DetailRow(label: 'Total Travelers', value: '${booking.travelers} Guests'),
+              _DetailRow(
+                label: 'Travelers Summary',
+                value: booking.formattedTravelersSummary(),
+              ),
+              _DetailRow(
+                label: 'Adults',
+                value: '${booking.adultsCount} Adult${booking.adultsCount > 1 ? 's' : ''} (18+ yrs)',
+              ),
+              _DetailRow(
+                label: 'Children',
+                value: '${booking.childrenCount} Child${booking.childrenCount != 1 ? 'ren' : ''} (0-17 yrs)',
+              ),
+              if (booking.childrenCount > 0)
+                _DetailRow(
+                  label: 'Child Ages',
+                  value: booking.formattedChildAges(),
+                ),
+              _DetailRow(
+                label: 'Status',
+                value: booking.status.label.toUpperCase(),
+              ),
               _DetailRow(
                 label: 'Created Date',
                 value: booking.createdAt != null
-                    ? DateFormat('MMM dd, yyyy HH:mm').format(booking.createdAt!)
+                    ? DateFormat(
+                        'MMM dd, yyyy HH:mm',
+                      ).format(booking.createdAt!)
                     : 'Recent',
               ),
               if (booking.notes != null && booking.notes!.isNotEmpty)
-                _DetailRow(label: 'Special Notes / Requests', value: booking.notes!),
+                _DetailRow(
+                  label: 'Special Notes / Requests',
+                  value: booking.notes!,
+                ),
               const SizedBox(height: 20),
 
               // Action Buttons Row: Confirm, Cancel, Complete
               Row(
                 children: [
-                  const Text('Quick Action:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  const Text(
+                    'Quick Action:',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
                   const SizedBox(width: 12),
                   if (booking.status != BookingStatus.confirmed)
                     Padding(
@@ -152,11 +192,17 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.success,
                           foregroundColor: AppColors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                         ),
                         onPressed: () async {
                           Navigator.of(ctx).pop();
-                          await context.read<AdminBookingsCubit>().updateStatus(booking.id, BookingStatus.confirmed);
+                          await context.read<AdminBookingsCubit>().updateStatus(
+                            booking.id,
+                            BookingStatus.confirmed,
+                          );
                         },
                       ),
                     ),
@@ -169,11 +215,17 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.royalBlue,
                           foregroundColor: AppColors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                         ),
                         onPressed: () async {
                           Navigator.of(ctx).pop();
-                          await context.read<AdminBookingsCubit>().updateStatus(booking.id, BookingStatus.completed);
+                          await context.read<AdminBookingsCubit>().updateStatus(
+                            booking.id,
+                            BookingStatus.completed,
+                          );
                         },
                       ),
                     ),
@@ -184,11 +236,17 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.error,
                         foregroundColor: AppColors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                       onPressed: () async {
                         Navigator.of(ctx).pop();
-                        await context.read<AdminBookingsCubit>().updateStatus(booking.id, BookingStatus.cancelled);
+                        await context.read<AdminBookingsCubit>().updateStatus(
+                          booking.id,
+                          BookingStatus.cancelled,
+                        );
                       },
                     ),
                 ],
@@ -200,8 +258,17 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                 children: [
                   TextButton.icon(
                     onPressed: () => _openWhatsAppForCustomer(booking),
-                    icon: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF25D366)),
-                    label: const Text('Chat on WhatsApp', style: TextStyle(color: Color(0xFF25D366), fontWeight: FontWeight.bold)),
+                    icon: const Icon(
+                      Icons.chat_bubble_outline_rounded,
+                      color: Color(0xFF25D366),
+                    ),
+                    label: const Text(
+                      'Chat on WhatsApp',
+                      style: TextStyle(
+                        color: Color(0xFF25D366),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.of(ctx).pop(),
@@ -243,10 +310,18 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
       },
       builder: (context, state) {
         final total = state.allBookings.length;
-        final pending = state.allBookings.where((b) => b.status == BookingStatus.pending).length;
-        final confirmed = state.allBookings.where((b) => b.status == BookingStatus.confirmed).length;
-        final completed = state.allBookings.where((b) => b.status == BookingStatus.completed).length;
-        final cancelled = state.allBookings.where((b) => b.status == BookingStatus.cancelled).length;
+        final pending = state.allBookings
+            .where((b) => b.status == BookingStatus.pending)
+            .length;
+        final confirmed = state.allBookings
+            .where((b) => b.status == BookingStatus.confirmed)
+            .length;
+        final completed = state.allBookings
+            .where((b) => b.status == BookingStatus.completed)
+            .length;
+        final cancelled = state.allBookings
+            .where((b) => b.status == BookingStatus.cancelled)
+            .length;
 
         return Scaffold(
           backgroundColor: AppColors.lightGray,
@@ -264,19 +339,24 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                       children: [
                         Text(
                           'Bookings & Inquiries',
-                          style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold),
+                          style: AppTextStyles.h3.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'Review and manage client booking requests, dates, and statuses',
-                          style: AppTextStyles.bodyMD.copyWith(color: AppColors.gray600),
+                          style: AppTextStyles.bodyMD.copyWith(
+                            color: AppColors.gray600,
+                          ),
                         ),
                       ],
                     ),
                     IconButton(
                       tooltip: 'Refresh Bookings',
                       icon: const Icon(Icons.refresh_rounded),
-                      onPressed: () => context.read<AdminBookingsCubit>().loadBookings(),
+                      onPressed: () =>
+                          context.read<AdminBookingsCubit>().loadBookings(),
                     ),
                   ],
                 ),
@@ -287,11 +367,36 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                   spacing: 12,
                   runSpacing: 12,
                   children: [
-                    _StatCard(label: 'Total Bookings', value: '$total', color: AppColors.navyDark, icon: Icons.all_inbox_rounded),
-                    _StatCard(label: 'Pending', value: '$pending', color: AppColors.goldDark, icon: Icons.hourglass_top_rounded),
-                    _StatCard(label: 'Confirmed', value: '$confirmed', color: AppColors.success, icon: Icons.check_circle_rounded),
-                    _StatCard(label: 'Completed', value: '$completed', color: AppColors.royalBlue, icon: Icons.task_alt_rounded),
-                    _StatCard(label: 'Cancelled', value: '$cancelled', color: AppColors.error, icon: Icons.cancel_rounded),
+                    _StatCard(
+                      label: 'Total Bookings',
+                      value: '$total',
+                      color: AppColors.navyDark,
+                      icon: Icons.all_inbox_rounded,
+                    ),
+                    _StatCard(
+                      label: 'Pending',
+                      value: '$pending',
+                      color: AppColors.goldDark,
+                      icon: Icons.hourglass_top_rounded,
+                    ),
+                    _StatCard(
+                      label: 'Confirmed',
+                      value: '$confirmed',
+                      color: AppColors.success,
+                      icon: Icons.check_circle_rounded,
+                    ),
+                    _StatCard(
+                      label: 'Completed',
+                      value: '$completed',
+                      color: AppColors.royalBlue,
+                      icon: Icons.task_alt_rounded,
+                    ),
+                    _StatCard(
+                      label: 'Cancelled',
+                      value: '$cancelled',
+                      color: AppColors.error,
+                      icon: Icons.cancel_rounded,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -310,12 +415,20 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                       Expanded(
                         child: TextField(
                           controller: _searchCtrl,
-                          onChanged: (q) => context.read<AdminBookingsCubit>().searchBookings(q),
+                          onChanged: (q) => context
+                              .read<AdminBookingsCubit>()
+                              .searchBookings(q),
                           decoration: InputDecoration(
-                            hintText: 'Search customer name, email, phone, reference, or tour...',
+                            hintText:
+                                'Search customer name, email, phone, reference, or tour...',
                             prefixIcon: const Icon(Icons.search),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
                           ),
                         ),
                       ),
@@ -328,12 +441,20 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                         underline: const SizedBox.shrink(),
                         borderRadius: BorderRadius.circular(10),
                         items: [
-                          const DropdownMenuItem(value: null, child: Text('All Statuses')),
+                          const DropdownMenuItem(
+                            value: null,
+                            child: Text('All Statuses'),
+                          ),
                           ...BookingStatus.values.map(
-                            (s) => DropdownMenuItem(value: s, child: Text(s.label)),
+                            (s) => DropdownMenuItem(
+                              value: s,
+                              child: Text(s.label),
+                            ),
                           ),
                         ],
-                        onChanged: (status) => context.read<AdminBookingsCubit>().filterByStatus(status),
+                        onChanged: (status) => context
+                            .read<AdminBookingsCubit>()
+                            .filterByStatus(status),
                       ),
                       const SizedBox(width: 14),
 
@@ -343,12 +464,24 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                         underline: const SizedBox.shrink(),
                         borderRadius: BorderRadius.circular(10),
                         items: const [
-                          DropdownMenuItem(value: BookingSortOption.newest, child: Text('Newest First')),
-                          DropdownMenuItem(value: BookingSortOption.oldest, child: Text('Oldest First')),
-                          DropdownMenuItem(value: BookingSortOption.travelersHigh, child: Text('Most Travelers')),
+                          DropdownMenuItem(
+                            value: BookingSortOption.newest,
+                            child: Text('Newest First'),
+                          ),
+                          DropdownMenuItem(
+                            value: BookingSortOption.oldest,
+                            child: Text('Oldest First'),
+                          ),
+                          DropdownMenuItem(
+                            value: BookingSortOption.travelersHigh,
+                            child: Text('Most Travelers'),
+                          ),
                         ],
                         onChanged: (opt) {
-                          if (opt != null) context.read<AdminBookingsCubit>().setSortOption(opt);
+                          if (opt != null)
+                            context.read<AdminBookingsCubit>().setSortOption(
+                              opt,
+                            );
                         },
                       ),
                     ],
@@ -359,59 +492,78 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                 // ── Bookings List / Table ─────────────────────────────────────
                 Expanded(
                   child: state.isLoading
-                      ? const Center(child: CircularProgressIndicator(color: AppColors.gold))
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.gold,
+                          ),
+                        )
                       : state.filteredBookings.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.event_busy_rounded, color: AppColors.gray400, size: 54),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'No booking records found.',
-                                    style: AppTextStyles.h5.copyWith(color: AppColors.textSecondary),
-                                  ),
-                                ],
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.event_busy_rounded,
+                                color: AppColors.gray400,
+                                size: 54,
                               ),
-                            )
-                          : isMobile
-                              ? ListView.builder(
-                                  itemCount: state.pagedBookings.length,
-                                  itemBuilder: (context, index) {
-                                    final booking = state.pagedBookings[index];
-                                    return _BookingMobileCard(
-                                      booking: booking,
-                                      onTap: () => _showBookingDetailsDialog(booking),
-                                      onStatusChange: (status) =>
-                                          context.read<AdminBookingsCubit>().updateStatus(booking.id, status),
-                                      onWhatsApp: () => _openWhatsAppForCustomer(booking),
-                                    );
-                                  },
-                                )
-                              : _BookingDesktopTable(
-                                  bookings: state.pagedBookings,
-                                  onViewDetails: (b) => _showBookingDetailsDialog(b),
-                                  onStatusChange: (b, s) =>
-                                      context.read<AdminBookingsCubit>().updateStatus(b.id, s),
-                                  onWhatsApp: (b) => _openWhatsAppForCustomer(b),
-                                  onDelete: (b) async {
-                                    final confirm = await showAdminConfirmDialog(
-                                      context: context,
-                                      title: 'Delete Booking Record',
-                                      message: 'Are you sure you want to delete reservation for "${b.customerName}" (${b.bookingReference})?',
-                                    );
-                                    if (confirm == true && context.mounted) {
-                                      await context.read<AdminBookingsCubit>().deleteBooking(b.id);
-                                    }
-                                  },
+                              const SizedBox(height: 12),
+                              Text(
+                                'No booking records found.',
+                                style: AppTextStyles.h5.copyWith(
+                                  color: AppColors.textSecondary,
                                 ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : isMobile
+                      ? ListView.builder(
+                          itemCount: state.pagedBookings.length,
+                          itemBuilder: (context, index) {
+                            final booking = state.pagedBookings[index];
+                            return _BookingMobileCard(
+                              booking: booking,
+                              onTap: () => _showBookingDetailsDialog(booking),
+                              onStatusChange: (status) => context
+                                  .read<AdminBookingsCubit>()
+                                  .updateStatus(booking.id, status),
+                              onWhatsApp: () =>
+                                  _openWhatsAppForCustomer(booking),
+                            );
+                          },
+                        )
+                      : _BookingDesktopTable(
+                          bookings: state.pagedBookings,
+                          onViewDetails: (b) => _showBookingDetailsDialog(b),
+                          onStatusChange: (b, s) => context
+                              .read<AdminBookingsCubit>()
+                              .updateStatus(b.id, s),
+                          onWhatsApp: (b) => _openWhatsAppForCustomer(b),
+                          onDelete: (b) async {
+                            final confirm = await showAdminConfirmDialog(
+                              context: context,
+                              title: 'Delete Booking Record',
+                              message:
+                                  'Are you sure you want to delete reservation for "${b.customerName}" (${b.bookingReference})?',
+                            );
+                            if (confirm == true && context.mounted) {
+                              await context
+                                  .read<AdminBookingsCubit>()
+                                  .deleteBooking(b.id);
+                            }
+                          },
+                        ),
                 ),
 
                 // ── Pagination Controls ──────────────────────────────────────
                 if (state.totalPages > 1) ...[
                   const SizedBox(height: 14),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(10),
@@ -422,21 +574,32 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
                       children: [
                         Text(
                           'Showing page ${state.currentPage} of ${state.totalPages} (${state.filteredBookings.length} bookings)',
-                          style: AppTextStyles.caption.copyWith(color: AppColors.gray600),
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.gray600,
+                          ),
                         ),
                         Row(
                           children: [
                             IconButton(
                               icon: const Icon(Icons.chevron_left),
                               onPressed: state.currentPage > 1
-                                  ? () => context.read<AdminBookingsCubit>().setPage(state.currentPage - 1)
+                                  ? () => context
+                                        .read<AdminBookingsCubit>()
+                                        .setPage(state.currentPage - 1)
                                   : null,
                             ),
-                            Text('${state.currentPage}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text(
+                              '${state.currentPage}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             IconButton(
                               icon: const Icon(Icons.chevron_right),
                               onPressed: state.currentPage < state.totalPages
-                                  ? () => context.read<AdminBookingsCubit>().setPage(state.currentPage + 1)
+                                  ? () => context
+                                        .read<AdminBookingsCubit>()
+                                        .setPage(state.currentPage + 1)
                                   : null,
                             ),
                           ],
@@ -492,8 +655,22 @@ class _StatCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(label, style: const TextStyle(fontSize: 11, color: AppColors.gray600, fontWeight: FontWeight.w600)),
-              Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: color)),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.gray600,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                ),
+              ),
             ],
           ),
         ],
@@ -517,10 +694,24 @@ class _DetailRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 140,
-            child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.gray600, fontSize: 13)),
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppColors.gray600,
+                fontSize: 13,
+              ),
+            ),
           ),
           Expanded(
-            child: Text(value, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.navyDark)),
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+                color: AppColors.navyDark,
+              ),
+            ),
           ),
         ],
       ),
@@ -553,7 +744,8 @@ class _BookingDesktopTable extends StatelessWidget {
       ),
       child: ListView.separated(
         itemCount: bookings.length + 1,
-        separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.gray200),
+        separatorBuilder: (_, __) =>
+            const Divider(height: 1, color: AppColors.gray200),
         itemBuilder: (context, i) {
           if (i == 0) {
             return Container(
@@ -561,12 +753,66 @@ class _BookingDesktopTable extends StatelessWidget {
               color: AppColors.lightGray,
               child: const Row(
                 children: [
-                  Expanded(flex: 3, child: Text('Customer & Contact', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                  Expanded(flex: 3, child: Text('Tour / Package', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                  Expanded(flex: 2, child: Text('Travel Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                  Expanded(flex: 1, child: Text('Guests', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                  Expanded(flex: 2, child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                  Expanded(flex: 3, child: Text('Admin Actions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      'Customer & Contact',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      'Tour / Package',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Travel Date',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Travelers & Ages',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Status',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      'Admin Actions',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -582,9 +828,28 @@ class _BookingDesktopTable extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(booking.customerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      Text('${booking.email} • ${booking.phone}', style: const TextStyle(color: AppColors.gray500, fontSize: 11)),
-                      Text('Ref: ${booking.bookingReference}', style: const TextStyle(color: AppColors.royalBlue, fontSize: 10, fontWeight: FontWeight.bold)),
+                      Text(
+                        booking.customerName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                      Text(
+                        '${booking.email} • ${booking.phone}',
+                        style: const TextStyle(
+                          color: AppColors.gray500,
+                          fontSize: 11,
+                        ),
+                      ),
+                      Text(
+                        'Ref: ${booking.bookingReference}',
+                        style: const TextStyle(
+                          color: AppColors.royalBlue,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -592,7 +857,10 @@ class _BookingDesktopTable extends StatelessWidget {
                   flex: 3,
                   child: Text(
                     booking.tourTitle ?? 'Direct Request',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -607,8 +875,28 @@ class _BookingDesktopTable extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  flex: 1,
-                  child: Text('${booking.travelers}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${booking.adultsCount} Adults${booking.childrenCount > 0 ? ', ${booking.childrenCount} Kids' : ''}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                      if (booking.childrenAges.isNotEmpty)
+                        Text(
+                          'Ages: ${booking.childrenAges.join(", ")}',
+                          style: const TextStyle(
+                            color: AppColors.royalBlueDark,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
                 Expanded(
                   flex: 2,
@@ -616,9 +904,14 @@ class _BookingDesktopTable extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: PopupMenuButton<BookingStatus>(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: _statusColor(booking.status).withValues(alpha: 0.15),
+                          color: _statusColor(
+                            booking.status,
+                          ).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
@@ -626,19 +919,40 @@ class _BookingDesktopTable extends StatelessWidget {
                           children: [
                             Text(
                               booking.status.label.toUpperCase(),
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _statusColor(booking.status)),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: _statusColor(booking.status),
+                              ),
                             ),
                             const SizedBox(width: 4),
-                            Icon(Icons.arrow_drop_down, size: 14, color: _statusColor(booking.status)),
+                            Icon(
+                              Icons.arrow_drop_down,
+                              size: 14,
+                              color: _statusColor(booking.status),
+                            ),
                           ],
                         ),
                       ),
-                      onSelected: (newStatus) => onStatusChange(booking, newStatus),
+                      onSelected: (newStatus) =>
+                          onStatusChange(booking, newStatus),
                       itemBuilder: (ctx) => [
-                        const PopupMenuItem(value: BookingStatus.pending, child: Text('Pending')),
-                        const PopupMenuItem(value: BookingStatus.confirmed, child: Text('Confirm Booking')),
-                        const PopupMenuItem(value: BookingStatus.completed, child: Text('Complete Booking')),
-                        const PopupMenuItem(value: BookingStatus.cancelled, child: Text('Cancel Booking')),
+                        const PopupMenuItem(
+                          value: BookingStatus.pending,
+                          child: Text('Pending'),
+                        ),
+                        const PopupMenuItem(
+                          value: BookingStatus.confirmed,
+                          child: Text('Confirm Booking'),
+                        ),
+                        const PopupMenuItem(
+                          value: BookingStatus.completed,
+                          child: Text('Complete Booking'),
+                        ),
+                        const PopupMenuItem(
+                          value: BookingStatus.cancelled,
+                          child: Text('Cancel Booking'),
+                        ),
                       ],
                     ),
                   ),
@@ -650,32 +964,54 @@ class _BookingDesktopTable extends StatelessWidget {
                       // Quick Confirm button
                       if (booking.status == BookingStatus.pending)
                         IconButton(
-                          icon: const Icon(Icons.check_circle_outline_rounded, size: 18, color: AppColors.success),
-                          onPressed: () => onStatusChange(booking, BookingStatus.confirmed),
+                          icon: const Icon(
+                            Icons.check_circle_outline_rounded,
+                            size: 18,
+                            color: AppColors.success,
+                          ),
+                          onPressed: () =>
+                              onStatusChange(booking, BookingStatus.confirmed),
                           tooltip: 'Confirm Booking',
                         ),
                       // Quick Complete button
                       if (booking.status == BookingStatus.confirmed)
                         IconButton(
-                          icon: const Icon(Icons.task_alt_rounded, size: 18, color: AppColors.royalBlue),
-                          onPressed: () => onStatusChange(booking, BookingStatus.completed),
+                          icon: const Icon(
+                            Icons.task_alt_rounded,
+                            size: 18,
+                            color: AppColors.royalBlue,
+                          ),
+                          onPressed: () =>
+                              onStatusChange(booking, BookingStatus.completed),
                           tooltip: 'Complete Booking',
                         ),
                       // WhatsApp button
                       IconButton(
-                        icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18, color: Color(0xFF25D366)),
+                        icon: const Icon(
+                          Icons.chat_bubble_outline_rounded,
+                          size: 18,
+                          color: Color(0xFF25D366),
+                        ),
                         onPressed: () => onWhatsApp(booking),
                         tooltip: 'Message Customer on WhatsApp',
                       ),
                       // View Details
                       IconButton(
-                        icon: const Icon(Icons.visibility_outlined, size: 18, color: AppColors.royalBlue),
+                        icon: const Icon(
+                          Icons.visibility_outlined,
+                          size: 18,
+                          color: AppColors.royalBlue,
+                        ),
                         onPressed: () => onViewDetails(booking),
                         tooltip: 'View Booking Info',
                       ),
                       // Delete
                       IconButton(
-                        icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error),
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          size: 18,
+                          color: AppColors.error,
+                        ),
                         onPressed: () => onDelete(booking),
                         tooltip: 'Delete Record',
                       ),
@@ -737,43 +1073,128 @@ class _BookingMobileCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(booking.customerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                    Text('Ref: ${booking.bookingReference}', style: const TextStyle(color: AppColors.royalBlue, fontSize: 11, fontWeight: FontWeight.bold)),
+                    Text(
+                      booking.customerName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    Text(
+                      'Ref: ${booking.bookingReference}',
+                      style: const TextStyle(
+                        color: AppColors.royalBlue,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),
               PopupMenuButton<BookingStatus>(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.navy.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text(booking.status.label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                  child: Text(
+                    booking.status.label,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+                  ),
                 ),
                 onSelected: onStatusChange,
                 itemBuilder: (ctx) => [
-                  const PopupMenuItem(value: BookingStatus.pending, child: Text('Pending')),
-                  const PopupMenuItem(value: BookingStatus.confirmed, child: Text('Confirm')),
-                  const PopupMenuItem(value: BookingStatus.completed, child: Text('Complete')),
-                  const PopupMenuItem(value: BookingStatus.cancelled, child: Text('Cancel')),
+                  const PopupMenuItem(
+                    value: BookingStatus.pending,
+                    child: Text('Pending'),
+                  ),
+                  const PopupMenuItem(
+                    value: BookingStatus.confirmed,
+                    child: Text('Confirm'),
+                  ),
+                  const PopupMenuItem(
+                    value: BookingStatus.completed,
+                    child: Text('Complete'),
+                  ),
+                  const PopupMenuItem(
+                    value: BookingStatus.cancelled,
+                    child: Text('Cancel'),
+                  ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(booking.tourTitle ?? 'Tour inquiry', style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.navy)),
+          Text(
+            booking.tourTitle ?? 'Tour inquiry',
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: AppColors.navy,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text('${booking.email} • ${booking.phone}', style: const TextStyle(color: AppColors.gray600, fontSize: 12)),
+          Text(
+            '${booking.email} • ${booking.phone}',
+            style: const TextStyle(color: AppColors.gray600, fontSize: 12),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.borderLight),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.group_outlined,
+                  size: 16,
+                  color: AppColors.royalBlue,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    booking.formattedTravelersSummary(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      color: AppColors.navyDark,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('${booking.travelers} Guests', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              Text(
+                booking.travelDate != null
+                    ? DateFormat('MMM dd, yyyy').format(booking.travelDate!)
+                    : 'Flexible Date',
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18, color: Color(0xFF25D366)),
+                    icon: const Icon(
+                      Icons.chat_bubble_outline_rounded,
+                      size: 18,
+                      color: Color(0xFF25D366),
+                    ),
                     onPressed: onWhatsApp,
                   ),
                   TextButton(onPressed: onTap, child: const Text('Details')),
