@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
@@ -12,8 +11,7 @@ import '../../../../data/models/visa_model.dart';
 import '../../../../data/repositories/visa_repository.dart';
 import '../../../../shared/presentation/widgets/app_navbar.dart';
 import '../../../../shared/presentation/widgets/app_footer.dart';
-import '../../../bookings/presentation/cubit/booking_cubit.dart';
-import '../../../bookings/presentation/cubit/booking_state.dart';
+import 'visa_details_page.dart';
 
 class VisaServicesPage extends StatefulWidget {
   final String? initialCountry;
@@ -38,17 +36,25 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
   bool _isLoading = true;
   String? _errorMessage;
 
+  // Search & Filters (Destination Country, Visa Type, Travel Purpose, Processing Time)
   late TextEditingController _searchCtrl;
   String _searchQuery = '';
+  String _selectedVisaType = 'All';
+  String _selectedTravelPurpose = 'All';
+  String _selectedProcessingTime = 'All';
   String _selectedRegion = 'All';
 
   final List<String> _regions = ['All', 'Europe', 'UK & USA', 'Middle East', 'Asia'];
+  final List<String> _visaTypes = ['All', 'Tourist Visa', 'Business / Conference', 'Express Fast-Track Visa'];
+  final List<String> _purposes = ['All', 'Tourism', 'Business', 'Family Visit', 'Transit', 'Study', 'Medical'];
+  final List<String> _processingTimes = ['All', 'Fast (1-5 Days)', 'Standard (6-15 Days)', 'Consular (15+ Days)'];
 
   @override
   void initState() {
     super.initState();
     _searchQuery = widget.initialCountry ?? '';
     _searchCtrl = TextEditingController(text: _searchQuery);
+    _selectedVisaType = widget.initialVisaType ?? 'All';
     _loadVisaServices();
   }
 
@@ -93,6 +99,29 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
           v.country.toLowerCase().contains(reg)).toList();
     }
 
+    if (_selectedVisaType != 'All') {
+      final type = _selectedVisaType.toLowerCase();
+      result = result.where((v) => v.visaType.toLowerCase().contains(type)).toList();
+    }
+
+    if (_selectedProcessingTime != 'All') {
+      if (_selectedProcessingTime.contains('Fast')) {
+        result = result.where((v) =>
+            v.processingTime.contains('1-') ||
+            v.processingTime.contains('2-') ||
+            v.processingTime.contains('3-') ||
+            v.processingTime.contains('5') ||
+            v.processingTime.contains('Express')).toList();
+      } else if (_selectedProcessingTime.contains('Standard')) {
+        result = result.where((v) =>
+            v.processingTime.contains('7') ||
+            v.processingTime.contains('10') ||
+            v.processingTime.contains('12') ||
+            v.processingTime.contains('14') ||
+            v.processingTime.contains('15')).toList();
+      }
+    }
+
     if (_searchQuery.trim().isNotEmpty) {
       final q = _searchQuery.toLowerCase().trim();
       result = result.where((v) =>
@@ -108,15 +137,23 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
     });
   }
 
-  void _showApplyModal(VisaServiceModel service) {
+  void _openApplicationFlow(VisaServiceModel service) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => _VisaApplicationModal(
+      builder: (ctx) => VisaApplicationFlowDialog(
         service: service,
-        initialApplicants: widget.initialApplicants ?? 1,
+        onSubmitted: () {
+          // Success feedback
+        },
       ),
     );
+  }
+
+  void _openQuickApplyHero() {
+    if (_allVisaServices.isNotEmpty) {
+      _openApplicationFlow(_allVisaServices.first);
+    }
   }
 
   @override
@@ -135,20 +172,21 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
             child: AppNavbar(currentRoute: AppRoutes.visaServices),
           ),
 
-          // ── Header ───────────────────────────────────────────────────────
+          // ── 1. Hero Section ───────────────────────────────────────────────
           SliverToBoxAdapter(
             child: Container(
               color: AppColors.navyDark,
               padding: EdgeInsets.symmetric(
                 horizontal: hPad,
-                vertical: isMobile ? 48 : 72,
+                vertical: isMobile ? 54 : 84,
               ),
               child: MaxWidthContainer(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Badge
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
                         color: AppColors.gold.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(100),
@@ -158,9 +196,9 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(Icons.verified_user_rounded, color: AppColors.gold, size: 14),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Text(
-                            isArabic ? 'خدمات التأشيرات واستشارات السفر' : 'CONSULAR & TRAVEL PERMITS',
+                            isArabic ? 'خدمات التأشيرات واستشارات السفر الرسمية' : 'CONSULAR & VISA SERVICES',
                             style: const TextStyle(
                               color: AppColors.gold,
                               fontWeight: FontWeight.bold,
@@ -171,21 +209,53 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
+
+                    // Title
                     Text(
-                      isArabic ? 'خدمات التأشيرات السياحية العالمية' : 'Global Visa Assistance',
+                      isArabic ? 'خدمات التأشيرات' : 'Visa Services',
                       style: (isMobile ? AppTextStyles.h2 : AppTextStyles.h1).copyWith(
                         color: AppColors.white,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      isArabic
-                          ? 'استخراج تأشيرات الشنغن، بريطانيا، أمريكا، إلكترونية دبي والسعودية وشرق آسيا بأعلى نسب قبول ومتابعة دقيقة.'
-                          : 'Hassle-free Schengen, UK, US, Dubai e-Visa, and Asian tourist visas with industry-leading approval rates.',
-                      style: AppTextStyles.bodyLG.copyWith(
-                        color: AppColors.textOnDarkMuted,
+                    const SizedBox(height: 14),
+
+                    // Subtitle explaining Travella helps customers with applications and requirements
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 820),
+                      child: Text(
+                        isArabic
+                            ? 'تساعد ترافيلا عملاءها في استخراج كافة تأشيرات السفر حول العالم، تجهيز المتطلبات والمستندات، حجز مواعيد المقابلات والبصمات، مع توفير استشارات متخصصة لضمان أعلى نسب قبول.'
+                            : 'Travella helps customers with visa applications, consular requirements, embassy appointment scheduling, and end-to-end documentation with industry-leading approval rates.',
+                        style: AppTextStyles.bodyLG.copyWith(
+                          color: AppColors.textOnDarkMuted,
+                          height: 1.6,
+                        ),
                       ),
+                    ),
+                    const SizedBox(height: 28),
+
+                    // CTA: Apply for a Visa
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 12,
+                      children: [
+                        TravellaButton(
+                          label: isArabic ? 'التقديم على تأشيرة' : 'Apply for a Visa',
+                          variant: TravellaButtonVariant.gold,
+                          size: TravellaButtonSize.lg,
+                          leadingIcon: Icons.send_rounded,
+                          onPressed: _openQuickApplyHero,
+                        ),
+                        TravellaButton(
+                          label: isArabic ? 'استكشاف متطلبات الدول' : 'Explore Destinations',
+                          variant: TravellaButtonVariant.outline,
+                          size: TravellaButtonSize.lg,
+                          onPressed: () {
+                            // Scroll down smoothly
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -193,17 +263,32 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
             ),
           ),
 
-          // ── Search & Region Filter ───────────────────────────────────────
+          // ── 3. Visa Search & Multi-Filter Bar ──────────────────────────────
           SliverToBoxAdapter(
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 20),
+              padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 24),
               decoration: const BoxDecoration(
                 color: AppColors.white,
                 border: Border(bottom: BorderSide(color: AppColors.borderLight)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x0A000000),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
               child: MaxWidthContainer(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text(
+                      isArabic ? 'بحث وتصفية التأشيرات' : 'Search & Filter Visa Services',
+                      style: AppTextStyles.labelLG.copyWith(fontWeight: FontWeight.bold, color: AppColors.navyDark),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Main Search Input (Destination Country)
                     TextField(
                       controller: _searchCtrl,
                       onChanged: (val) {
@@ -212,8 +297,8 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
                       },
                       decoration: InputDecoration(
                         hintText: isArabic
-                            ? 'ابحث عن تأشيرة باسم الدولة أو نوع التأشيرة...'
-                            : 'Search visa by destination country or type...',
+                            ? 'ابحث باسم دولة الوجهة (مثل: المملكة المتحدة، إسبانيا، اليابان)...'
+                            : 'Search destination country (e.g. United Kingdom, Japan, Schengen)...',
                         prefixIcon: const Icon(Icons.search, color: AppColors.royalBlue),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
@@ -227,7 +312,7 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
                             : null,
                         filled: true,
                         fillColor: AppColors.surfaceLight,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(color: AppColors.borderLight),
@@ -238,14 +323,80 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 16),
+
+                    // 4 Filter Selectors: Destination Region, Visa Type, Travel Purpose, Processing Time
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        // Visa Type Filter
+                        _buildFilterDropdown(
+                          label: isArabic ? 'نوع التأشيرة' : 'Visa Type',
+                          value: _selectedVisaType,
+                          items: _visaTypes,
+                          onChanged: (val) {
+                            setState(() => _selectedVisaType = val!);
+                            _applyFilters();
+                          },
+                        ),
+
+                        // Travel Purpose Filter
+                        _buildFilterDropdown(
+                          label: isArabic ? 'الغرض من السفر' : 'Travel Purpose',
+                          value: _selectedTravelPurpose,
+                          items: _purposes,
+                          onChanged: (val) {
+                            setState(() => _selectedTravelPurpose = val!);
+                            _applyFilters();
+                          },
+                        ),
+
+                        // Processing Time Filter
+                        _buildFilterDropdown(
+                          label: isArabic ? 'مدة المعالجة' : 'Processing Time',
+                          value: _selectedProcessingTime,
+                          items: _processingTimes,
+                          onChanged: (val) {
+                            setState(() => _selectedProcessingTime = val!);
+                            _applyFilters();
+                          },
+                        ),
+
+                        // Reset Button
+                        if (_selectedVisaType != 'All' || _selectedTravelPurpose != 'All' || _selectedProcessingTime != 'All' || _selectedRegion != 'All' || _searchQuery.isNotEmpty)
+                          TextButton.icon(
+                            icon: const Icon(Icons.restart_alt_rounded, size: 16, color: AppColors.errorRed),
+                            label: Text(
+                              isArabic ? 'إعادة ضبط' : 'Reset Filters',
+                              style: const TextStyle(color: AppColors.errorRed, fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              setState(() {
+                                _searchQuery = '';
+                                _selectedVisaType = 'All';
+                                _selectedTravelPurpose = 'All';
+                                _selectedProcessingTime = 'All';
+                                _selectedRegion = 'All';
+                              });
+                              _applyFilters();
+                            },
+                          ),
+                      ],
+                    ),
+
                     const SizedBox(height: 14),
+
+                    // Region Quick Filter Chips
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: _regions.map((reg) {
                           final isSel = _selectedRegion == reg;
                           return Padding(
-                            padding: const EdgeInsets.only(right: 10),
+                            padding: const EdgeInsets.only(right: 8),
                             child: FilterChip(
                               label: Text(reg),
                               selected: isSel,
@@ -258,6 +409,7 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
                               labelStyle: TextStyle(
                                 color: isSel ? AppColors.white : AppColors.navyDark,
                                 fontWeight: isSel ? FontWeight.bold : FontWeight.w500,
+                                fontSize: 12,
                               ),
                               backgroundColor: AppColors.surfaceLight,
                               shape: RoundedRectangleBorder(
@@ -277,12 +429,51 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
             ),
           ),
 
-          // ── Content ───────────────────────────────────────────────────────
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 40),
-            sliver: SliverToBoxAdapter(
+          // ── 2. Popular Visa Destinations (Dynamic from Supabase) ───────────
+          SliverToBoxAdapter(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 36),
               child: MaxWidthContainer(
-                child: _buildContent(columns, isMobile, isArabic),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isArabic ? 'أشهر وجهات التأشيرات المطلوبة' : 'Popular Visa Destinations',
+                              style: AppTextStyles.h3.copyWith(color: AppColors.navyDark, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              isArabic
+                                  ? 'تأشيرات سياحية وتجارية معتمدة مع أعلى نسب قبول'
+                                  : 'Verified tourist & business visa services from Supabase',
+                              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                        if (!isMobile)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: AppColors.royalBlueFaded,
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: Text(
+                              '${_filteredVisaServices.length} Destinaitons',
+                              style: const TextStyle(color: AppColors.royalBlue, fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    _buildContent(columns, isMobile, isArabic),
+                  ],
+                ),
               ),
             ),
           ),
@@ -290,6 +481,37 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
           // ── Footer ────────────────────────────────────────────────────────
           const SliverToBoxAdapter(
             child: AppFooter(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterDropdown({
+    required String label,
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('$label: ', style: const TextStyle(fontSize: 12, color: AppColors.gray600)),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: value,
+              isDense: true,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.navyDark),
+              items: items.map((i) => DropdownMenuItem(value: i, child: Text(i))).toList(),
+              onChanged: onChanged,
+            ),
           ),
         ],
       ),
@@ -307,7 +529,7 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
               const CircularProgressIndicator(color: AppColors.royalBlue),
               const SizedBox(height: 16),
               Text(
-                isArabic ? 'جاري تحميل خدمات التأشيرات...' : 'Loading visa services from Supabase...',
+                isArabic ? 'جاري تحميل خدمات التأشيرات...' : 'Loading visa destinations from Supabase...',
                 style: const TextStyle(color: AppColors.textSecondary),
               ),
             ],
@@ -369,6 +591,9 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
                   _searchCtrl.clear();
                   setState(() {
                     _searchQuery = '';
+                    _selectedVisaType = 'All';
+                    _selectedTravelPurpose = 'All';
+                    _selectedProcessingTime = 'All';
                     _selectedRegion = 'All';
                   });
                   _applyFilters();
@@ -385,7 +610,7 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: columns,
-        mainAxisExtent: isMobile ? 500 : 510,
+        mainAxisExtent: isMobile ? 480 : 490,
         crossAxisSpacing: 24,
         mainAxisSpacing: 24,
       ),
@@ -394,9 +619,12 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
         final service = _filteredVisaServices[i];
         return ScaleInOnScroll(
           delay: Duration(milliseconds: (i % 3) * 60),
-          child: _VisaServiceCard(
+          child: VisaDestinationCard(
             service: service,
-            onApply: () => _showApplyModal(service),
+            onApply: () => _openApplicationFlow(service),
+            onViewDetails: () {
+              context.go('/visa-services/${service.id}');
+            },
           ),
         );
       },
@@ -404,20 +632,24 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
   }
 }
 
-class _VisaServiceCard extends StatefulWidget {
+/// Dynamic Destination Card displaying: Country flag/image, Country name, Visa types, Starting price, Processing time, View Details, Apply Now
+class VisaDestinationCard extends StatefulWidget {
   final VisaServiceModel service;
   final VoidCallback onApply;
+  final VoidCallback onViewDetails;
 
-  const _VisaServiceCard({
+  const VisaDestinationCard({
+    super.key,
     required this.service,
     required this.onApply,
+    required this.onViewDetails,
   });
 
   @override
-  State<_VisaServiceCard> createState() => _VisaServiceCardState();
+  State<VisaDestinationCard> createState() => _VisaDestinationCardState();
 }
 
-class _VisaServiceCardState extends State<_VisaServiceCard> {
+class _VisaDestinationCardState extends State<VisaDestinationCard> {
   bool _isHovered = false;
 
   @override
@@ -451,45 +683,56 @@ class _VisaServiceCardState extends State<_VisaServiceCard> {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(22),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with flag & fee
+              // Header with flag/image & price
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 52,
+                    height: 52,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: AppColors.royalBlueFaded,
                       borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.royalBlue.withValues(alpha: 0.2)),
                     ),
-                    child: Text(s.flagEmoji, style: const TextStyle(fontSize: 24)),
+                    child: Text(s.flagEmoji, style: const TextStyle(fontSize: 26)),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.gold.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.gold),
-                    ),
-                    child: Text(
-                      isArabic ? 'الرسوم \$${s.price.toInt()}' : 'Fee \$${s.price.toInt()}',
-                      style: const TextStyle(
-                        color: AppColors.goldDark,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
+                  if (s.price > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.gold.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.gold),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            isArabic ? 'يبدأ من' : 'Starting at',
+                            style: const TextStyle(fontSize: 9, color: AppColors.goldDark),
+                          ),
+                          Text(
+                            '\$${s.price.toInt()}',
+                            style: const TextStyle(
+                              color: AppColors.goldDark,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
                 ],
               ),
               const SizedBox(height: 16),
 
-              // Country & Visa Type
+              // Country Name & Visa Type
               Text(
                 countryName,
                 style: AppTextStyles.h4.copyWith(color: AppColors.navyDark),
@@ -499,7 +742,7 @@ class _VisaServiceCardState extends State<_VisaServiceCard> {
               const SizedBox(height: 4),
               Text(
                 s.visaType,
-                style: AppTextStyles.labelMD.copyWith(color: AppColors.royalBlue),
+                style: AppTextStyles.labelMD.copyWith(color: AppColors.royalBlue, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 10),
 
@@ -518,9 +761,9 @@ class _VisaServiceCardState extends State<_VisaServiceCard> {
               const Divider(color: AppColors.borderLight),
               const SizedBox(height: 10),
 
-              // Requirements checklist
+              // Key Requirements
               Text(
-                isArabic ? 'المستندات المطلوبة:' : 'Key Requirements:',
+                isArabic ? 'المستندات والمتطلبات:' : 'Key Requirements:',
                 style: AppTextStyles.labelSM.copyWith(
                   color: AppColors.navyDark,
                   fontWeight: FontWeight.bold,
@@ -563,374 +806,48 @@ class _VisaServiceCardState extends State<_VisaServiceCard> {
                       ),
               ),
 
-              const SizedBox(height: 16),
-              TravellaButton(
-                label: isArabic ? 'طلب التأشيرة والاستشارة' : 'Apply & Consultation',
-                variant: _isHovered ? TravellaButtonVariant.gold : TravellaButtonVariant.primary,
-                fullWidth: true,
-                onPressed: widget.onApply,
+              const SizedBox(height: 14),
+
+              // Card Actions: View Details & Apply Now
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.royalBlue),
+                        foregroundColor: AppColors.royalBlue,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: widget.onViewDetails,
+                      child: Text(
+                        isArabic ? 'التفاصيل' : 'View Details',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _isHovered ? AppColors.gold : AppColors.navy,
+                        foregroundColor: _isHovered ? AppColors.navy : AppColors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: widget.onApply,
+                      child: Text(
+                        isArabic ? 'قدّم الآن' : 'Apply Now',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Complete Visa Consultation & Application Modal connected to Supabase
-class _VisaApplicationModal extends StatefulWidget {
-  final VisaServiceModel service;
-  final int initialApplicants;
-
-  const _VisaApplicationModal({
-    required this.service,
-    required this.initialApplicants,
-  });
-
-  @override
-  State<_VisaApplicationModal> createState() => _VisaApplicationModalState();
-}
-
-class _VisaApplicationModalState extends State<_VisaApplicationModal> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _phoneCtrl = TextEditingController();
-  final _passportCtrl = TextEditingController();
-  final _notesCtrl = TextEditingController();
-
-  late int _applicants;
-  late DateTime _travelDate;
-  bool _isSubmitting = false;
-  String? _submittedRef;
-
-  final DateFormat _dateFormat = DateFormat('dd MMM yyyy');
-
-  @override
-  void initState() {
-    super.initState();
-    _applicants = widget.initialApplicants.clamp(1, 10);
-    _travelDate = DateTime.now().add(const Duration(days: 30));
-  }
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _emailCtrl.dispose();
-    _phoneCtrl.dispose();
-    _passportCtrl.dispose();
-    _notesCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submitVisaRequest() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isSubmitting = true);
-
-    final totalFee = widget.service.price * _applicants;
-    final structuredNotes = StringBuffer()
-      ..writeln('=== VISA CONSULTATION & APPLICATION REQUEST ===')
-      ..writeln('Country: ${widget.service.country}')
-      ..writeln('Visa Type: ${widget.service.visaType}')
-      ..writeln('Number of Applicants: $_applicants')
-      ..writeln('Planned Travel Date: ${_dateFormat.format(_travelDate)}')
-      ..writeln('Processing Time: ${widget.service.processingTime}')
-      ..writeln('Estimated Fees: \$${totalFee.toInt()}');
-
-    if (_passportCtrl.text.trim().isNotEmpty) {
-      structuredNotes.writeln('Passport / Nationality: ${_passportCtrl.text.trim()}');
-    }
-    if (_notesCtrl.text.trim().isNotEmpty) {
-      structuredNotes.writeln('Additional Notes: ${_notesCtrl.text.trim()}');
-    }
-
-    final bookingCubit = context.read<BookingCubit>();
-    final success = await bookingCubit.submitBooking(
-      customerName: _nameCtrl.text.trim(),
-      email: _emailCtrl.text.trim(),
-      phone: _phoneCtrl.text.trim(),
-      travelDate: _travelDate,
-      travelers: _applicants,
-      notes: structuredNotes.toString(),
-    );
-
-    if (mounted) {
-      setState(() {
-        _isSubmitting = false;
-        if (success) {
-          final state = bookingCubit.state;
-          if (state is BookingSubmittedSuccess) {
-            _submittedRef = state.booking.bookingReference;
-          } else {
-            _submittedRef = 'VS-${DateTime.now().millisecondsSinceEpoch.toRadixString(16).toUpperCase()}';
-          }
-        }
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isArabic = context.isArabic;
-    final s = widget.service;
-
-    if (_submittedRef != null) {
-      return AlertDialog(
-        backgroundColor: AppColors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 56),
-            const SizedBox(height: 16),
-            Text(
-              isArabic ? 'تم إرسال طلب التأشيرة بنجاح' : 'Visa Application Request Submitted!',
-              style: AppTextStyles.h4.copyWith(color: AppColors.navyDark),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isArabic ? 'رقم الطلب المرجعي:' : 'Your visa application reference number:',
-              style: const TextStyle(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.gold),
-              ),
-              child: Text(
-                _submittedRef!,
-                style: AppTextStyles.labelLG.copyWith(
-                  color: AppColors.royalBlueDark,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              isArabic
-                  ? 'تم استلام طلبك بنجاح، وسيقوم مستشار التأشيرات بالتواصل مع حضرتك لمراجعة المستندات واستكمال الإجراءات.'
-                  : 'Your request has been received. A dedicated visa specialist will contact you shortly to review your documents and proceed with the application.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-            ),
-          ],
-        ),
-        actions: [
-          TravellaButton(
-            label: isArabic ? 'إغلاق' : 'Close',
-            variant: TravellaButtonVariant.primary,
-            fullWidth: true,
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      );
-    }
-
-    return AlertDialog(
-      backgroundColor: AppColors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Row(
-        children: [
-          Text(s.flagEmoji, style: const TextStyle(fontSize: 26)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isArabic ? 'التقديم على تأشيرة ${s.localizedCountry(isArabic)}' : 'Apply for ${s.country} Visa',
-                  style: AppTextStyles.h5.copyWith(color: AppColors.navyDark),
-                ),
-                Text(
-                  '${s.visaType} • ${s.processingTime} • \$${s.price.toInt()}/person',
-                  style: AppTextStyles.bodySM.copyWith(color: AppColors.textSecondary, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close_rounded),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-      content: SizedBox(
-        width: 480,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Applicant & Date row
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceLight,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.borderLight),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(isArabic ? 'عدد المتقدمين' : 'Applicants', style: const TextStyle(fontSize: 11, color: AppColors.textLightMuted)),
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove_circle_outline, size: 18),
-                                onPressed: _applicants > 1 ? () => setState(() => _applicants--) : null,
-                              ),
-                              Text('$_applicants', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                              IconButton(
-                                icon: const Icon(Icons.add_circle_outline, size: 18),
-                                onPressed: _applicants < 10 ? () => setState(() => _applicants++) : null,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(isArabic ? 'تاريخ السفر المخطط' : 'Planned Travel Date', style: const TextStyle(fontSize: 11, color: AppColors.textLightMuted)),
-                          InkWell(
-                            onTap: () async {
-                              final picked = await showDatePicker(
-                                context: context,
-                                initialDate: _travelDate,
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime.now().add(const Duration(days: 365)),
-                              );
-                              if (picked != null) {
-                                setState(() => _travelDate = picked);
-                              }
-                            },
-                            child: Row(
-                              children: [
-                                const Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.royalBlue),
-                                const SizedBox(width: 4),
-                                Text(_dateFormat.format(_travelDate), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Name
-                TextFormField(
-                  controller: _nameCtrl,
-                  decoration: InputDecoration(
-                    labelText: isArabic ? 'الاسم الكامل بالإنجليزية *' : 'Full Name (as in Passport) *',
-                    prefixIcon: const Icon(Icons.person_outline_rounded),
-                    filled: true,
-                    fillColor: AppColors.surfaceLight,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  validator: (v) => v == null || v.trim().isEmpty
-                      ? (isArabic ? 'الاسم مطلوب' : 'Full name is required')
-                      : null,
-                ),
-                const SizedBox(height: 12),
-
-                // Email & Phone
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _emailCtrl,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: isArabic ? 'البريد *' : 'Email *',
-                          prefixIcon: const Icon(Icons.email_outlined),
-                          filled: true,
-                          fillColor: AppColors.surfaceLight,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        validator: (v) => v == null || !v.contains('@')
-                            ? (isArabic ? 'بريد غير صالح' : 'Valid email required')
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _phoneCtrl,
-                        keyboardType: TextInputType.phone,
-                        decoration: InputDecoration(
-                          labelText: isArabic ? 'الهاتف / واتساب *' : 'Phone / WhatsApp *',
-                          prefixIcon: const Icon(Icons.phone_outlined),
-                          filled: true,
-                          fillColor: AppColors.surfaceLight,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        validator: (v) => v == null || v.trim().length < 7
-                            ? (isArabic ? 'هاتف غير صالح' : 'Valid phone required')
-                            : null,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Passport / Nationality
-                TextFormField(
-                  controller: _passportCtrl,
-                  decoration: InputDecoration(
-                    labelText: isArabic ? 'الجنسية / دولة إصدار الجواز' : 'Nationality / Passport Issuing Country',
-                    prefixIcon: const Icon(Icons.flag_outlined),
-                    filled: true,
-                    fillColor: AppColors.surfaceLight,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Notes
-                TextFormField(
-                  controller: _notesCtrl,
-                  maxLines: 2,
-                  decoration: InputDecoration(
-                    labelText: isArabic ? 'ملاحظات إضافية' : 'Additional Notes / Previous Visa History',
-                    hintText: isArabic
-                        ? 'مثال: موعد مستعجل، تم الحصول على تأشيرة سابقة...'
-                        : 'e.g. Urgent appointment required, held previous Schengen/US visa...',
-                    filled: true,
-                    fillColor: AppColors.surfaceLight,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(isArabic ? 'إلغاء' : 'Cancel', style: const TextStyle(color: AppColors.gray600)),
-        ),
-        TravellaButton(
-          label: isArabic ? 'إرسال طلب التأشيرة' : 'Submit Visa Request',
-          variant: TravellaButtonVariant.gold,
-          isLoading: _isSubmitting,
-          onPressed: _submitVisaRequest,
-        ),
-      ],
     );
   }
 }

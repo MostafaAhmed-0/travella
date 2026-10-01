@@ -49,6 +49,8 @@ class AppConstants {
   static const String partnerLogosBucket = 'partner-logos';
   static const String partnersBucket = 'partner-logos';
 
+  static const String visaDocumentsBucket = 'visa-documents';
+
   // Pagination
   static const int defaultPageSize = 12;
   static const int searchDebounceMs = 400;

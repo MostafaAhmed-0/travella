@@ -53,4 +53,20 @@ class VisaRepository {
 
   Future<void> deleteVisaService(String id) =>
       _remoteDataSource.deleteVisaService(id);
+
+  // ── Visa Applications ──────────────────────────────────────────────────────
+  Future<List<VisaApplicationModel>> getVisaApplications({String? userId, String? status}) =>
+      _remoteDataSource.getVisaApplications(userId: userId, status: status);
+
+  Future<VisaApplicationModel?> getVisaApplicationById(String id) =>
+      _remoteDataSource.getVisaApplicationById(id);
+
+  Future<VisaApplicationModel> submitVisaApplication(VisaApplicationModel application) =>
+      _remoteDataSource.createVisaApplication(application);
+
+  Future<VisaApplicationModel> updateVisaApplicationStatus(String id, String status, {String? adminNotes}) =>
+      _remoteDataSource.updateVisaApplicationStatus(id, status, adminNotes: adminNotes);
+
+  Future<void> deleteVisaApplication(String id) =>
+      _remoteDataSource.deleteVisaApplication(id);
 }

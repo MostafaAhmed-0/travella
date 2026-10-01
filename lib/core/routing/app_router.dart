@@ -25,6 +25,7 @@ import '../../features/destinations/presentation/pages/destinations_page.dart';
 import '../../features/domestic_tours/presentation/pages/domestic_tours_page.dart';
 import '../../features/international_tours/presentation/pages/international_tours_page.dart';
 import '../../features/visa_services/presentation/pages/visa_services_page.dart';
+import '../../features/visa_services/presentation/pages/visa_details_page.dart';
 import '../../features/flights/presentation/pages/flights_page.dart';
 import '../../features/flights/data/models/flight_models.dart';
 import '../../features/hotels/presentation/pages/hotels_page.dart';
@@ -116,6 +117,19 @@ class AppRouter {
               initialApplicants: int.tryParse(state.uri.queryParameters['applicants'] ?? ''),
             ),
           ),
+          routes: [
+            GoRoute(
+              path: ':id',
+              name: AppRoutes.visaDetailsName,
+              pageBuilder: (context, state) {
+                final id = state.pathParameters['id'] ?? '';
+                return buildPageTransition(
+                  key: state.pageKey,
+                  child: VisaDetailsPage(visaId: id),
+                );
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: AppRoutes.flights,

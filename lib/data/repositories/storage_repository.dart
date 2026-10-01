@@ -10,6 +10,7 @@ abstract class StorageRepository {
   Future<String> uploadGalleryImage(Uint8List bytes, String filename);
   Future<String> uploadBlogImage(Uint8List bytes, String filename);
   Future<String> uploadPartnerLogo(Uint8List bytes, String filename);
+  Future<String> uploadVisaDocument(Uint8List bytes, String filename, {String? userId});
   Future<void> deleteFile(String bucket, String path);
 }
 
@@ -19,9 +20,12 @@ class StorageRepositoryImpl implements StorageRepository {
   StorageRepositoryImpl({StorageRemoteDataSource? remoteDataSource})
     : _remoteDataSource = remoteDataSource ?? StorageRemoteDataSourceImpl();
 
-  String _sanitizePath(String filename) {
+  String _sanitizePath(String filename, {String? prefix}) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final clean = filename.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+    if (prefix != null && prefix.isNotEmpty) {
+      return '$prefix/$timestamp-$clean';
+    }
     return '$timestamp-$clean';
   }
 
@@ -75,6 +79,15 @@ class StorageRepositoryImpl implements StorageRepository {
     return _remoteDataSource.uploadBytes(
       bucket: AppConstants.partnerLogosBucket,
       path: _sanitizePath(filename),
+      bytes: bytes,
+    );
+  }
+
+  @override
+  Future<String> uploadVisaDocument(Uint8List bytes, String filename, {String? userId}) {
+    return _remoteDataSource.uploadBytes(
+      bucket: AppConstants.visaDocumentsBucket,
+      path: _sanitizePath(filename, prefix: userId ?? 'guest'),
       bytes: bytes,
     );
   }

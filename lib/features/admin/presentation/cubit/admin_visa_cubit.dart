@@ -13,6 +13,13 @@ class AdminVisaState extends Equatable {
   final String searchQuery;
   final bool? filterActive;
 
+  // Visa Applications
+  final List<VisaApplicationModel> allApplications;
+  final List<VisaApplicationModel> filteredApplications;
+  final String applicationSearchQuery;
+  final String selectedStatusFilter; // 'All', 'pending', 'under_review', 'missing_documents', 'approved', 'rejected', 'completed'
+  final int selectedTab; // 0 = Services, 1 = Applications
+
   const AdminVisaState({
     this.isLoading = false,
     this.isSaving = false,
@@ -22,6 +29,11 @@ class AdminVisaState extends Equatable {
     this.filteredServices = const [],
     this.searchQuery = '',
     this.filterActive,
+    this.allApplications = const [],
+    this.filteredApplications = const [],
+    this.applicationSearchQuery = '',
+    this.selectedStatusFilter = 'All',
+    this.selectedTab = 0,
   });
 
   AdminVisaState copyWith({
@@ -33,6 +45,11 @@ class AdminVisaState extends Equatable {
     List<VisaServiceModel>? filteredServices,
     String? searchQuery,
     bool? filterActive,
+    List<VisaApplicationModel>? allApplications,
+    List<VisaApplicationModel>? filteredApplications,
+    String? applicationSearchQuery,
+    String? selectedStatusFilter,
+    int? selectedTab,
     bool clearError = false,
     bool clearSuccess = false,
   }) {
@@ -45,6 +62,11 @@ class AdminVisaState extends Equatable {
       filteredServices: filteredServices ?? this.filteredServices,
       searchQuery: searchQuery ?? this.searchQuery,
       filterActive: filterActive ?? this.filterActive,
+      allApplications: allApplications ?? this.allApplications,
+      filteredApplications: filteredApplications ?? this.filteredApplications,
+      applicationSearchQuery: applicationSearchQuery ?? this.applicationSearchQuery,
+      selectedStatusFilter: selectedStatusFilter ?? this.selectedStatusFilter,
+      selectedTab: selectedTab ?? this.selectedTab,
     );
   }
 
@@ -58,6 +80,11 @@ class AdminVisaState extends Equatable {
         filteredServices,
         searchQuery,
         filterActive,
+        allApplications,
+        filteredApplications,
+        applicationSearchQuery,
+        selectedStatusFilter,
+        selectedTab,
       ];
 }
 
@@ -68,22 +95,38 @@ class AdminVisaCubit extends Cubit<AdminVisaState> {
       : _visaRepository = visaRepository,
         super(const AdminVisaState());
 
-  Future<void> loadVisaServices() async {
+  Future<void> loadVisaData() async {
     emit(state.copyWith(isLoading: true, clearError: true, clearSuccess: true));
     try {
-      final list = await _visaRepository.getAllCountries();
-      final filtered = _applyFilters(list, state.searchQuery, state.filterActive);
+      final servicesFuture = _visaRepository.getAllCountries();
+      final applicationsFuture = _visaRepository.getVisaApplications();
+
+      final results = await Future.wait([servicesFuture, applicationsFuture]);
+      final services = results[0] as List<VisaServiceModel>;
+      final applications = results[1] as List<VisaApplicationModel>;
+
+      final filteredServices = _applyFilters(services, state.searchQuery, state.filterActive);
+      final filteredApplications = _applyAppFilters(applications, state.applicationSearchQuery, state.selectedStatusFilter);
+
       emit(state.copyWith(
         isLoading: false,
-        allServices: list,
-        filteredServices: filtered,
+        allServices: services,
+        filteredServices: filteredServices,
+        allApplications: applications,
+        filteredApplications: filteredApplications,
       ));
     } catch (e) {
       emit(state.copyWith(
         isLoading: false,
-        errorMessage: 'Failed to load visa services: ${e.toString().replaceAll('Exception: ', '')}',
+        errorMessage: 'Failed to load visa data: ${e.toString().replaceAll('Exception: ', '')}',
       ));
     }
+  }
+
+  Future<void> loadVisaServices() => loadVisaData();
+
+  void setTab(int tabIndex) {
+    emit(state.copyWith(selectedTab: tabIndex));
   }
 
   void searchVisa(String query) {
@@ -94,6 +137,64 @@ class AdminVisaCubit extends Cubit<AdminVisaState> {
   void filterByActive(bool? active) {
     final filtered = _applyFilters(state.allServices, state.searchQuery, active);
     emit(state.copyWith(filterActive: active, filteredServices: filtered));
+  }
+
+  void searchApplications(String query) {
+    final filtered = _applyAppFilters(state.allApplications, query, state.selectedStatusFilter);
+    emit(state.copyWith(applicationSearchQuery: query, filteredApplications: filtered));
+  }
+
+  void filterApplicationsByStatus(String status) {
+    final filtered = _applyAppFilters(state.allApplications, state.applicationSearchQuery, status);
+    emit(state.copyWith(selectedStatusFilter: status, filteredApplications: filtered));
+  }
+
+  Future<bool> updateApplicationStatus(String applicationId, String newStatus, {String? adminNotes}) async {
+    emit(state.copyWith(isSaving: true, clearError: true, clearSuccess: true));
+    try {
+      final updated = await _visaRepository.updateVisaApplicationStatus(
+        applicationId,
+        newStatus,
+        adminNotes: adminNotes,
+      );
+      final updatedList = state.allApplications.map((a) => a.id == updated.id ? updated : a).toList();
+      final filtered = _applyAppFilters(updatedList, state.applicationSearchQuery, state.selectedStatusFilter);
+      emit(state.copyWith(
+        isSaving: false,
+        allApplications: updatedList,
+        filteredApplications: filtered,
+        successMessage: 'Application ${updated.referenceNumber} status updated to "$newStatus".',
+      ));
+      return true;
+    } catch (e) {
+      emit(state.copyWith(
+        isSaving: false,
+        errorMessage: 'Failed to update application status: ${e.toString().replaceAll('Exception: ', '')}',
+      ));
+      return false;
+    }
+  }
+
+  Future<bool> deleteApplication(String id) async {
+    emit(state.copyWith(isSaving: true, clearError: true, clearSuccess: true));
+    try {
+      await _visaRepository.deleteVisaApplication(id);
+      final updatedList = state.allApplications.where((a) => a.id != id).toList();
+      final filtered = _applyAppFilters(updatedList, state.applicationSearchQuery, state.selectedStatusFilter);
+      emit(state.copyWith(
+        isSaving: false,
+        allApplications: updatedList,
+        filteredApplications: filtered,
+        successMessage: 'Visa application deleted successfully.',
+      ));
+      return true;
+    } catch (e) {
+      emit(state.copyWith(
+        isSaving: false,
+        errorMessage: 'Failed to delete visa application: ${e.toString().replaceAll('Exception: ', '')}',
+      ));
+      return false;
+    }
   }
 
   Future<bool> createVisaService(VisaServiceModel service) async {
@@ -187,6 +288,28 @@ class AdminVisaCubit extends Cubit<AdminVisaState> {
         if (!matchCountry && !matchCountryAr && !matchType) return false;
       }
       if (active != null && item.active != active) return false;
+      return true;
+    }).toList();
+  }
+
+  List<VisaApplicationModel> _applyAppFilters(
+    List<VisaApplicationModel> list,
+    String query,
+    String status,
+  ) {
+    return list.where((item) {
+      if (status != 'All' && item.status.toLowerCase() != status.toLowerCase()) {
+        return false;
+      }
+      if (query.isNotEmpty) {
+        final q = query.toLowerCase();
+        final matchRef = item.referenceNumber.toLowerCase().contains(q);
+        final matchName = item.fullName.toLowerCase().contains(q);
+        final matchEmail = item.email.toLowerCase().contains(q);
+        final matchCountry = item.country.toLowerCase().contains(q);
+        final matchPassport = item.passportNumber.toLowerCase().contains(q);
+        if (!matchRef && !matchName && !matchEmail && !matchCountry && !matchPassport) return false;
+      }
       return true;
     }).toList();
   }

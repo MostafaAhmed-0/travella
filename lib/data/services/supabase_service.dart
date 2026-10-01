@@ -76,6 +76,7 @@ class SupabaseService {
   static const String tableHotels = 'hotels';
   static const String tableVisaServices = 'visa_services';
   static const String tableVisaRequirements = 'visa_requirements';
+  static const String tableVisaApplications = 'visa_applications';
   static const String tableBookings = 'bookings';
   static const String tableGallery = 'gallery';
   static const String tableBlogs = 'blogs';
