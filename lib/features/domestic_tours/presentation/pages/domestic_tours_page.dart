@@ -12,7 +12,8 @@ import '../../../../shared/presentation/widgets/app_navbar.dart';
 import '../../../../shared/presentation/widgets/app_footer.dart';
 
 class DomesticToursPage extends StatefulWidget {
-  const DomesticToursPage({super.key});
+  final String? initialDestination;
+  const DomesticToursPage({super.key, this.initialDestination});
 
   @override
   State<DomesticToursPage> createState() => _DomesticToursPageState();
@@ -24,6 +25,7 @@ class _DomesticToursPageState extends State<DomesticToursPage> {
   List<TourModel> _filteredTours = [];
   bool _isLoading = true;
   String? _errorMessage;
+  late TextEditingController _searchCtrl;
   String _searchQuery = '';
   String _sortBy = 'Popularity';
 
@@ -37,7 +39,15 @@ class _DomesticToursPageState extends State<DomesticToursPage> {
   @override
   void initState() {
     super.initState();
+    _searchQuery = widget.initialDestination ?? '';
+    _searchCtrl = TextEditingController(text: _searchQuery);
     _loadTours();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _loadTours() async {
@@ -162,6 +172,7 @@ class _DomesticToursPageState extends State<DomesticToursPage> {
                     ? Column(
                         children: [
                           TextField(
+                            controller: _searchCtrl,
                             onChanged: (val) {
                               _searchQuery = val;
                               _applyFilters();
@@ -224,6 +235,7 @@ class _DomesticToursPageState extends State<DomesticToursPage> {
                         children: [
                           Expanded(
                             child: TextField(
+                              controller: _searchCtrl,
                               onChanged: (val) {
                                 _searchQuery = val;
                                 _applyFilters();

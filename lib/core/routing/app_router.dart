@@ -25,6 +25,7 @@ import '../../features/destinations/presentation/pages/destinations_page.dart';
 import '../../features/domestic_tours/presentation/pages/domestic_tours_page.dart';
 import '../../features/international_tours/presentation/pages/international_tours_page.dart';
 import '../../features/visa_services/presentation/pages/visa_services_page.dart';
+import '../../features/flights/presentation/pages/flight_inquiry_page.dart';
 import '../../features/hotels/presentation/pages/hotels_page.dart';
 import '../../features/hajj_umrah/presentation/pages/hajj_umrah_page.dart';
 import '../../features/gallery/presentation/pages/gallery_page.dart';
@@ -77,7 +78,10 @@ class AppRouter {
           name: AppRoutes.destinationsName,
           pageBuilder: (context, state) => buildPageTransition(
             key: state.pageKey,
-            child: const DestinationsPage(),
+            child: DestinationsPage(
+              initialQuery: state.uri.queryParameters['search'] ??
+                  state.uri.queryParameters['destination'],
+            ),
           ),
         ),
         GoRoute(
@@ -85,7 +89,9 @@ class AppRouter {
           name: AppRoutes.domesticToursName,
           pageBuilder: (context, state) => buildPageTransition(
             key: state.pageKey,
-            child: const DomesticToursPage(),
+            child: DomesticToursPage(
+              initialDestination: state.uri.queryParameters['destination'],
+            ),
           ),
         ),
         GoRoute(
@@ -93,7 +99,9 @@ class AppRouter {
           name: AppRoutes.internationalToursName,
           pageBuilder: (context, state) => buildPageTransition(
             key: state.pageKey,
-            child: const InternationalToursPage(),
+            child: InternationalToursPage(
+              initialDestination: state.uri.queryParameters['destination'],
+            ),
           ),
         ),
         GoRoute(
@@ -101,15 +109,39 @@ class AppRouter {
           name: AppRoutes.visaServicesName,
           pageBuilder: (context, state) => buildPageTransition(
             key: state.pageKey,
-            child: const VisaServicesPage(),
+            child: VisaServicesPage(
+              initialCountry: state.uri.queryParameters['country'],
+              initialVisaType: state.uri.queryParameters['visaType'],
+              initialApplicants: int.tryParse(state.uri.queryParameters['applicants'] ?? ''),
+            ),
           ),
+        ),
+        GoRoute(
+          path: AppRoutes.flightInquiry,
+          name: AppRoutes.flightInquiryName,
+          pageBuilder: (context, state) {
+            final flightData = state.extra is FlightInquiryData
+                ? state.extra as FlightInquiryData
+                : FlightInquiryData.fromUri(state.uri);
+            return buildPageTransition(
+              key: state.pageKey,
+              child: FlightInquiryPage(initialData: flightData),
+            );
+          },
         ),
         GoRoute(
           path: AppRoutes.hotels,
           name: AppRoutes.hotelsName,
           pageBuilder: (context, state) => buildPageTransition(
             key: state.pageKey,
-            child: const HotelsPage(),
+            child: HotelsPage(
+              initialDestination: state.uri.queryParameters['destination'],
+              checkIn: state.uri.queryParameters['checkIn'],
+              checkOut: state.uri.queryParameters['checkOut'],
+              adults: int.tryParse(state.uri.queryParameters['adults'] ?? ''),
+              children: int.tryParse(state.uri.queryParameters['children'] ?? ''),
+              rooms: int.tryParse(state.uri.queryParameters['rooms'] ?? ''),
+            ),
           ),
         ),
         GoRoute(
@@ -117,7 +149,10 @@ class AppRouter {
           name: AppRoutes.hajjUmrahName,
           pageBuilder: (context, state) => buildPageTransition(
             key: state.pageKey,
-            child: const HajjUmrahPage(),
+            child: HajjUmrahPage(
+              initialType: state.uri.queryParameters['category'] ??
+                  state.uri.queryParameters['type'],
+            ),
           ),
         ),
         GoRoute(

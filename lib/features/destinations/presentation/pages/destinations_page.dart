@@ -12,7 +12,8 @@ import '../../../../shared/presentation/widgets/app_navbar.dart';
 import '../../../../shared/presentation/widgets/app_footer.dart';
 
 class DestinationsPage extends StatefulWidget {
-  const DestinationsPage({super.key});
+  final String? initialQuery;
+  const DestinationsPage({super.key, this.initialQuery});
 
   @override
   State<DestinationsPage> createState() => _DestinationsPageState();
@@ -25,6 +26,7 @@ class _DestinationsPageState extends State<DestinationsPage> {
   bool _isLoading = true;
   String? _errorMessage;
   String _selectedCategory = 'All';
+  late TextEditingController _searchCtrl;
   String _searchQuery = '';
 
   final List<String> _categories = [
@@ -39,7 +41,15 @@ class _DestinationsPageState extends State<DestinationsPage> {
   @override
   void initState() {
     super.initState();
+    _searchQuery = widget.initialQuery ?? '';
+    _searchCtrl = TextEditingController(text: _searchQuery);
     _loadDestinations();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDestinations() async {
@@ -167,6 +177,7 @@ class _DestinationsPageState extends State<DestinationsPage> {
                       children: [
                         Expanded(
                           child: TextField(
+                            controller: _searchCtrl,
                             onChanged: (val) {
                               _searchQuery = val;
                               _applyFilters();

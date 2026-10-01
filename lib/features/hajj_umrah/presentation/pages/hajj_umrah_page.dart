@@ -12,7 +12,8 @@ import '../../../../shared/presentation/widgets/app_navbar.dart';
 import '../../../../shared/presentation/widgets/app_footer.dart';
 
 class HajjUmrahPage extends StatefulWidget {
-  const HajjUmrahPage({super.key});
+  final String? initialType;
+  const HajjUmrahPage({super.key, this.initialType});
 
   @override
   State<HajjUmrahPage> createState() => _HajjUmrahPageState();
@@ -35,6 +36,14 @@ class _HajjUmrahPageState extends State<HajjUmrahPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialType != null) {
+      final t = widget.initialType!.toLowerCase();
+      if (t.contains('hajj')) {
+        _selectedTab = 'Hajj Packages';
+      } else if (t.contains('umrah')) {
+        _selectedTab = 'Umrah Packages';
+      }
+    }
     _loadPilgrimages();
   }
 

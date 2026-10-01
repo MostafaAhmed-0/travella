@@ -12,7 +12,8 @@ import '../../../../shared/presentation/widgets/app_navbar.dart';
 import '../../../../shared/presentation/widgets/app_footer.dart';
 
 class InternationalToursPage extends StatefulWidget {
-  const InternationalToursPage({super.key});
+  final String? initialDestination;
+  const InternationalToursPage({super.key, this.initialDestination});
 
   @override
   State<InternationalToursPage> createState() => _InternationalToursPageState();
@@ -24,6 +25,7 @@ class _InternationalToursPageState extends State<InternationalToursPage> {
   List<TourModel> _filteredTours = [];
   bool _isLoading = true;
   String? _errorMessage;
+  late TextEditingController _searchCtrl;
   String _searchQuery = '';
   String _sortBy = 'Popularity';
 
@@ -37,7 +39,15 @@ class _InternationalToursPageState extends State<InternationalToursPage> {
   @override
   void initState() {
     super.initState();
+    _searchQuery = widget.initialDestination ?? '';
+    _searchCtrl = TextEditingController(text: _searchQuery);
     _loadTours();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _loadTours() async {
@@ -163,6 +173,7 @@ class _InternationalToursPageState extends State<InternationalToursPage> {
                     ? Column(
                         children: [
                           TextField(
+                            controller: _searchCtrl,
                             onChanged: (val) {
                               _searchQuery = val;
                               _applyFilters();
@@ -225,6 +236,7 @@ class _InternationalToursPageState extends State<InternationalToursPage> {
                         children: [
                           Expanded(
                             child: TextField(
+                              controller: _searchCtrl,
                               onChanged: (val) {
                                 _searchQuery = val;
                                 _applyFilters();

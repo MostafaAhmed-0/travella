@@ -192,7 +192,6 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   void _submitBooking() {
-    final tourTitle = _getSelectedTourTitle();
     final combinedNotes = _buildAggregatedNotes();
 
     context.read<BookingCubit>().submitBooking(
@@ -448,7 +447,6 @@ class _BookingPageState extends State<BookingPage> {
         children: steps.map((s) {
           final stepNum = s['num'] as int;
           final title = s['title'] as String;
-          final icon = s['icon'] as IconData;
           final isActive = _currentStep == stepNum;
           final isCompleted = _currentStep > stepNum;
 

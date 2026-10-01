@@ -21,6 +21,9 @@ class AppRoutes {
   static const String visaServices = '/visa-services';
   static const String visaServicesName = 'visa-services';
 
+  static const String flightInquiry = '/flight-inquiry';
+  static const String flightInquiryName = 'flight-inquiry';
+
   static const String hotels = '/hotels';
   static const String hotelsName = 'hotels';
 
