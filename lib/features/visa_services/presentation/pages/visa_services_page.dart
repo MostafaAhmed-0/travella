@@ -196,9 +196,9 @@ class _VisaServicesPageState extends State<VisaServicesPage> {
           // ── Search & Region Filter ───────────────────────────────────────
           SliverToBoxAdapter(
             child: Container(
-              color: AppColors.white,
               padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 20),
               decoration: const BoxDecoration(
+                color: AppColors.white,
                 border: Border(bottom: BorderSide(color: AppColors.borderLight)),
               ),
               child: MaxWidthContainer(

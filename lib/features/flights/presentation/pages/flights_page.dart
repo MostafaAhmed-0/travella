@@ -317,6 +317,7 @@ class _FlightsPageState extends State<_FlightsPageView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(
                     Icons.verified_user_rounded,
@@ -324,11 +325,13 @@ class _FlightsPageState extends State<_FlightsPageView> {
                     size: 24,
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    isArabic
-                        ? 'شراكات حصرية مع كبرى خطوط الطيران العالمية'
-                        : 'Official Airline Partnerships & Verified Scheduling',
-                    style: AppTextStyles.h4.copyWith(color: AppColors.navyDark),
+                  Expanded(
+                    child: Text(
+                      isArabic
+                          ? 'شراكات حصرية مع كبرى خطوط الطيران العالمية'
+                          : 'Official Airline Partnerships & Verified Scheduling',
+                      style: AppTextStyles.h4.copyWith(color: AppColors.navyDark),
+                    ),
                   ),
                 ],
               ),
@@ -401,15 +404,13 @@ class _FlightsPageState extends State<_FlightsPageView> {
     required String desc,
   }) {
     return Container(
-      constraints: const BoxConstraints(minWidth: 260),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderLight),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.all(10),
@@ -431,6 +432,8 @@ class _FlightsPageState extends State<_FlightsPageView> {
                     color: AppColors.navyDark,
                     fontWeight: FontWeight.w700,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   desc,
@@ -438,6 +441,8 @@ class _FlightsPageState extends State<_FlightsPageView> {
                     color: AppColors.textSecondary,
                     fontSize: 11,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -503,27 +508,34 @@ class _FlightsPageState extends State<_FlightsPageView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${r.$1} ➔ ${r.$2}',
-                      style: AppTextStyles.labelLG.copyWith(
-                        color: AppColors.navyDark,
-                        fontWeight: FontWeight.w700,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${r.$1} ➔ ${r.$2}',
+                        style: AppTextStyles.labelLG.copyWith(
+                          color: AppColors.navyDark,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${r.$3} • ${r.$4}',
-                      style: AppTextStyles.bodySM.copyWith(
-                        color: AppColors.textSecondary,
-                        fontSize: 11,
+                      const SizedBox(height: 4),
+                      Text(
+                        '${r.$3} • ${r.$4}',
+                        style: AppTextStyles.bodySM.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 const Icon(
                   Icons.arrow_forward_rounded,
                   color: AppColors.royalBlue,
@@ -788,7 +800,7 @@ class _FlightsPageState extends State<_FlightsPageView> {
 
   Widget _buildSummaryRow(String label, String value) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
@@ -797,11 +809,17 @@ class _FlightsPageState extends State<_FlightsPageView> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        Text(
-          value,
-          style: AppTextStyles.labelMD.copyWith(
-            color: AppColors.navyDark,
-            fontWeight: FontWeight.w700,
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: AppTextStyles.labelMD.copyWith(
+              color: AppColors.navyDark,
+              fontWeight: FontWeight.w700,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -926,28 +944,34 @@ class _FlightsPageState extends State<_FlightsPageView> {
       children: [
         // Results Subheader: Counts & Sorting
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${state.query.origin} ➔ ${state.query.destination}',
-                  style: AppTextStyles.h3.copyWith(
-                    color: AppColors.navyDark,
-                    fontSize: isMobile ? 18 : 22,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${state.query.origin} ➔ ${state.query.destination}',
+                    style: AppTextStyles.h3.copyWith(
+                      color: AppColors.navyDark,
+                      fontSize: isMobile ? 16 : 22,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${state.filteredOffers.length} ${isArabic ? 'رحلات متاحة' : 'verified airline itineraries'}',
-                  style: AppTextStyles.bodySM.copyWith(
-                    color: AppColors.textSecondary,
+                  const SizedBox(height: 4),
+                  Text(
+                    '${state.filteredOffers.length} ${isArabic ? 'رحلات متاحة' : 'verified airline itineraries'}',
+                    style: AppTextStyles.bodySM.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            const SizedBox(width: 8),
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 if (isMobile) ...[
                   IconButton.filledTonal(
@@ -1051,39 +1075,44 @@ class _FlightsPageState extends State<_FlightsPageView> {
 
                   // Custom Route Inquiry Box
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: AppColors.navyDark,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.gold.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.flight_takeoff_rounded,
-                            color: AppColors.gold,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
+                    child: isMobile
+                        ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                isArabic
-                                    ? 'تبحث عن رحلة خاصة أو خط طيران آخر؟'
-                                    : 'Need a Specific Airline or Custom Routing?',
-                                style: AppTextStyles.h4.copyWith(
-                                  color: AppColors.white,
-                                ),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.gold.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.flight_takeoff_rounded,
+                                      color: AppColors.gold,
+                                      size: 22,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      isArabic
+                                          ? 'تبحث عن رحلة خاصة أو خط طيران آخر؟'
+                                          : 'Need a Custom Route?',
+                                      style: AppTextStyles.h4.copyWith(
+                                        color: AppColors.white,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 10),
                               Text(
                                 isArabic
                                     ? 'أرسل طلبك لفريق المستشارين للبحث في كافة جداول الطيران العالمية وتزويدك بأفضل عرض.'
@@ -1092,22 +1121,68 @@ class _FlightsPageState extends State<_FlightsPageView> {
                                   color: AppColors.textOnDarkMuted,
                                 ),
                               ),
+                              const SizedBox(height: 14),
+                              TravellaButton(
+                                label: isArabic ? 'طلب استفسار خاص' : 'Custom Request',
+                                variant: TravellaButtonVariant.gold,
+                                fullWidth: true,
+                                onPressed: () => showFlightInquiryDialog(
+                                  context,
+                                  query: state.query,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.gold.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.flight_takeoff_rounded,
+                                  color: AppColors.gold,
+                                  size: 28,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      isArabic
+                                          ? 'تبحث عن رحلة خاصة أو خط طيران آخر؟'
+                                          : 'Need a Specific Airline or Custom Routing?',
+                                      style: AppTextStyles.h4.copyWith(
+                                        color: AppColors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      isArabic
+                                          ? 'أرسل طلبك لفريق المستشارين للبحث في كافة جداول الطيران العالمية وتزويدك بأفضل عرض.'
+                                          : 'Submit a custom flight request to our air travel desk for special charters, offline routes, or group fares.',
+                                      style: AppTextStyles.bodySM.copyWith(
+                                        color: AppColors.textOnDarkMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              TravellaButton(
+                                label: isArabic ? 'طلب استفسار خاص' : 'Custom Request',
+                                variant: TravellaButtonVariant.gold,
+                                onPressed: () => showFlightInquiryDialog(
+                                  context,
+                                  query: state.query,
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        TravellaButton(
-                          label: isArabic
-                              ? 'طلب استفسار خاص'
-                              : 'Custom Request',
-                          variant: TravellaButtonVariant.gold,
-                          onPressed: () => showFlightInquiryDialog(
-                            context,
-                            query: state.query,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ],
               ),

@@ -74,11 +74,15 @@ class _FlightResultCardState extends State<FlightResultCard> {
                       children: [
                         Row(
                           children: [
-                            Text(
-                              offer.airlineName,
-                              style: AppTextStyles.h4.copyWith(
-                                color: AppColors.navyDark,
-                                fontSize: widget.isMobile ? 16 : 18,
+                            Flexible(
+                              child: Text(
+                                offer.airlineName,
+                                style: AppTextStyles.h4.copyWith(
+                                  color: AppColors.navyDark,
+                                  fontSize: widget.isMobile ? 16 : 18,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -344,61 +348,76 @@ class _FlightResultCardState extends State<FlightResultCard> {
   }
 
   Widget _buildMobileFlightTimes(FlightOffer offer, bool isArabic) {
-    return Column(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  offer.departureTime,
-                  style: AppTextStyles.h4.copyWith(
-                    color: AppColors.navyDark,
-                    fontWeight: FontWeight.w800,
-                  ),
+        // Departure
+        Expanded(
+          flex: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                offer.departureTime,
+                style: AppTextStyles.h4.copyWith(
+                  color: AppColors.navyDark,
+                  fontWeight: FontWeight.w800,
                 ),
-                Text(
-                  '${offer.departureAirportCode} • ${offer.departureCity}',
-                  style: AppTextStyles.labelSM.copyWith(color: AppColors.royalBlue),
+              ),
+              Text(
+                '${offer.departureAirportCode} • ${offer.departureCity}',
+                style: AppTextStyles.labelSM.copyWith(color: AppColors.royalBlue),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+        // Route info (center)
+        Expanded(
+          flex: 2,
+          child: Column(
+            children: [
+              Text(
+                offer.durationFormatted,
+                style: AppTextStyles.labelSM.copyWith(color: AppColors.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+              const Icon(Icons.arrow_forward_rounded, color: AppColors.gold, size: 16),
+              Text(
+                offer.stopsLabel,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: offer.isNonStop ? AppColors.successGreen : AppColors.warning,
                 ),
-              ],
-            ),
-            Column(
-              children: [
-                Text(
-                  offer.durationFormatted,
-                  style: AppTextStyles.labelSM.copyWith(color: AppColors.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+        // Arrival
+        Expanded(
+          flex: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                offer.arrivalTime,
+                style: AppTextStyles.h4.copyWith(
+                  color: AppColors.navyDark,
+                  fontWeight: FontWeight.w800,
                 ),
-                const Icon(Icons.arrow_forward_rounded, color: AppColors.gold, size: 16),
-                Text(
-                  offer.stopsLabel,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: offer.isNonStop ? AppColors.successGreen : AppColors.warning,
-                  ),
-                ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  offer.arrivalTime,
-                  style: AppTextStyles.h4.copyWith(
-                    color: AppColors.navyDark,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                Text(
-                  '${offer.arrivalAirportCode} • ${offer.arrivalCity}',
-                  style: AppTextStyles.labelSM.copyWith(color: AppColors.royalBlue),
-                ),
-              ],
-            ),
-          ],
+              ),
+              Text(
+                '${offer.arrivalAirportCode} • ${offer.arrivalCity}',
+                style: AppTextStyles.labelSM.copyWith(color: AppColors.royalBlue),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+              ),
+            ],
+          ),
         ),
       ],
     );
