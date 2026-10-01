@@ -4,6 +4,8 @@ import '../../../../core/routing/app_routes.dart';
 import '../../../../shared/presentation/widgets/app_navbar.dart';
 import '../../../../shared/presentation/widgets/app_footer.dart';
 
+import '../../../../core/responsive/app_breakpoints.dart';
+
 // Modular Home Widgets
 import '../widgets/home_hero_section.dart';
 import '../widgets/partners_section.dart';
@@ -41,8 +43,10 @@ class HomePage extends StatelessWidget {
           ),
 
           // ── Spacer for Floating Planner Bottom Overhang ──────────────────
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 70),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: AppBreakpoints.isMobile(context) ? 160 : 70,
+            ),
           ),
 
           // ── 2. Partners Infinite Marquee ─────────────────────────────────

@@ -115,12 +115,43 @@ class _MobileFooterTop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _BrandColumn(),
-        SizedBox(height: 32),
-        _ContactColumn(),
+        const _BrandColumn(),
+        const SizedBox(height: 36),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _FooterLinkColumn(
+                title: context.isArabic ? 'الخدمات والبرامج' : 'Services',
+                links: [
+                  (context.tr('nav_international_tours'), AppRoutes.internationalToursName),
+                  (context.tr('nav_domestic_tours'), AppRoutes.domesticToursName),
+                  (context.tr('nav_visa_services'), AppRoutes.visaServicesName),
+                  (context.tr('nav_hotels'), AppRoutes.hotelsName),
+                  (context.tr('nav_hajj_umrah'), AppRoutes.hajjUmrahName),
+                ],
+              ),
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: _FooterLinkColumn(
+                title: context.isArabic ? 'روابط هامة' : 'Company',
+                links: [
+                  (context.tr('nav_home'), AppRoutes.homeName),
+                  (context.tr('nav_destinations'), AppRoutes.destinationsName),
+                  (context.tr('nav_gallery'), AppRoutes.galleryName),
+                  (context.tr('nav_blog'), AppRoutes.blogName),
+                  (context.tr('nav_contact'), AppRoutes.contactName),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 36),
+        const _ContactColumn(),
       ],
     );
   }

@@ -159,60 +159,122 @@ class _InternationalToursPageState extends State<InternationalToursPage> {
               color: AppColors.white,
               padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 20),
               child: MaxWidthContainer(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        onChanged: (val) {
-                          _searchQuery = val;
-                          _applyFilters();
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Search international tours by city or country...',
-                          prefixIcon: const Icon(Icons.search, color: AppColors.royalBlue),
-                          filled: true,
-                          fillColor: AppColors.surfaceLight,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.borderLight),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.borderLight),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    DropdownButtonHideUnderline(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceLight,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.borderLight),
-                        ),
-                        child: DropdownButton<String>(
-                          value: _sortBy,
-                          icon: const Icon(Icons.sort_rounded, color: AppColors.royalBlue),
-                          items: _sortOptions.map((s) {
-                            return DropdownMenuItem<String>(
-                              value: s,
-                              child: Text(s, style: AppTextStyles.labelMD),
-                            );
-                          }).toList(),
-                          onChanged: (val) {
-                            if (val != null) {
-                              setState(() => _sortBy = val);
+                child: isMobile
+                    ? Column(
+                        children: [
+                          TextField(
+                            onChanged: (val) {
+                              _searchQuery = val;
                               _applyFilters();
-                            }
-                          },
-                        ),
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'Search international tours by city or country...',
+                              prefixIcon: const Icon(Icons.search, color: AppColors.royalBlue),
+                              filled: true,
+                              fillColor: AppColors.surfaceLight,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: AppColors.borderLight),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: AppColors.borderLight),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Sort by:',
+                                style: AppTextStyles.labelSM.copyWith(color: AppColors.gray600),
+                              ),
+                              DropdownButtonHideUnderline(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surfaceLight,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppColors.borderLight),
+                                  ),
+                                  child: DropdownButton<String>(
+                                    value: _sortBy,
+                                    icon: const Icon(Icons.sort_rounded, color: AppColors.royalBlue),
+                                    items: _sortOptions.map((s) {
+                                      return DropdownMenuItem<String>(
+                                        value: s,
+                                        child: Text(s, style: AppTextStyles.labelMD),
+                                      );
+                                    }).toList(),
+                                    onChanged: (val) {
+                                      if (val != null) {
+                                        setState(() => _sortBy = val);
+                                        _applyFilters();
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              onChanged: (val) {
+                                _searchQuery = val;
+                                _applyFilters();
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Search international tours by city or country...',
+                                prefixIcon: const Icon(Icons.search, color: AppColors.royalBlue),
+                                filled: true,
+                                fillColor: AppColors.surfaceLight,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: AppColors.borderLight),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: AppColors.borderLight),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          DropdownButtonHideUnderline(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceLight,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.borderLight),
+                              ),
+                              child: DropdownButton<String>(
+                                value: _sortBy,
+                                icon: const Icon(Icons.sort_rounded, color: AppColors.royalBlue),
+                                items: _sortOptions.map((s) {
+                                  return DropdownMenuItem<String>(
+                                    value: s,
+                                    child: Text(s, style: AppTextStyles.labelMD),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() => _sortBy = val);
+                                    _applyFilters();
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ),

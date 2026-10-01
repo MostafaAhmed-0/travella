@@ -38,10 +38,12 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
     final screenHeight = AppBreakpoints.screenHeight(context);
 
     // Hero height calculated to ensure full immersion and room for floating planner
-    final heroHeight = math.max(
-      isMobile ? 740.0 : 860.0,
-      isDesktop ? screenHeight * 0.95 : screenHeight * 0.9,
-    );
+    final heroHeight = isMobile
+        ? 620.0
+        : math.max(
+            860.0,
+            isDesktop ? screenHeight * 0.95 : screenHeight * 0.9,
+          );
 
     return SizedBox(
       width: double.infinity,
@@ -109,7 +111,7 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: hPad,
-                      vertical: isMobile ? 40 : 60,
+                      vertical: isMobile ? 36 : 60,
                     ),
                     child: MaxWidthContainer(
                       child: Row(
@@ -239,7 +241,7 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
 
                 // Destination quick switcher dots at bottom right
                 Positioned(
-                  bottom: isMobile ? 24 : 40,
+                  bottom: isMobile ? 18 : 40,
                   right: hPad,
                   child: Row(
                     children: List.generate(_bgImages.length, (i) {
@@ -268,7 +270,7 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
           Positioned(
             left: hPad,
             right: hPad,
-            bottom: -60,
+            bottom: isMobile ? -140 : -60,
             child: MaxWidthContainer(
               child: SlideInOnScroll(
                 delay: const Duration(milliseconds: 400),

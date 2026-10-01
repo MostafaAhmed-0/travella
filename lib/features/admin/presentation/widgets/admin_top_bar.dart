@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/localization/app_locales.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
@@ -215,11 +216,12 @@ class AdminTopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final authState = context.watch<AuthCubit>().state;
     final profile = authState is Authenticated ? authState.profile : null;
+    final isMobile = AppBreakpoints.isMobile(context);
 
     return Container(
       height: 70,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      decoration: BoxDecoration(
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 24),
+      decoration: const BoxDecoration(
         color: AppColors.white,
         border: Border(bottom: BorderSide(color: AppColors.gray200)),
       ),
@@ -241,30 +243,40 @@ class AdminTopBar extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: AppTextStyles.h5.copyWith(
+                  style: (isMobile ? AppTextStyles.labelLG : AppTextStyles.h5).copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.navyDark,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  'Travella CMS / $title',
-                  style: AppTextStyles.caption.copyWith(color: AppColors.gray500, fontSize: 11),
-                ),
+                if (!isMobile)
+                  Text(
+                    'Travella CMS / $title',
+                    style: AppTextStyles.caption.copyWith(color: AppColors.gray500, fontSize: 11),
+                  ),
               ],
             ),
           ),
 
           // View Public Website Link
-          TextButton.icon(
-            onPressed: () => context.goNamed(AppRoutes.homeName),
-            icon: const Icon(Icons.open_in_new_rounded, size: 16, color: AppColors.gray600),
-            label: const Text('Live Website', style: TextStyle(color: AppColors.gray700, fontSize: 13, fontWeight: FontWeight.w600)),
-          ),
-          const SizedBox(width: 8),
+          if (isMobile)
+            IconButton(
+              icon: const Icon(Icons.open_in_new_rounded, size: 20, color: AppColors.gray600),
+              tooltip: 'Live Website',
+              onPressed: () => context.goNamed(AppRoutes.homeName),
+            )
+          else
+            TextButton.icon(
+              onPressed: () => context.goNamed(AppRoutes.homeName),
+              icon: const Icon(Icons.open_in_new_rounded, size: 16, color: AppColors.gray600),
+              label: const Text('Live Website', style: TextStyle(color: AppColors.gray700, fontSize: 13, fontWeight: FontWeight.w600)),
+            ),
+          const SizedBox(width: 4),
 
           // Language Switcher
           const LanguageSwitchButton(isDark: false),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
 
           // Notifications Button
           IconButton(
@@ -289,7 +301,7 @@ class AdminTopBar extends StatelessWidget {
             tooltip: 'Notifications',
             onPressed: () => _showNotificationsMenu(context),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
 
           // Admin User Profile & Sign Out
           if (authState is Authenticated)
@@ -297,11 +309,12 @@ class AdminTopBar extends StatelessWidget {
               onTap: () => _showProfileDialog(context, authState),
               borderRadius: BorderRadius.circular(12),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     CircleAvatar(
-                      radius: 18,
+                      radius: 16,
                       backgroundColor: AppColors.gold.withValues(alpha: 0.2),
                       child: Text(
                         (profile?.fullName?.isNotEmpty == true
@@ -311,42 +324,44 @@ class AdminTopBar extends StatelessWidget {
                         style: const TextStyle(
                           color: AppColors.navy,
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: 13,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          profile?.fullName ?? profile?.email.split('@').first ?? 'Admin',
-                          style: AppTextStyles.bodySM.copyWith(fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: authState.isAdmin
-                                ? AppColors.gold.withValues(alpha: 0.2)
-                                : AppColors.royalBlue.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(4),
+                    if (!isMobile) ...[
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            profile?.fullName ?? profile?.email.split('@').first ?? 'Admin',
+                            style: AppTextStyles.bodySM.copyWith(fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          child: Text(
-                            profile?.role.toDbString().toUpperCase() ?? 'STAFF',
-                            style: TextStyle(
-                              color: authState.isAdmin ? AppColors.goldDark : AppColors.royalBlue,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: authState.isAdmin
+                                  ? AppColors.gold.withValues(alpha: 0.2)
+                                  : AppColors.royalBlue.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              profile?.role.toDbString().toUpperCase() ?? 'STAFF',
+                              style: TextStyle(
+                                color: authState.isAdmin ? AppColors.goldDark : AppColors.royalBlue,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 6),
-                    const Icon(Icons.arrow_drop_down, color: AppColors.gray500),
+                        ],
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.arrow_drop_down, color: AppColors.gray500),
+                    ],
                   ],
                 ),
               ),

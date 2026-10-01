@@ -229,7 +229,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
           children: [
             Expanded(
               child: _FieldBox(
-                label: 'FROM',
+                label: context.tr('field_from'),
                 value: _origin,
                 icon: Icons.flight_takeoff_rounded,
                 onTap: _showOriginPicker,
@@ -238,7 +238,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
             const SizedBox(width: 10),
             Expanded(
               child: _FieldBox(
-                label: 'TO',
+                label: context.tr('field_destination'),
                 value: _destination,
                 icon: Icons.place_rounded,
                 onTap: _showDestinationPicker,
@@ -251,7 +251,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
           children: [
             Expanded(
               child: _FieldBox(
-                label: 'DEPART',
+                label: context.tr('field_departure'),
                 value: _dateFormat.format(_departureDate),
                 icon: Icons.calendar_today_rounded,
                 onTap: () => _pickDate(isDeparture: true),
@@ -260,7 +260,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
             const SizedBox(width: 10),
             Expanded(
               child: _FieldBox(
-                label: 'RETURN',
+                label: context.tr('field_return'),
                 value: _dateFormat.format(_returnDate),
                 icon: Icons.event_repeat_rounded,
                 onTap: () => _pickDate(isDeparture: false),
@@ -270,14 +270,14 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         ),
         const SizedBox(height: 10),
         _FieldBox(
-          label: 'TRAVELERS',
-          value: '$_adultsCount Adults${_childrenCount > 0 ? ', $_childrenCount Kids' : ''}',
+          label: context.tr('field_travelers'),
+          value: '$_adultsCount ${context.tr('adults_label')}${_childrenCount > 0 ? ', $_childrenCount ${context.tr('kids_label')}' : ''}',
           icon: Icons.people_alt_rounded,
           onTap: _showTravelersModal,
         ),
         const SizedBox(height: 16),
         TravellaButton(
-          label: 'Search Available Trips',
+          label: context.tr('btn_search'),
           variant: TravellaButtonVariant.gold,
           size: TravellaButtonSize.lg,
           fullWidth: true,

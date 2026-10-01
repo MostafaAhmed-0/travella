@@ -48,10 +48,12 @@ class _AppNavbarState extends State<AppNavbar> {
       (context.tr('nav_contact'), AppRoutes.contact, AppRoutes.contactName, Icons.contact_support_outlined),
     ];
 
+    final isVerySmallMobile = screenWidth < 400;
+
     return Container(
       color: AppColors.surfaceNavbar,
       padding: EdgeInsets.symmetric(
-        horizontal: screenWidth < 600 ? 16 : 28,
+        horizontal: screenWidth < 600 ? (screenWidth < 360 ? 10 : 16) : 28,
         vertical: 0,
       ),
       height: 72,
@@ -61,10 +63,11 @@ class _AppNavbarState extends State<AppNavbar> {
           GestureDetector(
             onTap: () => context.goNamed(AppRoutes.homeName),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: screenWidth < 360 ? 32 : 38,
+                  height: screenWidth < 360 ? 32 : 38,
                   decoration: BoxDecoration(
                     color: AppColors.gold,
                     borderRadius: BorderRadius.circular(10),
@@ -75,13 +78,13 @@ class _AppNavbarState extends State<AppNavbar> {
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.flight_takeoff_rounded,
                     color: AppColors.navyDark,
-                    size: 22,
+                    size: screenWidth < 360 ? 18 : 22,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +95,7 @@ class _AppNavbarState extends State<AppNavbar> {
                         color: AppColors.white,
                         letterSpacing: context.isArabic ? 0.0 : 1.5,
                         fontWeight: FontWeight.w800,
-                        fontSize: 16,
+                        fontSize: screenWidth < 360 ? 14 : 16,
                       ),
                     ),
                     Text(
@@ -100,7 +103,7 @@ class _AppNavbarState extends State<AppNavbar> {
                       style: AppTextStyles.labelSM.copyWith(
                         color: AppColors.gold,
                         letterSpacing: context.isArabic ? 0.0 : 1.5,
-                        fontSize: 9,
+                        fontSize: screenWidth < 360 ? 8 : 9,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -133,14 +136,16 @@ class _AppNavbarState extends State<AppNavbar> {
           ] else ...[
             // Mobile/Tablet Quick Actions: Language Switcher + Book Now + Menu Icon
             const LanguageSwitchButton(isDark: true, isCompact: true),
-            const SizedBox(width: 8),
-            TravellaButton(
-              label: context.tr('nav_book_now'),
-              variant: TravellaButtonVariant.gold,
-              size: TravellaButtonSize.sm,
-              onPressed: () => context.goNamed(AppRoutes.bookingName),
-            ),
-            const SizedBox(width: 6),
+            if (!isVerySmallMobile) ...[
+              const SizedBox(width: 8),
+              TravellaButton(
+                label: context.tr('nav_book_now'),
+                variant: TravellaButtonVariant.gold,
+                size: TravellaButtonSize.sm,
+                onPressed: () => context.goNamed(AppRoutes.bookingName),
+              ),
+            ],
+            const SizedBox(width: 4),
             IconButton(
               onPressed: () => _openMobileDrawer(context),
               icon: const Icon(

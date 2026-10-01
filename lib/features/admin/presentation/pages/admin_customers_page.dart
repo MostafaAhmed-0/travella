@@ -100,48 +100,91 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = AppBreakpoints.isMobile(context);
-
     return BlocBuilder<AdminBookingsCubit, AdminBookingsState>(
       builder: (context, state) {
         final customers = _deriveCustomers(state.allBookings);
+        final gap = _gx(context, mobile: 16, tablet: 22, desktop: 28);
 
         return Scaffold(
           backgroundColor: AppColors.lightGray,
           body: Padding(
-            padding: EdgeInsets.all(isMobile ? 16 : 28),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppBreakpoints.horizontalPadding(context),
+              vertical: AppBreakpoints.value<double>(
+                context,
+                mobile: 16,
+                tablet: 22,
+                desktop: 28,
+              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final title = Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Customer Directory', style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold)),
+                        Text(
+                          'Customer Directory',
+                          style: _rt(context, AppTextStyles.h3)
+                              .copyWith(fontWeight: FontWeight.bold),
+                        ),
                         const SizedBox(height: 2),
-                        Text('Registered travelers and client reservation history', style: AppTextStyles.bodyMD.copyWith(color: AppColors.gray600)),
+                        Text(
+                          'Registered travelers and client reservation history',
+                          style: _rt(context, AppTextStyles.bodyMD)
+                              .copyWith(color: AppColors.gray600),
+                        ),
                       ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    );
+                    final badge = Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.navy,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         '${customers.length} Verified Clients',
-                        style: const TextStyle(color: AppColors.gold, fontWeight: FontWeight.bold, fontSize: 13),
+                        style: TextStyle(
+                          color: AppColors.gold,
+                          fontWeight: FontWeight.bold,
+                          fontSize: _rs(context, 13),
+                        ),
                       ),
-                    ),
-                  ],
+                    );
+
+                    if (constraints.maxWidth < 420) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          title,
+                          const SizedBox(height: 12),
+                          badge,
+                        ],
+                      );
+                    }
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [Expanded(child: title), badge],
+                    );
+                  },
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: gap),
 
                 // Search Box
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(
+                    AppBreakpoints.value<double>(
+                      context,
+                      mobile: 12,
+                      tablet: 16,
+                      desktop: 16,
+                    ),
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(14),
@@ -153,17 +196,44 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
                     decoration: InputDecoration(
                       hintText: 'Search clients by name, email, or phone...',
                       prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      suffixIcon: _searchQuery.isEmpty
+                          ? null
+                          : IconButton(
+                              tooltip: 'Clear search',
+                              icon: const Icon(Icons.close_rounded),
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 18),
+                SizedBox(height: gap),
 
                 // Customer List
                 Expanded(
                   child: customers.isEmpty
-                      ? const Center(child: Text('No customers found.'))
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 420),
+                              child: Text(
+                                'No customers found.',
+                                textAlign: TextAlign.center,
+                                style: _rt(context, AppTextStyles.bodyMD),
+                              ),
+                            ),
+                          ),
+                        )
                       : ListView.builder(
                           itemCount: customers.length,
                           itemBuilder: (context, index) {
@@ -176,60 +246,130 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
                                 borderRadius: BorderRadius.circular(14),
                                 border: Border.all(color: AppColors.gray200),
                               ),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 22,
-                                    backgroundColor: AppColors.royalBlue.withValues(alpha: 0.15),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final wide = constraints.maxWidth >=
+                                      kTableBreakpoint;
+                                  final avatar = CircleAvatar(
+                                    radius: wide ? 22 : 20,
+                                    backgroundColor: AppColors.royalBlue
+                                        .withValues(alpha: 0.15),
                                     child: Text(
-                                      c.name.isNotEmpty ? c.name[0].toUpperCase() : 'C',
-                                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.royalBlue),
+                                      c.name.isNotEmpty
+                                          ? c.name[0].toUpperCase()
+                                          : 'C',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.royalBlue,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(c.name, style: AppTextStyles.h6.copyWith(fontWeight: FontWeight.bold)),
-                                        const SizedBox(height: 2),
-                                        Text('${c.email} • ${c.phone}', style: AppTextStyles.caption.copyWith(color: AppColors.gray600)),
-                                        if (c.bookedTours.isNotEmpty) ...[
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Booked: ${c.bookedTours.join(", ")}',
-                                            style: AppTextStyles.caption.copyWith(color: AppColors.navy, fontWeight: FontWeight.w500),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
+                                  );
+                                  final details = Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        c.name,
+                                        style: _rt(context, AppTextStyles.h6)
+                                            .copyWith(
+                                                fontWeight: FontWeight.bold),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${c.email} • ${c.phone}',
+                                        style: _rt(context, AppTextStyles.caption)
+                                            .copyWith(color: AppColors.gray600),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      if (c.bookedTours.isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Booked: ${c.bookedTours.join(", ")}',
+                                          style: _rt(context, AppTextStyles.caption)
+                                              .copyWith(
+                                            color: AppColors.navy,
+                                            fontWeight: FontWeight.w500,
                                           ),
-                                        ],
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ],
-                                    ),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    ],
+                                  );
+                                  final stats = Column(
+                                    crossAxisAlignment:
+                                        wide
+                                            ? CrossAxisAlignment.end
+                                            : CrossAxisAlignment.start,
                                     children: [
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: AppColors.gold.withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(8),
+                                          color: AppColors.gold.withValues(
+                                              alpha: 0.15),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
                                         child: Text(
                                           '${c.totalBookings} ${c.totalBookings == 1 ? "Booking" : "Bookings"}',
-                                          style: const TextStyle(color: AppColors.navyDark, fontWeight: FontWeight.bold, fontSize: 12),
+                                          style: TextStyle(
+                                            color: AppColors.navyDark,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: _rs(context, 12),
+                                          ),
                                         ),
                                       ),
                                       if (c.latestBookingDate != null) ...[
                                         const SizedBox(height: 4),
                                         Text(
                                           'Last: ${DateFormat('MMM dd, yyyy').format(c.latestBookingDate!)}',
-                                          style: AppTextStyles.caption.copyWith(color: AppColors.gray500, fontSize: 10),
+                                          style: _rt(
+                                            context,
+                                            AppTextStyles.caption,
+                                          ).copyWith(
+                                            color: AppColors.gray500,
+                                            fontSize: _rs(context, 10),
+                                          ),
                                         ),
                                       ],
                                     ],
-                                  ),
-                                ],
+                                  );
+
+                                  if (wide) {
+                                    return Row(
+                                      children: [
+                                        avatar,
+                                        const SizedBox(width: 16),
+                                        Expanded(child: details),
+                                        const SizedBox(width: 12),
+                                        stats,
+                                      ],
+                                    );
+                                  }
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          avatar,
+                                          const SizedBox(width: 12),
+                                          Expanded(child: details),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      stats,
+                                    ],
+                                  );
+                                },
                               ),
                             );
                           },
@@ -243,3 +383,38 @@ class _AdminCustomersPageState extends State<AdminCustomersPage> {
     );
   }
 }
+
+// ── Local responsive helpers ─────────────────────────────────────────────
+/// Below this width, hand-built tables become stacked record cards.
+const double kTableBreakpoint = 720;
+
+/// A text style that scales down on small screens.
+TextStyle _rt(BuildContext context, TextStyle base) =>
+    AppTextStyles.responsive(
+      base,
+      isMobile: AppBreakpoints.isMobile(context),
+      isTablet: AppBreakpoints.isTablet(context),
+    );
+
+/// A raw font size that scales down on small screens.
+double _rs(BuildContext context, double size) =>
+    AppBreakpoints.value<double>(
+      context,
+      mobile: size * 0.85,
+      tablet: size * 0.94,
+      desktop: size,
+    );
+
+/// A spacing value that follows the device size.
+double _gx(
+  BuildContext context, {
+  double mobile = 12,
+  double tablet = 16,
+  double desktop = 20,
+}) =>
+    AppBreakpoints.value<double>(
+      context,
+      mobile: mobile,
+      tablet: tablet,
+      desktop: desktop,
+    );

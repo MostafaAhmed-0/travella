@@ -505,12 +505,71 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
   }
 
   Widget _buildTourOverviewAndTabs(TourModel tour) {
+    final isMobile = AppBreakpoints.isMobile(context);
+    final cardPadding = isMobile ? const EdgeInsets.all(18) : const EdgeInsets.all(28);
+
+    final includedWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 20),
+            const SizedBox(width: 8),
+            Text('Included', style: AppTextStyles.labelLG.copyWith(color: AppColors.successGreen, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const SizedBox(height: 14),
+        if (tour.included.isEmpty)
+          const Text('• 5-Star Hotel Accommodations\n• Daily Breakfast & Dinners\n• Private Airport Transfers\n• Professional English/Arabic Tour Guide\n• Entrance fees to all scheduled sites', style: TextStyle(height: 1.7, color: AppColors.textPrimary))
+        else
+          ...tour.included.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.check_rounded, color: AppColors.successGreen, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(item, style: AppTextStyles.bodyMD)),
+                  ],
+                ),
+              )),
+      ],
+    );
+
+    final excludedWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.cancel_rounded, color: AppColors.errorRed, size: 20),
+            const SizedBox(width: 8),
+            Text('Excluded', style: AppTextStyles.labelLG.copyWith(color: AppColors.errorRed, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const SizedBox(height: 14),
+        if (tour.excluded.isEmpty)
+          const Text('• International Flight Tickets (unless specified)\n• Personal expenses & souvenirs\n• Travel & Medical Insurance\n• Gratuities & tips for drivers/guides', style: TextStyle(height: 1.7, color: AppColors.textSecondary))
+        else
+          ...tour.excluded.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.close_rounded, color: AppColors.errorRed, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(item, style: AppTextStyles.bodyMD.copyWith(color: AppColors.textSecondary))),
+                  ],
+                ),
+              )),
+      ],
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ── Description Card ──────────────────────────────────────────────
         Container(
-          padding: const EdgeInsets.all(28),
+          padding: cardPadding,
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(20),
@@ -543,7 +602,7 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
         // ── Highlights ────────────────────────────────────────────────────
         if (tour.highlights.isNotEmpty) ...[
           Container(
-            padding: const EdgeInsets.all(28),
+            padding: cardPadding,
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(20),
@@ -592,7 +651,7 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
 
         // ── Itinerary Section ─────────────────────────────────────────────
         Container(
-          padding: const EdgeInsets.all(28),
+          padding: cardPadding,
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(20),
@@ -622,7 +681,7 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
 
         // ── Inclusions & Exclusions ───────────────────────────────────────
         Container(
-          padding: const EdgeInsets.all(28),
+          padding: cardPadding,
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(20),
@@ -633,72 +692,22 @@ class _TourDetailsPageState extends State<TourDetailsPage> {
             children: [
               Text('What’s Included & Excluded', style: AppTextStyles.h4),
               const SizedBox(height: 20),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Included
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 20),
-                            const SizedBox(width: 8),
-                            Text('Included', style: AppTextStyles.labelLG.copyWith(color: AppColors.successGreen, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        if (tour.included.isEmpty)
-                          const Text('• 5-Star Hotel Accommodations\n• Daily Breakfast & Dinners\n• Private Airport Transfers\n• Professional English/Arabic Tour Guide\n• Entrance fees to all scheduled sites', style: TextStyle(height: 1.7, color: AppColors.textPrimary))
-                        else
-                          ...tour.included.map((item) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Icon(Icons.check_rounded, color: AppColors.successGreen, size: 16),
-                                    const SizedBox(width: 8),
-                                    Expanded(child: Text(item, style: AppTextStyles.bodyMD)),
-                                  ],
-                                ),
-                              )),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                  // Excluded
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.cancel_rounded, color: AppColors.errorRed, size: 20),
-                            const SizedBox(width: 8),
-                            Text('Excluded', style: AppTextStyles.labelLG.copyWith(color: AppColors.errorRed, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        if (tour.excluded.isEmpty)
-                          const Text('• International Flight Tickets (unless specified)\n• Personal expenses & souvenirs\n• Travel & Medical Insurance\n• Gratuities & tips for drivers/guides', style: TextStyle(height: 1.7, color: AppColors.textSecondary))
-                        else
-                          ...tour.excluded.map((item) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Icon(Icons.close_rounded, color: AppColors.errorRed, size: 16),
-                                    const SizedBox(width: 8),
-                                    Expanded(child: Text(item, style: AppTextStyles.bodyMD.copyWith(color: AppColors.textSecondary))),
-                                  ],
-                                ),
-                              )),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              if (isMobile) ...[
+                includedWidget,
+                const SizedBox(height: 24),
+                const Divider(color: AppColors.borderLight),
+                const SizedBox(height: 16),
+                excludedWidget,
+              ] else ...[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: includedWidget),
+                    const SizedBox(width: 24),
+                    Expanded(child: excludedWidget),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

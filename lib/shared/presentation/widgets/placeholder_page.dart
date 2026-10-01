@@ -27,87 +27,107 @@ class PlaceholderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hPad = AppBreakpoints.horizontalPadding(context);
+    final isMobile = AppBreakpoints.isMobile(context);
+
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: Column(
-        children: [
-          AppNavbar(currentRoute: currentRoute),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: AppNavbar(currentRoute: currentRoute),
+          ),
           // Page header
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 80),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.navyDark, AppColors.navy],
+          SliverToBoxAdapter(
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(
+                horizontal: hPad,
+                vertical: isMobile ? 48 : 80,
               ),
-            ),
-            child: MaxWidthContainer(
-              child: SlideInOnScroll(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SectionBadge(
-                      text: 'Coming Soon',
-                      color: AppColors.gold.withValues(alpha: 0.15),
-                      textColor: AppColors.gold,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      title,
-                      style: AppTextStyles.h1.copyWith(color: AppColors.white),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      subtitle,
-                      style: AppTextStyles.bodyLG.copyWith(
-                        color: AppColors.textOnDarkMuted,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.navyDark, AppColors.navy],
+                ),
+              ),
+              child: MaxWidthContainer(
+                child: SlideInOnScroll(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SectionBadge(
+                        text: 'Coming Soon',
+                        color: AppColors.gold.withValues(alpha: 0.15),
+                        textColor: AppColors.gold,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      Text(
+                        title,
+                        style: (isMobile ? AppTextStyles.h2 : AppTextStyles.h1)
+                            .copyWith(color: AppColors.white),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        subtitle,
+                        style: AppTextStyles.bodyLG.copyWith(
+                          color: AppColors.textOnDarkMuted,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
           // Body placeholder
-          Expanded(
-            child: Center(
-              child: ScaleInOnScroll(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: AppColors.royalBlueFaded,
-                        shape: BoxShape.circle,
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: hPad,
+                vertical: isMobile ? 60 : 100,
+              ),
+              child: Center(
+                child: ScaleInOnScroll(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 90,
+                        height: 90,
+                        decoration: const BoxDecoration(
+                          color: AppColors.royalBlueFaded,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(icon, size: 44, color: AppColors.royalBlue),
                       ),
-                      child: Icon(icon, size: 48, color: AppColors.royalBlue),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'This page is coming soon',
-                      style: AppTextStyles.h4.copyWith(color: AppColors.textPrimary),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'We\'re building something amazing. Check back soon!',
-                      style: AppTextStyles.bodyMD,
-                    ),
-                    const SizedBox(height: 32),
-                    TravellaButton(
-                      label: 'Back to Home',
-                      leadingIcon: Icons.arrow_back_rounded,
-                      onPressed: () => context.goNamed(AppRoutes.homeName),
-                    ),
-                  ],
+                      const SizedBox(height: 24),
+                      Text(
+                        'This feature is coming soon',
+                        style: AppTextStyles.h4.copyWith(color: AppColors.textPrimary),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'We\'re building something amazing. Check back soon!',
+                        style: AppTextStyles.bodyMD,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      TravellaButton(
+                        label: 'Back to Home',
+                        leadingIcon: Icons.arrow_back_rounded,
+                        onPressed: () => context.goNamed(AppRoutes.homeName),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-          const AppFooter(),
+          const SliverToBoxAdapter(
+            child: AppFooter(),
+          ),
         ],
       ),
     );

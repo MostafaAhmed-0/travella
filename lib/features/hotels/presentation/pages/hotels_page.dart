@@ -165,60 +165,113 @@ class _HotelsPageState extends State<HotelsPage> {
               child: MaxWidthContainer(
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
+                    if (isMobile) ...[
+                      TextField(
+                        onChanged: (val) {
+                          _searchQuery = val;
+                          _applyFilters();
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Search hotels...',
+                          prefixIcon: const Icon(Icons.search, color: AppColors.royalBlue),
+                          filled: true,
+                          fillColor: AppColors.surfaceLight,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: AppColors.borderLight),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: AppColors.borderLight),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonHideUnderline(
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceLight,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.borderLight),
+                          ),
+                          child: DropdownButton<String>(
+                            value: _sortBy,
+                            isExpanded: true,
+                            icon: const Icon(Icons.sort_rounded, color: AppColors.royalBlue),
+                            items: _sortOptions.map((s) {
+                              return DropdownMenuItem<String>(
+                                value: s,
+                                child: Text(s, style: AppTextStyles.labelMD),
+                              );
+                            }).toList(),
                             onChanged: (val) {
-                              _searchQuery = val;
-                              _applyFilters();
+                              if (val != null) {
+                                setState(() => _sortBy = val);
+                                _applyFilters();
+                              }
                             },
-                            decoration: InputDecoration(
-                              hintText: 'Search hotels by name, city, or destination...',
-                              prefixIcon: const Icon(Icons.search, color: AppColors.royalBlue),
-                              filled: true,
-                              fillColor: AppColors.surfaceLight,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.borderLight),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.borderLight),
-                              ),
-                            ),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        DropdownButtonHideUnderline(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceLight,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppColors.borderLight),
-                            ),
-                            child: DropdownButton<String>(
-                              value: _sortBy,
-                              icon: const Icon(Icons.sort_rounded, color: AppColors.royalBlue),
-                              items: _sortOptions.map((s) {
-                                return DropdownMenuItem<String>(
-                                  value: s,
-                                  child: Text(s, style: AppTextStyles.labelMD),
-                                );
-                              }).toList(),
+                      ),
+                    ] else ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
                               onChanged: (val) {
-                                if (val != null) {
-                                  setState(() => _sortBy = val);
-                                  _applyFilters();
-                                }
+                                _searchQuery = val;
+                                _applyFilters();
                               },
+                              decoration: InputDecoration(
+                                hintText: 'Search hotels by name, city, or destination...',
+                                prefixIcon: const Icon(Icons.search, color: AppColors.royalBlue),
+                                filled: true,
+                                fillColor: AppColors.surfaceLight,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: AppColors.borderLight),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: AppColors.borderLight),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: 16),
+                          DropdownButtonHideUnderline(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceLight,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.borderLight),
+                              ),
+                              child: DropdownButton<String>(
+                                value: _sortBy,
+                                icon: const Icon(Icons.sort_rounded, color: AppColors.royalBlue),
+                                items: _sortOptions.map((s) {
+                                  return DropdownMenuItem<String>(
+                                    value: s,
+                                    child: Text(s, style: AppTextStyles.labelMD),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() => _sortBy = val);
+                                    _applyFilters();
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 14),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -354,7 +407,7 @@ class _HotelsPageState extends State<HotelsPage> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: columns,
-        mainAxisExtent: isMobile ? 480 : 360,
+        mainAxisExtent: isMobile ? 500 : 360,
         crossAxisSpacing: 24,
         mainAxisSpacing: 24,
       ),
@@ -475,7 +528,7 @@ class _HotelGridCardState extends State<_HotelGridCard> {
 
   Widget _buildInfoSection(HotelModel hotel) {
     return Padding(
-      padding: const EdgeInsets.all(22),
+      padding: EdgeInsets.all(widget.isMobile ? 16 : 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

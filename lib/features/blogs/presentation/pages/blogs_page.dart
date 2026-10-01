@@ -90,11 +90,15 @@ class _BlogsPageState extends State<BlogsPage> {
   }
 
   void _readArticle(BlogModel blog) {
+    final isMobile = AppBreakpoints.isMobile(context);
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: AppColors.white,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 12 : 24,
+          vertical: isMobile ? 16 : 32,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800, maxHeight: 750),
@@ -102,7 +106,7 @@ class _BlogsPageState extends State<BlogsPage> {
             children: [
               // Header Image
               SizedBox(
-                height: 240,
+                height: isMobile ? 180 : 240,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
@@ -149,7 +153,7 @@ class _BlogsPageState extends State<BlogsPage> {
               // Content Body
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(28),
+                  padding: EdgeInsets.all(isMobile ? 18 : 28),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
