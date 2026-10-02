@@ -10,7 +10,7 @@ abstract class StorageRepository {
   Future<String> uploadGalleryImage(Uint8List bytes, String filename);
   Future<String> uploadBlogImage(Uint8List bytes, String filename);
   Future<String> uploadPartnerLogo(Uint8List bytes, String filename);
-  Future<String> uploadVisaDocument(Uint8List bytes, String filename, {String? userId});
+  Future<String> uploadVisaDocument(Uint8List bytes, String filename, {String? userId, String? contentType});
   Future<void> deleteFile(String bucket, String path);
 }
 
@@ -84,11 +84,12 @@ class StorageRepositoryImpl implements StorageRepository {
   }
 
   @override
-  Future<String> uploadVisaDocument(Uint8List bytes, String filename, {String? userId}) {
+  Future<String> uploadVisaDocument(Uint8List bytes, String filename, {String? userId, String? contentType}) {
     return _remoteDataSource.uploadBytes(
       bucket: AppConstants.visaDocumentsBucket,
       path: _sanitizePath(filename, prefix: userId ?? 'guest'),
       bytes: bytes,
+      contentType: contentType,
     );
   }
 

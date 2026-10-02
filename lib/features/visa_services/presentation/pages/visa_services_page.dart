@@ -7,6 +7,7 @@ import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/animations/animation_widgets.dart';
 import '../../../../core/localization/app_translations.dart';
+import '../../../../core/utils/country_flag_helper.dart';
 import '../../../../data/models/visa_model.dart';
 import '../../../../data/repositories/visa_repository.dart';
 import '../../../../shared/presentation/widgets/app_navbar.dart';
@@ -700,7 +701,10 @@ class _VisaDestinationCardState extends State<VisaDestinationCard> {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: AppColors.royalBlue.withValues(alpha: 0.2)),
                     ),
-                    child: Text(s.flagEmoji, style: const TextStyle(fontSize: 26)),
+                    child: Text(
+                      CountryFlagHelper.getFlag(s.country, s.flagEmoji),
+                      style: const TextStyle(fontSize: 26),
+                    ),
                   ),
                   if (s.price > 0)
                     Container(

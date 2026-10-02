@@ -162,6 +162,54 @@ CREATE TABLE IF NOT EXISTS public.partners (
     active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+-- ── 13. AIRPORT TRANSFER VEHICLES TABLE ────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.transfer_vehicles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    vehicle_name TEXT NOT NULL,
+    vehicle_name_ar TEXT,
+    vehicle_type TEXT NOT NULL DEFAULT 'sedan',
+    image_url TEXT,
+    passenger_capacity INTEGER NOT NULL DEFAULT 3,
+    luggage_capacity INTEGER NOT NULL DEFAULT 2,
+    supported_transfer_types JSONB NOT NULL DEFAULT '["airport_to_hotel","hotel_to_airport","airport_to_airport","custom"]'::jsonb,
+    base_price NUMERIC NOT NULL DEFAULT 45.0,
+    currency TEXT NOT NULL DEFAULT 'USD',
+    estimated_duration TEXT NOT NULL DEFAULT '45-60 mins',
+    features JSONB DEFAULT '["Flight Tracking","Meet & Greet with Name Board","Free 60 min Wait Time","Air Conditioned","Complimentary Bottled Water"]'::jsonb,
+    features_ar JSONB,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ── 14. AIRPORT TRANSFER BOOKINGS TABLE ────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.transfer_bookings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    vehicle_id UUID REFERENCES public.transfer_vehicles(id) ON DELETE SET NULL,
+    vehicle_type TEXT NOT NULL,
+    vehicle_name TEXT,
+    transfer_type TEXT NOT NULL CHECK (transfer_type IN ('airport_to_hotel', 'hotel_to_airport', 'airport_to_airport', 'custom')),
+    pickup_location TEXT NOT NULL,
+    dropoff_location TEXT NOT NULL,
+    pickup_date DATE NOT NULL,
+    pickup_time TEXT NOT NULL,
+    passengers_count INTEGER NOT NULL DEFAULT 1,
+    adults_count INTEGER NOT NULL DEFAULT 1 CHECK (adults_count >= 1),
+    children_count INTEGER NOT NULL DEFAULT 0 CHECK (children_count >= 0),
+    children_ages JSONB DEFAULT '[]'::jsonb,
+    luggage_count INTEGER NOT NULL DEFAULT 1 CHECK (luggage_count >= 0),
+    total_price NUMERIC NOT NULL DEFAULT 0.0,
+    currency TEXT NOT NULL DEFAULT 'USD',
+    customer_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    flight_number TEXT,
+    special_requests TEXT,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'in_progress', 'completed', 'cancelled')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- ── AUTOMATIC UPDATED_AT TRIGGER FUNCTION ─────────────────────────────────────
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER AS $$
@@ -406,6 +454,47 @@ CREATE POLICY "Admins can manage partners"
     USING (public.is_admin())
     WITH CHECK (public.is_admin());
 
+-- 13. Transfer Vehicles Policies
+ALTER TABLE public.transfer_vehicles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can view active transfer vehicles" ON public.transfer_vehicles;
+CREATE POLICY "Public can view active transfer vehicles"
+    ON public.transfer_vehicles FOR SELECT
+    USING (active = TRUE OR public.is_staff_or_admin());
+
+DROP POLICY IF EXISTS "Admins can manage transfer vehicles" ON public.transfer_vehicles;
+CREATE POLICY "Admins can manage transfer vehicles"
+    ON public.transfer_vehicles FOR ALL
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+
+-- 14. Transfer Bookings Policies
+ALTER TABLE public.transfer_bookings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can create transfer booking" ON public.transfer_bookings;
+CREATE POLICY "Public can create transfer booking"
+    ON public.transfer_bookings FOR INSERT
+    WITH CHECK (
+        status = 'pending' AND
+        customer_name IS NOT NULL AND
+        email IS NOT NULL AND
+        phone IS NOT NULL
+    );
+
+DROP POLICY IF EXISTS "Staff and Admins can view transfer bookings" ON public.transfer_bookings;
+CREATE POLICY "Staff and Admins can view transfer bookings"
+    ON public.transfer_bookings FOR SELECT
+    USING (public.is_staff_or_admin());
+
+DROP POLICY IF EXISTS "Staff and Admins can update transfer bookings" ON public.transfer_bookings;
+CREATE POLICY "Staff and Admins can update transfer bookings"
+    ON public.transfer_bookings FOR UPDATE
+    USING (public.is_staff_or_admin())
+    WITH CHECK (public.is_staff_or_admin());
+
+DROP POLICY IF EXISTS "Admins can delete transfer bookings" ON public.transfer_bookings;
+CREATE POLICY "Admins can delete transfer bookings"
+    ON public.transfer_bookings FOR DELETE
+    USING (public.is_admin());
+
 -- ── STORAGE BUCKETS SETUP & STORAGE RLS POLICIES ─────────────────────────────
 
 INSERT INTO storage.buckets (id, name, public)
@@ -415,21 +504,22 @@ VALUES
     ('hotel-images', 'hotel-images', true),
     ('gallery-images', 'gallery-images', true),
     ('blog-images', 'blog-images', true),
-    ('partner-logos', 'partner-logos', true)
+    ('partner-logos', 'partner-logos', true),
+    ('transfer-images', 'transfer-images', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Public can read any objects from these public buckets
 DROP POLICY IF EXISTS "Public read storage images" ON storage.objects;
 CREATE POLICY "Public read storage images"
     ON storage.objects FOR SELECT
-    USING (bucket_id IN ('tour-images', 'destination-images', 'hotel-images', 'gallery-images', 'blog-images', 'partner-logos'));
+    USING (bucket_id IN ('tour-images', 'destination-images', 'hotel-images', 'gallery-images', 'blog-images', 'partner-logos', 'transfer-images'));
 
 -- Admins can insert/upload objects
 DROP POLICY IF EXISTS "Admins insert storage images" ON storage.objects;
 CREATE POLICY "Admins insert storage images"
     ON storage.objects FOR INSERT
     WITH CHECK (
-        bucket_id IN ('tour-images', 'destination-images', 'hotel-images', 'gallery-images', 'blog-images', 'partner-logos')
+        bucket_id IN ('tour-images', 'destination-images', 'hotel-images', 'gallery-images', 'blog-images', 'partner-logos', 'transfer-images')
         AND (public.is_admin() OR public.is_staff_or_admin())
     );
 

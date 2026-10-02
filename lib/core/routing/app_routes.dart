@@ -29,6 +29,9 @@ class AppRoutes {
   static const String flightInquiry = '/flight-inquiry';
   static const String flightInquiryName = 'flight-inquiry';
 
+  static const String airportTransfers = '/airport-transfers';
+  static const String airportTransfersName = 'airport-transfers';
+
   static const String hotels = '/hotels';
   static const String hotelsName = 'hotels';
 
@@ -86,6 +89,9 @@ class AppRoutes {
 
   static const String adminPartners = '/admin/partners';
   static const String adminPartnersName = 'admin-partners';
+
+  static const String adminTransfers = '/admin/transfers';
+  static const String adminTransfersName = 'admin-transfers';
 
   static const String adminBookings = '/admin/bookings';
   static const String adminBookingsName = 'admin-bookings';

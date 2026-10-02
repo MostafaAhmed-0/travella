@@ -15,6 +15,7 @@ import 'package:travella/data/repositories/blog_repository.dart';
 import 'package:travella/data/repositories/testimonial_repository.dart';
 import 'package:travella/data/repositories/partner_repository.dart';
 import 'package:travella/data/repositories/storage_repository.dart';
+import 'package:travella/data/repositories/airport_transfer_repository.dart';
 import 'package:travella/data/services/supabase_service.dart';
 import 'package:travella/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:travella/features/bookings/presentation/cubit/booking_cubit.dart';
@@ -50,6 +51,7 @@ class _TravellaAppState extends State<TravellaApp> {
   late final TestimonialRepository _testimonialRepository;
   late final PartnerRepository _partnerRepository;
   late final StorageRepository _storageRepository;
+  late final AirportTransferRepository _transferRepository;
 
   // Root Cubits
   late final AuthCubit _authCubit;
@@ -74,6 +76,7 @@ class _TravellaAppState extends State<TravellaApp> {
     _testimonialRepository = TestimonialRepository();
     _partnerRepository = PartnerRepository();
     _storageRepository = StorageRepositoryImpl();
+    _transferRepository = AirportTransferRepository();
 
     // Instantiate Cubits
     _authCubit = AuthCubit(authRepository: _authRepository);
@@ -109,6 +112,7 @@ class _TravellaAppState extends State<TravellaApp> {
         RepositoryProvider<TestimonialRepository>.value(value: _testimonialRepository),
         RepositoryProvider<PartnerRepository>.value(value: _partnerRepository),
         RepositoryProvider<StorageRepository>.value(value: _storageRepository),
+        RepositoryProvider<AirportTransferRepository>.value(value: _transferRepository),
       ],
       child: MultiBlocProvider(
         providers: [

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../core/utils/country_flag_helper.dart';
 
 /// Model for visa requirement items matching Supabase public.visa_requirements table
 class VisaRequirementModel extends Equatable {
@@ -79,7 +80,7 @@ class VisaServiceModel extends Equatable {
     this.updatedAt,
     this.requirements = const [],
     this.region = 'International',
-    this.flagEmoji = '✈️',
+    this.flagEmoji = '🏳️',
     this.validity = '90 Days',
     this.stayDuration = '30 Days',
     this.requiredDocuments = const [
@@ -184,7 +185,10 @@ class VisaServiceModel extends Equatable {
           : null,
       requirements: reqs,
       region: json['region'] as String? ?? 'International',
-      flagEmoji: json['flag_emoji'] as String? ?? '✈️',
+      flagEmoji: CountryFlagHelper.getFlag(
+        json['country'] as String? ?? json['country_name'] as String? ?? '',
+        json['flag_emoji'] as String?,
+      ),
       validity: json['validity'] as String? ?? '90 Days',
       stayDuration: json['stay_duration'] as String? ?? '30 Days',
       requiredDocuments: docList,

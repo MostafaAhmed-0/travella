@@ -309,7 +309,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
           ),
           const SizedBox(width: 8),
           _TabButton(
-            icon: Icons.article_rounded,
+            icon: Icons.flag_rounded,
             label: context.tr('tab_visa'),
             isSelected: _selectedTab == PlannerTab.visa,
             onTap: () => setState(() => _selectedTab = PlannerTab.visa),
@@ -536,7 +536,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
           child: _FieldBox(
             label: context.tr('field_country'),
             value: _visaCountry,
-            icon: Icons.public_rounded,
+            icon: Icons.flag_rounded,
             onTap: _showVisaCountryPicker,
           ),
         ),
@@ -823,7 +823,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
               child: _FieldBox(
                 label: context.tr('field_country'),
                 value: _visaCountry,
-                icon: Icons.public_rounded,
+                icon: Icons.flag_rounded,
                 onTap: _showVisaCountryPicker,
               ),
             ),

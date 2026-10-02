@@ -11,6 +11,7 @@ import '../../../../data/repositories/hotel_repository.dart';
 import '../../../../data/repositories/gallery_repository.dart';
 import '../../../../data/repositories/blog_repository.dart';
 import '../../../../data/repositories/partner_repository.dart';
+import '../../../../data/repositories/airport_transfer_repository.dart';
 import '../../../../data/repositories/testimonial_repository.dart';
 import '../../../../data/repositories/visa_repository.dart';
 import '../../../../data/repositories/storage_repository.dart';
@@ -23,6 +24,7 @@ import '../cubit/admin_gallery_cubit.dart';
 import '../cubit/admin_blogs_cubit.dart';
 import '../cubit/admin_testimonials_cubit.dart';
 import '../cubit/admin_partners_cubit.dart';
+import '../cubit/admin_transfers_cubit.dart';
 import '../cubit/admin_bookings_cubit.dart';
 import '../widgets/admin_top_bar.dart';
 import '../widgets/admin_sidebar.dart';
@@ -62,6 +64,8 @@ class _AdminShellPageState extends State<AdminShellPage> {
         return 'Testimonials & Reviews';
       case AppRoutes.adminPartnersName:
         return 'Partners & Affiliates';
+      case AppRoutes.adminTransfersName:
+        return 'Airport Transfers';
       case AppRoutes.adminBookingsName:
         return 'Bookings & Reservations';
       case AppRoutes.adminCustomersName:
@@ -132,6 +136,11 @@ class _AdminShellPageState extends State<AdminShellPage> {
         BlocProvider<AdminPartnersCubit>(
           create: (ctx) => AdminPartnersCubit(
             partnerRepository: ctx.read<PartnerRepository>(),
+          ),
+        ),
+        BlocProvider<AdminTransfersCubit>(
+          create: (ctx) => AdminTransfersCubit(
+            transferRepository: ctx.read<AirportTransferRepository>(),
           ),
         ),
         BlocProvider<AdminBookingsCubit>(

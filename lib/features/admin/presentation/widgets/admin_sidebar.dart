@@ -24,6 +24,7 @@ class AdminSidebar extends StatelessWidget {
     ('Blogs', Icons.edit_note_rounded, AppRoutes.adminBlogName, null),
     ('Testimonials', Icons.reviews_rounded, AppRoutes.adminTestimonialsName, null),
     ('Partners', Icons.handshake_rounded, AppRoutes.adminPartnersName, null),
+    ('Airport Transfers', Icons.airport_shuttle_rounded, AppRoutes.adminTransfersName, null),
     ('Bookings', Icons.calendar_month_rounded, AppRoutes.adminBookingsName, 'New'),
     ('Customers', Icons.people_alt_rounded, AppRoutes.adminCustomersName, null),
     ('Settings', Icons.settings_rounded, AppRoutes.adminSettingsName, null),

@@ -9,6 +9,8 @@ import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/animations/animation_widgets.dart';
 import '../../../../core/localization/app_translations.dart';
+import '../../../../core/utils/country_flag_helper.dart';
+import '../../../../core/utils/file_picker_service.dart';
 import '../../../../data/models/visa_model.dart';
 import '../../../../data/repositories/visa_repository.dart';
 import '../../../../data/repositories/storage_repository.dart';
@@ -318,7 +320,7 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
                     value: v.validity,
                   ),
                   _specBadge(
-                    icon: Icons.flight_land_rounded,
+                    icon: Icons.flag_rounded,
                     label: isArabic ? 'مدة الإقامة' : 'Stay Duration',
                     value: v.stayDuration,
                   ),
@@ -647,8 +649,11 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
   final _passportNumberCtrl = TextEditingController();
   DateTime _dob = DateTime(1995, 5, 15);
 
-  // Step 5: Documents (Storage path or URL map)
+  // Step 5: Documents (Storage path or URL map & local previews)
   final Map<String, String> _uploadedDocuments = {};
+  final Map<String, String> _uploadedFileNames = {};
+  final Map<String, Uint8List> _uploadedFileBytes = {};
+  final Map<String, int> _uploadedFileSizes = {};
   bool _isUploadingDoc = false;
   String? _uploadingDocName;
 
@@ -687,29 +692,46 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
     super.dispose();
   }
 
-  Future<void> _simulateUploadDocument(String docKey) async {
-    setState(() {
-      _isUploadingDoc = true;
-      _uploadingDocName = docKey;
-    });
-
+  Future<void> _handlePickAndUploadDocument(String docKey, {bool isImageOnly = false}) async {
     try {
-      // In web/desktop without native file picker package, simulate document bytes creation & upload to Supabase
-      final dummyBytes = Uint8List.fromList(
-        'TRAVELLA_ENCRYPTED_DOC_${docKey}_${DateTime.now().millisecondsSinceEpoch}'.codeUnits,
+      final picked = await UniversalFilePicker.pickFile(
+        accept: isImageOnly ? 'image/*' : 'image/*,application/pdf,.pdf,.jpg,.jpeg,.png,.webp',
+        allowedExtensions: isImageOnly ? ['jpg', 'jpeg', 'png', 'webp'] : ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
       );
-      final filename = '${docKey.toLowerCase().replaceAll(' ', '_')}.pdf';
+
+      if (picked == null) return;
+
+      setState(() {
+        _isUploadingDoc = true;
+        _uploadingDocName = docKey;
+      });
+
+      final userPassport = _passportNumberCtrl.text.trim().isNotEmpty
+          ? _passportNumberCtrl.text.trim()
+          : 'applicant-${DateTime.now().millisecondsSinceEpoch}';
       final currentUser = SupabaseService.currentUser;
+      final userId = currentUser?.id ?? userPassport;
+
+      final cleanKey = docKey.toLowerCase().replaceAll(' ', '_');
+      final ext = picked.name.contains('.') ? picked.name.split('.').last : (isImageOnly ? 'jpg' : 'pdf');
+      final filename = '${cleanKey}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+
+      // Detect correct MIME type so browser renders PDF/images properly
+      final contentType = _mimeFromExtension(ext);
 
       final url = await _storageRepo.uploadVisaDocument(
-        dummyBytes,
+        picked.bytes,
         filename,
-        userId: currentUser?.id ?? 'applicant-${_passportNumberCtrl.text.trim()}',
+        userId: userId,
+        contentType: contentType,
       );
 
       if (mounted) {
         setState(() {
           _uploadedDocuments[docKey] = url;
+          _uploadedFileNames[docKey] = picked.name;
+          _uploadedFileBytes[docKey] = picked.bytes;
+          _uploadedFileSizes[docKey] = picked.size;
           _isUploadingDoc = false;
           _uploadingDocName = null;
         });
@@ -717,13 +739,42 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          // Fallback to secure ref url
-          _uploadedDocuments[docKey] = 'https://supabase.co/storage/visa-docs/${widget.service.id}/$docKey.pdf';
           _isUploadingDoc = false;
           _uploadingDocName = null;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload failed: ${e.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: AppColors.errorRed,
+          ),
+        );
       }
     }
+  }
+
+  /// Returns the MIME type for a given file extension.
+  String _mimeFromExtension(String ext) {
+    switch (ext.toLowerCase()) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'jpg':
+      case 'jpeg':
+      default:
+        return 'image/jpeg';
+    }
+  }
+
+  void _removeUploadedDocument(String docKey) {
+    setState(() {
+      _uploadedDocuments.remove(docKey);
+      _uploadedFileNames.remove(docKey);
+      _uploadedFileBytes.remove(docKey);
+      _uploadedFileSizes.remove(docKey);
+    });
   }
 
   Future<void> _submitFinalApplication() async {
@@ -1238,16 +1289,104 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
 
   // STEP 4: Applicant Information
   Widget _step4ApplicantInfo(bool isArabic, bool isMobile) {
+    final profileBytes = _uploadedFileBytes['Personal Photo'] ?? _uploadedFileBytes['Profile Picture'];
+    final profileUrl = _uploadedDocuments['Personal Photo'] ?? _uploadedDocuments['Profile Picture'];
+
     return Form(
       key: _formKeyApplicant,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isArabic ? 'الخطوة 4: البيانات الشخصية لمقدم الطلب' : 'Step 4: Applicant Personal Information',
+            isArabic ? 'الخطوة 4: البيانات الشخصية وصورة الحساب' : 'Step 4: Applicant Personal Information & Profile Photo',
             style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
+
+          // Profile Image Quick Upload Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceLight,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: profileUrl != null ? AppColors.successGreen : AppColors.royalBlue.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 34,
+                      backgroundColor: AppColors.royalBlueFaded,
+                      backgroundImage: profileBytes != null
+                          ? MemoryImage(profileBytes)
+                          : (profileUrl != null ? NetworkImage(profileUrl) as ImageProvider : null),
+                      child: profileBytes == null && profileUrl == null
+                          ? const Icon(Icons.person_rounded, size: 36, color: AppColors.royalBlue)
+                          : null,
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: InkWell(
+                        onTap: _isUploadingDoc ? null : () => _handlePickAndUploadDocument('Personal Photo', isImageOnly: true),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: AppColors.navy,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.camera_alt_rounded, size: 14, color: AppColors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isArabic ? 'الصورة الشخصية للتقديم (Image Profile)' : 'Applicant Profile Picture',
+                        style: AppTextStyles.labelMD.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        profileUrl != null
+                            ? (isArabic ? 'تم رفع وحفظ الصورة في Supabase Storage' : 'Profile photo stored in Supabase Storage')
+                            : (isArabic ? 'صورة رسمية حديثة بخلفية بيضاء (JPG / PNG)' : 'Recent clear photo with white background (JPG / PNG)'),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: profileUrl != null ? AppColors.successGreen : AppColors.textSecondary,
+                          fontWeight: profileUrl != null ? FontWeight.w600 : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: profileUrl != null ? AppColors.surfaceLight : AppColors.royalBlue,
+                    foregroundColor: profileUrl != null ? AppColors.navyDark : AppColors.white,
+                    side: profileUrl != null ? const BorderSide(color: AppColors.borderLight) : null,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  icon: Icon(profileUrl != null ? Icons.change_circle_outlined : Icons.upload_rounded, size: 14),
+                  label: Text(
+                    profileUrl != null
+                        ? (isArabic ? 'تغيير' : 'Change')
+                        : (isArabic ? 'رفع الصورة' : 'Upload Photo'),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: _isUploadingDoc ? null : () => _handlePickAndUploadDocument('Personal Photo', isImageOnly: true),
+                ),
+              ],
+            ),
+          ),
 
           // Full Name
           TextFormField(
@@ -1367,105 +1506,281 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
     );
   }
 
-  // STEP 5: Upload Documents to Supabase Storage
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
+  }
+
+  // STEP 5: Upload Documents & Images to Supabase Storage
   Widget _step5DocumentsUpload(bool isArabic) {
     final docsList = [
-      ('Passport', isArabic ? 'صورة جواز السفر الساري (6 أشهر فأكثر) *' : 'Valid Passport Copy (6+ months validity) *', true),
-      ('Personal Photo', isArabic ? 'صورة شخصية حديثة بخلفية بيضاء *' : 'Recent Personal Photo (White background) *', true),
-      ('Bank Statement', isArabic ? 'كشف حساب بنكي لآخر 3-6 أشهر' : 'Bank Statement (Last 3-6 months)', false),
-      ('Supporting Document', isArabic ? 'مستند إضافي (خطاب عمل / سجل تجاري / تذكرة)' : 'Supporting Proof (Employment / Reservation)', false),
+      (
+        'Passport',
+        isArabic ? 'جواز السفر (ملف PDF أو صورة الجواز)' : 'Passport (PDF File or Image Scan)',
+        isArabic ? 'صورة واضحة أو ملف PDF لصفحة البيانات بجواز السفر (ساري 6 أشهر فأكثر) *' : 'Clear scan or PDF of the passport bio page (6+ months validity) *',
+        Icons.badge_rounded,
+        false, // can be pdf or image
+        true,  // required
+      ),
+      (
+        'Personal Photo',
+        isArabic ? 'الصورة الشخصية (Profile Picture)' : 'Personal Profile Photo',
+        isArabic ? 'صورة شخصية حديثة بخلفية بيضاء بدقة عالية (JPG / PNG) *' : 'Recent high-resolution color portrait with white background *',
+        Icons.account_box_rounded,
+        true,  // image only
+        true,  // required
+      ),
+      (
+        'Bank Statement',
+        isArabic ? 'كشف الحساب البنكي' : 'Bank Statement',
+        isArabic ? 'كشف حساب رسمي لآخر 3-6 أشهر بصيغة PDF أو صور' : 'Official bank statement for the last 3-6 months (PDF or scans)',
+        Icons.account_balance_wallet_outlined,
+        false,
+        false,
+      ),
+      (
+        'Supporting Document',
+        isArabic ? 'مستند إضافي / حجز / خطاب عمل' : 'Supporting Proof (Employment / Reservation)',
+        isArabic ? 'خطاب جهة العمل أو السجل التجاري أو حجز الطيران/الفندق' : 'Employment letter, commercial registration, or flight/hotel voucher',
+        Icons.attachment_rounded,
+        false,
+        false,
+      ),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isArabic ? 'الخطوة 5: رفع المستندات المطلوبة' : 'Step 5: Upload Required Documents',
+          isArabic ? 'الخطوة 5: رفع المستندات والجواز والصورة إلى Supabase' : 'Step 5: Upload Passport, Profile Photo & Documents',
           style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
         Text(
           isArabic
-              ? 'يتم تخزين جميع المستندات بأمان ومشفرة على سحابة Supabase Storage.'
-              : 'All files are securely stored in Supabase Storage with strict RLS policies.',
+              ? 'يتم رفع وتشفير جميع الصور والملفات مباشرة إلى سحابة Supabase Storage في مجلد آمن.'
+              : 'Files and photos are directly uploaded and encrypted in Supabase Storage.',
           style: const TextStyle(color: AppColors.gray600, fontSize: 12),
         ),
         const SizedBox(height: 16),
 
+        // Live Uploading Banner
         if (_isUploadingDoc)
           Container(
             padding: const EdgeInsets.all(14),
-            margin: const EdgeInsets.only(bottom: 14),
+            margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
               color: AppColors.royalBlueFaded,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.royalBlue.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
                 const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.royalBlue),
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.royalBlue),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  isArabic
-                      ? 'جاري رفع $_uploadingDocName إلى سوبابيس...'
-                      : 'Uploading $_uploadingDocName to Supabase Storage...',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.royalBlue),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    isArabic
+                        ? 'جاري رفع $_uploadingDocName إلى سحابة Supabase Storage...'
+                        : 'Uploading $_uploadingDocName to Supabase Storage...',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.royalBlueDark),
+                  ),
                 ),
               ],
             ),
           ),
 
+        // List of Document Cards
         ...docsList.map((doc) {
-          final isUploaded = _uploadedDocuments.containsKey(doc.$1);
-          final url = _uploadedDocuments[doc.$1];
+          final key = doc.$1;
+          final title = doc.$2;
+          final subtitle = doc.$3;
+          final icon = doc.$4;
+          final isImageOnly = doc.$5;
+          final isRequired = doc.$6;
+
+          final isUploaded = _uploadedDocuments.containsKey(key);
+          final url = _uploadedDocuments[key];
+          final fileName = _uploadedFileNames[key];
+          final fileBytes = _uploadedFileBytes[key];
+          final fileSize = _uploadedFileSizes[key];
 
           return Container(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsets.only(bottom: 14),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isUploaded ? AppColors.successGreen.withValues(alpha: 0.06) : AppColors.surfaceLight,
-              borderRadius: BorderRadius.circular(14),
+              color: isUploaded ? AppColors.successGreen.withValues(alpha: 0.05) : AppColors.surfaceLight,
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isUploaded ? AppColors.successGreen : AppColors.borderLight,
+                width: isUploaded ? 1.5 : 1.0,
               ),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  isUploaded ? Icons.verified_rounded : Icons.cloud_upload_outlined,
-                  color: isUploaded ? AppColors.successGreen : AppColors.royalBlue,
-                  size: 24,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(doc.$2, style: AppTextStyles.bodySM.copyWith(fontWeight: FontWeight.bold)),
-                      if (isUploaded)
-                        Text(
-                          isArabic ? 'تم الرفع والتأمين بنجاح' : 'Stored in Supabase bucket: visa-documents',
-                          style: const TextStyle(fontSize: 11, color: AppColors.successGreen),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Thumbnail or Icon Preview
+                    if (isUploaded && fileBytes != null && (isImageOnly || (fileName != null && !fileName.endsWith('.pdf'))))
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.memory(
+                          fileBytes,
+                          width: 48,
+                          height: 48,
+                          fit: BoxFit.cover,
                         ),
-                    ],
-                  ),
+                      )
+                    else
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: isUploaded ? AppColors.successGreen.withValues(alpha: 0.15) : AppColors.royalBlueFaded,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          isUploaded ? Icons.check_circle_rounded : icon,
+                          color: isUploaded ? AppColors.successGreen : AppColors.royalBlue,
+                          size: 24,
+                        ),
+                      ),
+                    const SizedBox(width: 14),
+
+                    // Details
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  title,
+                                  style: AppTextStyles.labelLG.copyWith(fontWeight: FontWeight.bold, color: AppColors.navyDark),
+                                ),
+                              ),
+                              if (isRequired && !isUploaded)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.gold.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    isArabic ? 'مطلوب' : 'Required',
+                                    style: const TextStyle(color: AppColors.goldDark, fontSize: 10, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            subtitle,
+                            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                          ),
+                          if (isUploaded) ...[
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 4,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.successGreen.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.cloud_done_rounded, size: 12, color: AppColors.successGreen),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        isArabic ? 'تم الرفع إلى Supabase' : 'Uploaded to Supabase',
+                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.successGreen),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (fileName != null)
+                                  Text(
+                                    fileName,
+                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.navyDark),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                if (fileSize != null)
+                                  Text(
+                                    '(${_formatFileSize(fileSize)})',
+                                    style: const TextStyle(fontSize: 11, color: AppColors.gray600),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isUploaded ? AppColors.white : AppColors.navy,
-                    foregroundColor: isUploaded ? AppColors.successGreen : AppColors.white,
-                    side: isUploaded ? const BorderSide(color: AppColors.successGreen) : null,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  ),
-                  icon: Icon(isUploaded ? Icons.check : Icons.upload_file, size: 14),
-                  label: Text(
-                    isUploaded ? (isArabic ? 'تم الرفع' : 'Uploaded') : (isArabic ? 'رفع الملف' : 'Upload'),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: _isUploadingDoc ? null : () => _simulateUploadDocument(doc.$1),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: AppColors.borderLight),
+                const SizedBox(height: 10),
+
+                // Actions Bar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (isUploaded) ...[
+                      TextButton.icon(
+                        icon: const Icon(Icons.delete_outline_rounded, size: 16, color: AppColors.errorRed),
+                        label: Text(
+                          isArabic ? 'إزالة' : 'Remove',
+                          style: const TextStyle(color: AppColors.errorRed, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: () => _removeUploadedDocument(key),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.white,
+                          foregroundColor: AppColors.royalBlue,
+                          side: const BorderSide(color: AppColors.royalBlue),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        ),
+                        icon: const Icon(Icons.refresh_rounded, size: 14),
+                        label: Text(
+                          isArabic ? 'تغيير الملف' : 'Replace File',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: _isUploadingDoc ? null : () => _handlePickAndUploadDocument(key, isImageOnly: isImageOnly),
+                      ),
+                    ] else
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.navy,
+                          foregroundColor: AppColors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        icon: Icon(isImageOnly ? Icons.add_photo_alternate_rounded : Icons.upload_file_rounded, size: 16),
+                        label: Text(
+                          isImageOnly
+                              ? (isArabic ? 'اختيار ورفع الصورة' : 'Upload Profile Photo')
+                              : (isArabic ? 'اختيار ورفع الملف' : 'Upload File / Image'),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: _isUploadingDoc ? null : () => _handlePickAndUploadDocument(key, isImageOnly: isImageOnly),
+                      ),
+                  ],
                 ),
               ],
             ),
@@ -1477,11 +1792,14 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
 
   // STEP 6: Review Application
   Widget _step6Review(bool isArabic) {
+    final profileBytes = _uploadedFileBytes['Personal Photo'] ?? _uploadedFileBytes['Profile Picture'];
+    final profileUrl = _uploadedDocuments['Personal Photo'] ?? _uploadedDocuments['Profile Picture'];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isArabic ? 'الخطوة 6: مراجعة وتأكيد بيانات الطلب' : 'Step 6: Review Application Summary',
+          isArabic ? 'الخطوة 6: مراجعة وتأكيد بيانات الطلب والمستندات' : 'Step 6: Review Application & Uploaded Files',
           style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
@@ -1500,7 +1818,7 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
         _reviewSection(
           title: isArabic ? 'بيانات التأشيرة' : 'Visa Specifications',
           items: [
-            ('Destination', _destination),
+            ('Destination', '${CountryFlagHelper.getFlag(_destination)} $_destination'),
             ('Visa Type', _visaType),
             ('Estimated Service Fee', '\$${widget.service.price.toInt()}'),
           ],
@@ -1517,29 +1835,118 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
         ),
         const SizedBox(height: 14),
 
-        _reviewSection(
-          title: isArabic ? 'بيانات مقدم الطلب' : 'Applicant Details',
-          items: [
-            ('Full Name', _fullNameCtrl.text.trim()),
-            ('Email', _emailCtrl.text.trim()),
-            ('Phone / WhatsApp', _phoneCtrl.text.trim()),
-            ('Nationality', _nationalityCtrl.text.trim()),
-            ('Passport Number', _passportNumberCtrl.text.trim()),
-            ('Date of Birth', _dateFormat.format(_dob)),
-          ],
+        // Applicant & Profile Picture Review Box
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceLight,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    isArabic ? 'بيانات مقدم الطلب' : 'Applicant Details',
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.navyDark, fontSize: 13),
+                  ),
+                  if (profileBytes != null || profileUrl != null)
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundImage: profileBytes != null
+                          ? MemoryImage(profileBytes)
+                          : (profileUrl != null ? NetworkImage(profileUrl) as ImageProvider : null),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              _reviewRow('Full Name', _fullNameCtrl.text.trim()),
+              _reviewRow('Email', _emailCtrl.text.trim()),
+              _reviewRow('Phone / WhatsApp', _phoneCtrl.text.trim()),
+              _reviewRow('Nationality', _nationalityCtrl.text.trim()),
+              _reviewRow('Passport Number', _passportNumberCtrl.text.trim()),
+              _reviewRow('Date of Birth', _dateFormat.format(_dob)),
+            ],
+          ),
         ),
         const SizedBox(height: 14),
 
-        _reviewSection(
-          title: isArabic ? 'المستندات المرفوعة' : 'Uploaded Documents',
-          items: [
-            ('Files Attached', '${_uploadedDocuments.length} document(s) uploaded to Supabase Storage'),
-            ('Initial Status', 'Pending Review (قيد الانتظار)'),
-          ],
+        // Uploaded Documents Review
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceLight,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isArabic ? 'المستندات المحفوظة على Supabase Storage' : 'Attached Documents (Supabase Storage)',
+                style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.navyDark, fontSize: 13),
+              ),
+              const SizedBox(height: 8),
+              if (_uploadedDocuments.isEmpty)
+                Text(
+                  isArabic ? 'لم يتم رفع مستندات بعد' : 'No documents uploaded yet.',
+                  style: const TextStyle(color: AppColors.errorRed, fontSize: 12),
+                )
+              else
+                ..._uploadedDocuments.entries.map((e) {
+                  final fileName = _uploadedFileNames[e.key] ?? 'Document file';
+                  final size = _uploadedFileSizes[e.key];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 14),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${e.key}: ',
+                              style: const TextStyle(color: AppColors.navyDark, fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            Text(
+                              fileName,
+                              style: const TextStyle(color: AppColors.gray700, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        if (size != null)
+                          Text(
+                            _formatFileSize(size),
+                            style: const TextStyle(color: AppColors.gray600, fontSize: 11),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
+            ],
+          ),
         ),
       ],
     );
   }
+
+  Widget _reviewRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: AppColors.gray600, fontSize: 12)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
 
   // STEP 7: Success Screen
   Widget _step7Success(bool isArabic) {

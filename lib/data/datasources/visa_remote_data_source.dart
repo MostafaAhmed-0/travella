@@ -167,7 +167,11 @@ class VisaRemoteDataSourceImpl implements VisaRemoteDataSource {
   @override
   Future<VisaApplicationModel> createVisaApplication(VisaApplicationModel application) async {
     try {
-      final map = application.toJson()..remove('id');
+      // Remove server-managed fields from the insert payload
+      final map = application.toJson()
+        ..remove('id')
+        ..remove('created_at')
+        ..remove('updated_at');
       final response = await _client
           .from(SupabaseService.tableVisaApplications)
           .insert(map)
@@ -175,9 +179,7 @@ class VisaRemoteDataSourceImpl implements VisaRemoteDataSource {
           .single();
       return VisaApplicationModel.fromJson(response);
     } catch (e) {
-      // If table doesn't exist yet or connection error, generate client-side timestamped record
-      final genId = 'app-${DateTime.now().millisecondsSinceEpoch}';
-      return application.copyWith(id: genId);
+      throw Exception(SupabaseService.handleError(e));
     }
   }
 

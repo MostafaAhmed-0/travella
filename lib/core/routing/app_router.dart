@@ -18,6 +18,7 @@ import '../../features/admin/presentation/pages/admin_gallery_page.dart';
 import '../../features/admin/presentation/pages/admin_blogs_page.dart';
 import '../../features/admin/presentation/pages/admin_testimonials_page.dart';
 import '../../features/admin/presentation/pages/admin_partners_page.dart';
+import '../../features/admin/presentation/pages/admin_transfers_page.dart';
 import '../../features/admin/presentation/pages/admin_bookings_page.dart';
 import '../../features/admin/presentation/pages/admin_customers_page.dart';
 import '../../features/admin/presentation/pages/admin_settings_page.dart';
@@ -28,6 +29,7 @@ import '../../features/visa_services/presentation/pages/visa_services_page.dart'
 import '../../features/visa_services/presentation/pages/visa_details_page.dart';
 import '../../features/flights/presentation/pages/flights_page.dart';
 import '../../features/flights/data/models/flight_models.dart';
+import '../../features/airport_transfers/presentation/pages/airport_transfers_page.dart';
 import '../../features/hotels/presentation/pages/hotels_page.dart';
 import '../../features/hajj_umrah/presentation/pages/hajj_umrah_page.dart';
 import '../../features/gallery/presentation/pages/gallery_page.dart';
@@ -160,6 +162,20 @@ class AppRouter {
               child: FlightsPage(initialQuery: query),
             );
           },
+        ),
+        GoRoute(
+          path: AppRoutes.airportTransfers,
+          name: AppRoutes.airportTransfersName,
+          pageBuilder: (context, state) => buildPageTransition(
+            key: state.pageKey,
+            child: AirportTransfersPage(
+              initialPickup: state.uri.queryParameters['pickup'],
+              initialDropoff: state.uri.queryParameters['dropoff'],
+              initialType: state.uri.queryParameters['type'],
+              initialAdults: int.tryParse(state.uri.queryParameters['adults'] ?? ''),
+              initialChildren: int.tryParse(state.uri.queryParameters['children'] ?? ''),
+            ),
+          ),
         ),
         GoRoute(
           path: AppRoutes.hotels,
@@ -337,6 +353,14 @@ class AppRouter {
               pageBuilder: (context, state) => buildPageTransition(
                 key: state.pageKey,
                 child: const AdminPartnersPage(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.adminTransfers,
+              name: AppRoutes.adminTransfersName,
+              pageBuilder: (context, state) => buildPageTransition(
+                key: state.pageKey,
+                child: const AdminTransfersPage(),
               ),
             ),
             GoRoute(
