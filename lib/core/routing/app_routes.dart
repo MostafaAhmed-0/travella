@@ -12,6 +12,9 @@ class AppRoutes {
   static const String destinations = '/destinations';
   static const String destinationsName = 'destinations';
 
+  static const String tours = '/tours';
+  static const String toursName = 'tours';
+
   static const String domesticTours = '/domestic-tours';
   static const String domesticToursName = 'domestic-tours';
 

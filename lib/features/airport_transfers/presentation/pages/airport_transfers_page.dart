@@ -25,6 +25,9 @@ class AirportTransfersPage extends StatelessWidget {
   final String? initialType;
   final int? initialAdults;
   final int? initialChildren;
+  final String? initialDate;
+  final String? initialTime;
+  final String? initialChildAges;
 
   const AirportTransfersPage({
     super.key,
@@ -33,6 +36,9 @@ class AirportTransfersPage extends StatelessWidget {
     this.initialType,
     this.initialAdults,
     this.initialChildren,
+    this.initialDate,
+    this.initialTime,
+    this.initialChildAges,
   });
 
   @override
@@ -53,11 +59,26 @@ class AirportTransfersPage extends StatelessWidget {
           cubit.updateTransferType(TransferType.fromString(initialType));
         }
 
-        if (initialAdults != null || initialChildren != null) {
+        if (initialDate != null || initialTime != null) {
+          final parsedDate = initialDate != null
+              ? DateTime.tryParse(initialDate!) ?? cubit.state.pickupDate
+              : cubit.state.pickupDate;
+          final parsedTime = initialTime ?? cubit.state.pickupTime;
+          cubit.updateDateTime(date: parsedDate, time: parsedTime);
+        }
+
+        if (initialAdults != null || initialChildren != null || initialChildAges != null) {
+          List<int> childAgesList = [];
+          if (initialChildAges != null && initialChildAges!.isNotEmpty) {
+            childAgesList = initialChildAges!
+                .split(',')
+                .map((e) => int.tryParse(e.trim()) ?? 6)
+                .toList();
+          }
           cubit.updatePassengers(TravelerSelection(
             adults: initialAdults ?? 2,
-            children: initialChildren ?? 0,
-            childAges: const [],
+            children: initialChildren ?? (childAgesList.isNotEmpty ? childAgesList.length : 0),
+            childAges: childAgesList,
           ));
         }
 

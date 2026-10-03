@@ -89,6 +89,17 @@ class AppRouter {
           ),
         ),
         GoRoute(
+          path: AppRoutes.tours,
+          name: AppRoutes.toursName,
+          pageBuilder: (context, state) => buildPageTransition(
+            key: state.pageKey,
+            child: DestinationsPage(
+              initialQuery: state.uri.queryParameters['search'] ??
+                  state.uri.queryParameters['destination'],
+            ),
+          ),
+        ),
+        GoRoute(
           path: AppRoutes.domesticTours,
           name: AppRoutes.domesticToursName,
           pageBuilder: (context, state) => buildPageTransition(
@@ -174,6 +185,9 @@ class AppRouter {
               initialType: state.uri.queryParameters['type'],
               initialAdults: int.tryParse(state.uri.queryParameters['adults'] ?? ''),
               initialChildren: int.tryParse(state.uri.queryParameters['children'] ?? ''),
+              initialDate: state.uri.queryParameters['date'],
+              initialTime: state.uri.queryParameters['time'],
+              initialChildAges: state.uri.queryParameters['childAges'],
             ),
           ),
         ),

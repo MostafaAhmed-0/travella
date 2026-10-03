@@ -10,9 +10,9 @@ import '../../../../core/widgets/traveler_selector.dart';
 import '../../../../core/localization/app_translations.dart';
 import '../../../flights/data/models/flight_models.dart';
 
-enum PlannerTab { flights, hotels, tours, visa }
+enum PlannerTab { flights, hotels, tours, visa, transfers }
 
-/// Premium Floating Glassmorphic Travel Planner Bar
+/// Premium Floating Glassmorphic Travel Planner Bar with integrated quick-search entry points
 class TravelPlannerBar extends StatefulWidget {
   const TravelPlannerBar({super.key});
 
@@ -49,6 +49,14 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
   String _visaType = 'Tourist Visa';
   int _visaApplicants = 1;
   DateTime _visaTravelDate = DateTime.now().add(const Duration(days: 30));
+
+  // ── Transfers State ────────────────────────────────────────────────────────
+  String _transferPickup = 'Cairo International Airport (CAI)';
+  String _transferDropoff = 'New Cairo / 5th Settlement';
+  String _transferType = 'Airport Pickup';
+  DateTime _transferDate = DateTime.now().add(const Duration(days: 7));
+  TimeOfDay _transferTime = const TimeOfDay(hour: 14, minute: 0);
+  TravelerSelection _transferPassengers = const TravelerSelection(adults: 2, children: 0);
 
   final DateFormat _dateFormat = DateFormat('dd MMM yyyy');
 
@@ -157,6 +165,11 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
           _showValidationError(context.tr('val_err_checkout_before_in'));
           return;
         }
+        if (_hotelGuests.children > 0 &&
+            _hotelGuests.childAges.length < _hotelGuests.children) {
+          _showValidationError(context.tr('val_err_child_ages'));
+          return;
+        }
 
         final inStr = DateFormat('yyyy-MM-dd').format(_hotelCheckInDate);
         final outStr = DateFormat('yyyy-MM-dd').format(_hotelCheckOutDate);
@@ -183,8 +196,17 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
           _showValidationError(context.tr('val_err_dest_empty'));
           return;
         }
+        if (_tourDate.isBefore(today)) {
+          _showValidationError(context.tr('val_err_dep_past'));
+          return;
+        }
+        if (_tourTravelers.children > 0 &&
+            _tourTravelers.childAges.length < _tourTravelers.children) {
+          _showValidationError(context.tr('val_err_child_ages'));
+          return;
+        }
 
-        String targetRoute = AppRoutes.destinations;
+        String targetRoute = AppRoutes.tours;
         if (_tourCategory == 'Domestic') {
           targetRoute = AppRoutes.domesticTours;
         } else if (_tourCategory == 'International') {
@@ -200,7 +222,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
           path: targetRoute,
           queryParameters: {
             'destination': _tourDestination,
-            'category': _tourCategory,
+            if (_tourCategory != 'All') 'category': _tourCategory,
             'date': dateStr,
             'adults': _tourTravelers.adults.toString(),
             'children': _tourTravelers.children.toString(),
@@ -223,6 +245,47 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
             'country': _visaCountry,
             'visaType': _visaType,
             'applicants': _visaApplicants.toString(),
+          },
+        );
+
+        context.go(uri.toString());
+        break;
+
+      case PlannerTab.transfers:
+        if (_transferPickup.trim().isEmpty || _transferDropoff.trim().isEmpty) {
+          _showValidationError(context.tr('val_err_dest_empty'));
+          return;
+        }
+        if (_transferPickup.trim().toLowerCase() == _transferDropoff.trim().toLowerCase()) {
+          _showValidationError(context.tr('val_err_same_origin_dest'));
+          return;
+        }
+        if (_transferDate.isBefore(today)) {
+          _showValidationError(context.tr('val_err_dep_past'));
+          return;
+        }
+        if (_transferPassengers.children > 0 &&
+            _transferPassengers.childAges.length < _transferPassengers.children) {
+          _showValidationError(context.tr('val_err_child_ages'));
+          return;
+        }
+
+        final dateStr = DateFormat('yyyy-MM-dd').format(_transferDate);
+        final timeStr =
+            '${_transferTime.hour.toString().padLeft(2, '0')}:${_transferTime.minute.toString().padLeft(2, '0')}';
+        final agesStr = _transferPassengers.childAges.join(',');
+
+        final uri = Uri(
+          path: AppRoutes.airportTransfers,
+          queryParameters: {
+            'pickup': _transferPickup,
+            'dropoff': _transferDropoff,
+            'type': _transferType,
+            'date': dateStr,
+            'time': timeStr,
+            'adults': _transferPassengers.adults.toString(),
+            'children': _transferPassengers.children.toString(),
+            if (agesStr.isNotEmpty) 'childAges': agesStr,
           },
         );
 
@@ -314,6 +377,13 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
             isSelected: _selectedTab == PlannerTab.visa,
             onTap: () => setState(() => _selectedTab = PlannerTab.visa),
           ),
+          const SizedBox(width: 8),
+          _TabButton(
+            icon: Icons.airport_shuttle_rounded,
+            label: context.tr('tab_transfers'),
+            isSelected: _selectedTab == PlannerTab.transfers,
+            onTap: () => setState(() => _selectedTab = PlannerTab.transfers),
+          ),
         ],
       ),
     );
@@ -330,6 +400,8 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         return _buildDesktopToursFields();
       case PlannerTab.visa:
         return _buildDesktopVisaFields();
+      case PlannerTab.transfers:
+        return _buildDesktopTransfersFields();
     }
   }
 
@@ -405,7 +477,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         const SizedBox(width: 14),
 
         // Search Button
-        _buildSearchButton(context.tr('btn_search')),
+        _buildSearchButton(context.tr('btn_search_flights')),
       ],
     );
   }
@@ -463,7 +535,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         const SizedBox(width: 14),
 
         // Search Button
-        _buildSearchButton(context.tr('btn_search')),
+        _buildSearchButton(context.tr('btn_search_hotels')),
       ],
     );
   }
@@ -521,7 +593,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         const SizedBox(width: 14),
 
         // Search Button
-        _buildSearchButton(context.tr('btn_search')),
+        _buildSearchButton(context.tr('btn_search_tours')),
       ],
     );
   }
@@ -584,6 +656,77 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
     );
   }
 
+  Widget _buildDesktopTransfersFields() {
+    final isArabic = context.isArabic;
+    return Row(
+      children: [
+        // Pickup Location
+        Expanded(
+          flex: 3,
+          child: _FieldBox(
+            label: context.tr('field_pickup'),
+            value: _transferPickup,
+            icon: Icons.flight_land_rounded,
+            onTap: _showTransferPickupPicker,
+          ),
+        ),
+        const SizedBox(width: 10),
+
+        // Dropoff Location
+        Expanded(
+          flex: 3,
+          child: _FieldBox(
+            label: context.tr('field_dropoff'),
+            value: _transferDropoff,
+            icon: Icons.place_rounded,
+            onTap: _showTransferDropoffPicker,
+          ),
+        ),
+        const SizedBox(width: 10),
+
+        // Transfer Route Type
+        Expanded(
+          flex: 3,
+          child: _FieldBox(
+            label: context.tr('field_transfer_type'),
+            value: _transferType,
+            icon: Icons.directions_car_rounded,
+            onTap: _showTransferTypePicker,
+          ),
+        ),
+        const SizedBox(width: 10),
+
+        // Date & Time
+        Expanded(
+          flex: 3,
+          child: _FieldBox(
+            label: context.tr('field_transfer_date'),
+            value:
+                '${_dateFormat.format(_transferDate)} ${_transferTime.format(context)}',
+            icon: Icons.calendar_today_rounded,
+            onTap: _pickTransferDateTime,
+          ),
+        ),
+        const SizedBox(width: 10),
+
+        // Passengers
+        Expanded(
+          flex: 3,
+          child: _FieldBox(
+            label: context.tr('field_travelers'),
+            value: _transferPassengers.formattedSummary(isArabic: isArabic),
+            icon: Icons.people_alt_rounded,
+            onTap: _openTransferPassengersModal,
+          ),
+        ),
+        const SizedBox(width: 14),
+
+        // Search Button
+        _buildSearchButton(context.tr('btn_search_transfers')),
+      ],
+    );
+  }
+
   Widget _buildSearchButton(String label) {
     return ElevatedButton(
       onPressed: _onSearch,
@@ -624,6 +767,8 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         return _buildMobileTours();
       case PlannerTab.visa:
         return _buildMobileVisa();
+      case PlannerTab.transfers:
+        return _buildMobileTransfers();
     }
   }
 
@@ -690,7 +835,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         ),
         const SizedBox(height: 16),
         TravellaButton(
-          label: context.tr('btn_search'),
+          label: context.tr('btn_search_flights'),
           variant: TravellaButtonVariant.gold,
           size: TravellaButtonSize.lg,
           fullWidth: true,
@@ -742,7 +887,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         ),
         const SizedBox(height: 16),
         TravellaButton(
-          label: context.tr('btn_search'),
+          label: context.tr('btn_search_hotels'),
           variant: TravellaButtonVariant.gold,
           size: TravellaButtonSize.lg,
           fullWidth: true,
@@ -802,7 +947,7 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
         ),
         const SizedBox(height: 16),
         TravellaButton(
-          label: context.tr('btn_search'),
+          label: context.tr('btn_search_tours'),
           variant: TravellaButtonVariant.gold,
           size: TravellaButtonSize.lg,
           fullWidth: true,
@@ -873,6 +1018,74 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
     );
   }
 
+  Widget _buildMobileTransfers() {
+    final isArabic = context.isArabic;
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _FieldBox(
+                label: context.tr('field_pickup'),
+                value: _transferPickup,
+                icon: Icons.flight_land_rounded,
+                onTap: _showTransferPickupPicker,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _FieldBox(
+                label: context.tr('field_dropoff'),
+                value: _transferDropoff,
+                icon: Icons.place_rounded,
+                onTap: _showTransferDropoffPicker,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _FieldBox(
+                label: context.tr('field_transfer_type'),
+                value: _transferType,
+                icon: Icons.directions_car_rounded,
+                onTap: _showTransferTypePicker,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _FieldBox(
+                label: context.tr('field_transfer_date'),
+                value:
+                    '${_dateFormat.format(_transferDate)} ${_transferTime.format(context)}',
+                icon: Icons.calendar_today_rounded,
+                onTap: _pickTransferDateTime,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _FieldBox(
+          label: context.tr('field_travelers'),
+          value: _transferPassengers.formattedSummary(isArabic: isArabic),
+          icon: Icons.people_alt_rounded,
+          onTap: _openTransferPassengersModal,
+        ),
+        const SizedBox(height: 16),
+        TravellaButton(
+          label: context.tr('btn_search_transfers'),
+          variant: TravellaButtonVariant.gold,
+          size: TravellaButtonSize.lg,
+          fullWidth: true,
+          leadingIcon: Icons.airport_shuttle_rounded,
+          onPressed: _onSearch,
+        ),
+      ],
+    );
+  }
+
   // ── Modals & Pickers ───────────────────────────────────────────────────────
   Future<void> _openFlightTravelersModal() async {
     final result = await showTravelerSelectorModal(
@@ -907,6 +1120,18 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
     );
     if (result != null) {
       setState(() => _tourTravelers = result);
+    }
+  }
+
+  Future<void> _openTransferPassengersModal() async {
+    final result = await showTravelerSelectorModal(
+      context,
+      initial: _transferPassengers,
+      showRooms: false,
+      title: context.isArabic ? 'ركاب خدمة التوصيل' : 'Transfer Passengers',
+    );
+    if (result != null) {
+      setState(() => _transferPassengers = result);
     }
   }
 
@@ -985,6 +1210,36 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
 
     if (picked != null) {
       setState(() => _visaTravelDate = picked);
+    }
+  }
+
+  Future<void> _pickTransferDateTime() async {
+    final now = DateTime.now();
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _transferDate,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+      builder: (context, child) => _buildDarkThemePicker(child),
+    );
+
+    if (pickedDate != null && mounted) {
+      final pickedTime = await showTimePicker(
+        context: context,
+        initialTime: _transferTime,
+        builder: (context, child) => _buildDarkThemePicker(child),
+      );
+
+      if (pickedTime != null) {
+        setState(() {
+          _transferDate = pickedDate;
+          _transferTime = pickedTime;
+        });
+      } else {
+        setState(() {
+          _transferDate = pickedDate;
+        });
+      }
     }
   }
 
@@ -1126,6 +1381,71 @@ class _TravelPlannerBarState extends State<TravelPlannerBar> {
       onSelected: (val) {
         final num = int.tryParse(val.split(' ').first) ?? 1;
         setState(() => _visaApplicants = num);
+      },
+    );
+  }
+
+  void _showTransferPickupPicker() {
+    final isArabic = context.isArabic;
+    _showListDialog(
+      title: isArabic ? 'اختر موقع الاستلام' : 'Select Pickup Location',
+      options: [
+        'Cairo International Airport (CAI)',
+        'Sphinx International Airport (SPX)',
+        'Sharm El Sheikh Airport (SSH)',
+        'Hurghada Airport (HRG)',
+        'Luxor Airport (LXR)',
+        'Borg El Arab Airport (HBE)',
+        'Downtown Cairo / Tahrir Hotel',
+        'New Cairo / 5th Settlement',
+        'Zamalek / Nile Corniche',
+        'Giza Pyramids / Marriott Mena House',
+        '6th of October City',
+        'New Administrative Capital',
+      ],
+      onSelected: (val) => setState(() => _transferPickup = val),
+    );
+  }
+
+  void _showTransferDropoffPicker() {
+    final isArabic = context.isArabic;
+    _showListDialog(
+      title: isArabic ? 'اختر موقع التوصيل والوصول' : 'Select Drop-off Location',
+      options: [
+        'New Cairo / 5th Settlement',
+        'Downtown Cairo / Tahrir',
+        'Zamalek / Nile Corniche',
+        'Giza Pyramids Hotel',
+        '6th of October City',
+        'Cairo International Airport (CAI)',
+        'Sphinx International Airport (SPX)',
+        'Heliopolis / Sheraton',
+        'New Administrative Capital',
+        'Madinaty / El Shorouk',
+        'Alexandria City',
+        'Ain Sokhna Resorts',
+      ],
+      onSelected: (val) => setState(() => _transferDropoff = val),
+    );
+  }
+
+  void _showTransferTypePicker() {
+    final isArabic = context.isArabic;
+    _showListDialog(
+      title: isArabic ? 'اختر نوع المشوار' : 'Select Transfer Type',
+      options: [
+        isArabic ? 'استقبال من المطار (Airport Pickup)' : 'Airport Pickup',
+        isArabic ? 'توصيل إلى المطار (Airport Dropoff)' : 'Airport Dropoff',
+        isArabic
+            ? 'توصيل خاص بين المدن (Intercity Transfer)'
+            : 'Intercity / Private Chauffeur',
+      ],
+      onSelected: (val) {
+        String cleanType = val;
+        if (val.contains('Pickup')) cleanType = 'Airport Pickup';
+        if (val.contains('Dropoff')) cleanType = 'Airport Dropoff';
+        if (val.contains('Intercity')) cleanType = 'Intercity Transfer';
+        setState(() => _transferType = cleanType);
       },
     );
   }
