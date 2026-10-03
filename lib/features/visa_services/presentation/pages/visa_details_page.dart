@@ -21,10 +21,7 @@ import '../../../../shared/presentation/widgets/app_footer.dart';
 class VisaDetailsPage extends StatefulWidget {
   final String visaId;
 
-  const VisaDetailsPage({
-    super.key,
-    required this.visaId,
-  });
+  const VisaDetailsPage({super.key, required this.visaId});
 
   @override
   State<VisaDetailsPage> createState() => _VisaDetailsPageState();
@@ -127,19 +124,33 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline_rounded, color: AppColors.errorRed, size: 56),
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        color: AppColors.errorRed,
+                        size: 56,
+                      ),
                       const SizedBox(height: 16),
                       Text(
-                        isArabic ? 'لم نتمكن من العثور على التأشيرة' : 'Visa Service Not Found',
+                        isArabic
+                            ? 'لم نتمكن من العثور على التأشيرة'
+                            : 'Visa Service Not Found',
                         style: AppTextStyles.h3,
                       ),
                       const SizedBox(height: 8),
-                      Text(_errorMessage ?? (isArabic ? 'تأكد من صحة الرابط.' : 'Please check the link and try again.')),
+                      Text(
+                        _errorMessage ??
+                            (isArabic
+                                ? 'تأكد من صحة الرابط.'
+                                : 'Please check the link and try again.'),
+                      ),
                       const SizedBox(height: 24),
                       TravellaButton(
-                        label: isArabic ? 'العودة لخدمات التأشيرات' : 'Back to Visa Services',
+                        label: isArabic
+                            ? 'العودة لخدمات التأشيرات'
+                            : 'Back to Visa Services',
                         variant: TravellaButtonVariant.primary,
-                        onPressed: () => context.goNamed(AppRoutes.visaServicesName),
+                        onPressed: () =>
+                            context.goNamed(AppRoutes.visaServicesName),
                       ),
                     ],
                   ),
@@ -155,7 +166,10 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
 
                   // ── Main Content Grid ─────────────────────────────────────
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 48),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: hPad,
+                      vertical: 48,
+                    ),
                     child: MaxWidthContainer(
                       child: isMobile
                           ? Column(
@@ -170,7 +184,10 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
                               children: [
                                 Expanded(
                                   flex: 7,
-                                  child: _buildMainDetailsCard(_visa!, isArabic),
+                                  child: _buildMainDetailsCard(
+                                    _visa!,
+                                    isArabic,
+                                  ),
                                 ),
                                 const SizedBox(width: 32),
                                 Expanded(
@@ -186,15 +203,18 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
             ),
 
           // ── Footer ────────────────────────────────────────────────────────
-          const SliverToBoxAdapter(
-            child: AppFooter(),
-          ),
+          const SliverToBoxAdapter(child: AppFooter()),
         ],
       ),
     );
   }
 
-  Widget _buildHeroBanner(VisaServiceModel v, bool isMobile, bool isArabic, double hPad) {
+  Widget _buildHeroBanner(
+    VisaServiceModel v,
+    bool isMobile,
+    bool isArabic,
+    double hPad,
+  ) {
     return Container(
       width: double.infinity,
       color: AppColors.navyDark,
@@ -213,27 +233,45 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
                   onTap: () => context.goNamed(AppRoutes.homeName),
                   child: Text(
                     isArabic ? 'الرئيسية' : 'Home',
-                    style: const TextStyle(color: AppColors.textOnDarkMuted, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppColors.textOnDarkMuted,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Icon(Icons.chevron_right, size: 14, color: AppColors.textOnDarkMuted),
+                  child: Icon(
+                    Icons.chevron_right,
+                    size: 14,
+                    color: AppColors.textOnDarkMuted,
+                  ),
                 ),
                 InkWell(
                   onTap: () => context.goNamed(AppRoutes.visaServicesName),
                   child: Text(
                     isArabic ? 'خدمات التأشيرات' : 'Visa Services',
-                    style: const TextStyle(color: AppColors.textOnDarkMuted, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppColors.textOnDarkMuted,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Icon(Icons.chevron_right, size: 14, color: AppColors.textOnDarkMuted),
+                  child: Icon(
+                    Icons.chevron_right,
+                    size: 14,
+                    color: AppColors.textOnDarkMuted,
+                  ),
                 ),
                 Text(
                   v.localizedCountry(isArabic),
-                  style: const TextStyle(color: AppColors.gold, fontWeight: FontWeight.bold, fontSize: 13),
+                  style: const TextStyle(
+                    color: AppColors.gold,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -249,9 +287,14 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
                   decoration: BoxDecoration(
                     color: AppColors.royalBlue.withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.royalBlueLight.withValues(alpha: 0.4)),
+                    border: Border.all(
+                      color: AppColors.royalBlueLight.withValues(alpha: 0.4),
+                    ),
                   ),
-                  child: Text(v.flagEmoji, style: const TextStyle(fontSize: 30)),
+                  child: Text(
+                    v.flagEmoji,
+                    style: const TextStyle(fontSize: 30),
+                  ),
                 ),
                 const SizedBox(width: 18),
                 Expanded(
@@ -260,12 +303,15 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
                     children: [
                       Text(
                         '${v.localizedCountry(isArabic)} ${v.visaType}',
-                        style: (isMobile ? AppTextStyles.h3 : AppTextStyles.h2).copyWith(color: AppColors.white),
+                        style: (isMobile ? AppTextStyles.h3 : AppTextStyles.h2)
+                            .copyWith(color: AppColors.white),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${v.region} • ${v.processingTime} • ${v.validity}',
-                        style: AppTextStyles.bodyMD.copyWith(color: AppColors.textOnDarkMuted),
+                        style: AppTextStyles.bodyMD.copyWith(
+                          color: AppColors.textOnDarkMuted,
+                        ),
                       ),
                     ],
                   ),
@@ -301,8 +347,13 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isArabic ? 'المواصفات والمدة المتاحة' : 'Visa Validity & Processing Specs',
-                style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold, color: AppColors.navyDark),
+                isArabic
+                    ? 'المواصفات والمدة المتاحة'
+                    : 'Visa Validity & Processing Specs',
+                style: AppTextStyles.h5.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navyDark,
+                ),
               ),
               const SizedBox(height: 18),
               Wrap(
@@ -356,17 +407,25 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isArabic ? 'نبذة عن التأشيرة والشروط العامة' : 'Visa Overview & Assistance Details',
-                style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold, color: AppColors.navyDark),
+                isArabic
+                    ? 'نبذة عن التأشيرة والشروط العامة'
+                    : 'Visa Overview & Assistance Details',
+                style: AppTextStyles.h5.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navyDark,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 v.localizedDescription(isArabic).isNotEmpty
                     ? v.localizedDescription(isArabic)
                     : (isArabic
-                        ? 'تقدم ترافيلا خدمة متكاملة تشمل تدقيق المستندات، ملء الاستمارات الرسمية للسفارة، حجز المواعيد البيومترية، وإعداد حجوزات الطيران والفنادق المعتمدة.'
-                        : 'Travella provides end-to-end visa consultation including rigorous document audits, consular form completion, biometric appointment scheduling, and confirmed travel itineraries.'),
-                style: AppTextStyles.bodyMD.copyWith(color: AppColors.textPrimary, height: 1.7),
+                          ? 'تقدم ترافيلا خدمة متكاملة تشمل تدقيق المستندات، ملء الاستمارات الرسمية للسفارة، حجز المواعيد البيومترية، وإعداد حجوزات الطيران والفنادق المعتمدة.'
+                          : 'Travella provides end-to-end visa consultation including rigorous document audits, consular form completion, biometric appointment scheduling, and confirmed travel itineraries.'),
+                style: AppTextStyles.bodyMD.copyWith(
+                  color: AppColors.textPrimary,
+                  height: 1.7,
+                ),
               ),
             ],
           ),
@@ -393,11 +452,19 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.folder_shared_outlined, color: AppColors.royalBlue),
+                  const Icon(
+                    Icons.folder_shared_outlined,
+                    color: AppColors.royalBlue,
+                  ),
                   const SizedBox(width: 10),
                   Text(
-                    isArabic ? 'المستندات والأوراق المطلوبة' : 'Mandatory Document Checklist',
-                    style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold, color: AppColors.navyDark),
+                    isArabic
+                        ? 'المستندات والأوراق المطلوبة'
+                        : 'Mandatory Document Checklist',
+                    style: AppTextStyles.h5.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.navyDark,
+                    ),
                   ),
                 ],
               ),
@@ -408,12 +475,18 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 20),
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: AppColors.successGreen,
+                        size: 20,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           doc,
-                          style: AppTextStyles.bodyMD.copyWith(color: AppColors.textPrimary),
+                          style: AppTextStyles.bodyMD.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                     ],
@@ -438,11 +511,19 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.info_outline_rounded, color: AppColors.goldDark),
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    color: AppColors.goldDark,
+                  ),
                   const SizedBox(width: 10),
                   Text(
-                    isArabic ? 'إرشادات وملاحظات هامة' : 'Important Consular Notes',
-                    style: AppTextStyles.h6.copyWith(fontWeight: FontWeight.bold, color: AppColors.goldDark),
+                    isArabic
+                        ? 'إرشادات وملاحظات هامة'
+                        : 'Important Consular Notes',
+                    style: AppTextStyles.h6.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.goldDark,
+                    ),
                   ),
                 ],
               ),
@@ -453,11 +534,21 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('• ', style: TextStyle(color: AppColors.goldDark, fontWeight: FontWeight.bold)),
+                      const Text(
+                        '• ',
+                        style: TextStyle(
+                          color: AppColors.goldDark,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       Expanded(
                         child: Text(
                           note,
-                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, height: 1.5),
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13,
+                            height: 1.5,
+                          ),
                         ),
                       ),
                     ],
@@ -497,14 +588,21 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
                 style: const TextStyle(color: AppColors.gray600, fontSize: 13),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.successGreen.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   isArabic ? '99.4% نسبة القبول' : '99.4% Approval Rate',
-                  style: const TextStyle(color: AppColors.successGreen, fontSize: 11, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: AppColors.successGreen,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -515,12 +613,18 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
             children: [
               Text(
                 '\$${v.price.toInt()}',
-                style: AppTextStyles.h2.copyWith(color: AppColors.navyDark, fontWeight: FontWeight.bold),
+                style: AppTextStyles.h2.copyWith(
+                  color: AppColors.navyDark,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(width: 6),
               const Padding(
                 padding: EdgeInsets.only(bottom: 6),
-                child: Text('/ person', style: TextStyle(color: AppColors.gray600, fontSize: 13)),
+                child: Text(
+                  '/ person',
+                  style: TextStyle(color: AppColors.gray600, fontSize: 13),
+                ),
               ),
             ],
           ),
@@ -529,10 +633,26 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
           const SizedBox(height: 16),
 
           // Features checklist
-          _sidebarFeature(isArabic ? 'تدقيق احترافي لجميع المستندات' : 'Rigorous document audit'),
-          _sidebarFeature(isArabic ? 'تجهيز حجز طيران وفندق مؤكدين' : 'Flight & hotel booking vouchers'),
-          _sidebarFeature(isArabic ? 'حجز موعد البصمة والمقابلة' : 'Embassy biometric appointment scheduling'),
-          _sidebarFeature(isArabic ? 'متابعة مباشرة مع مستشار خاص' : '24/7 Dedicated visa consultant'),
+          _sidebarFeature(
+            isArabic
+                ? 'تدقيق احترافي لجميع المستندات'
+                : 'Rigorous document audit',
+          ),
+          _sidebarFeature(
+            isArabic
+                ? 'تجهيز حجز طيران وفندق مؤكدين'
+                : 'Flight & hotel booking vouchers',
+          ),
+          _sidebarFeature(
+            isArabic
+                ? 'حجز موعد البصمة والمقابلة'
+                : 'Embassy biometric appointment scheduling',
+          ),
+          _sidebarFeature(
+            isArabic
+                ? 'متابعة مباشرة مع مستشار خاص'
+                : '24/7 Dedicated visa consultant',
+          ),
 
           const SizedBox(height: 24),
           TravellaButton(
@@ -548,7 +668,11 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
                 ? 'لا يتم خصم أي دفعات قبل تدقيق مستنداتك وتأكيد جاهزية الطلب.'
                 : 'Zero upfront commitment. Dedicated specialist will verify documents before submission.',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 11, color: AppColors.gray500, height: 1.4),
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.gray500,
+              height: 1.4,
+            ),
           ),
         ],
       ),
@@ -560,10 +684,20 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          const Icon(Icons.check_circle_rounded, color: AppColors.royalBlue, size: 16),
+          const Icon(
+            Icons.check_circle_rounded,
+            color: AppColors.royalBlue,
+            size: 16,
+          ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(text, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ),
         ],
       ),
@@ -580,7 +714,9 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
       width: 170,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: highlight ? AppColors.gold.withValues(alpha: 0.12) : AppColors.surfaceLight,
+        color: highlight
+            ? AppColors.gold.withValues(alpha: 0.12)
+            : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: highlight ? AppColors.gold : AppColors.borderLight,
@@ -589,9 +725,16 @@ class _VisaDetailsPageState extends State<VisaDetailsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: highlight ? AppColors.goldDark : AppColors.royalBlue),
+          Icon(
+            icon,
+            size: 18,
+            color: highlight ? AppColors.goldDark : AppColors.royalBlue,
+          ),
           const SizedBox(height: 6),
-          Text(label, style: const TextStyle(fontSize: 11, color: AppColors.gray600)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 11, color: AppColors.gray600),
+          ),
           const SizedBox(height: 2),
           Text(
             value,
@@ -619,7 +762,8 @@ class VisaApplicationFlowDialog extends StatefulWidget {
   });
 
   @override
-  State<VisaApplicationFlowDialog> createState() => _VisaApplicationFlowDialogState();
+  State<VisaApplicationFlowDialog> createState() =>
+      _VisaApplicationFlowDialogState();
 }
 
 class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
@@ -692,11 +836,18 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
     super.dispose();
   }
 
-  Future<void> _handlePickAndUploadDocument(String docKey, {bool isImageOnly = false}) async {
+  Future<void> _handlePickAndUploadDocument(
+    String docKey, {
+    bool isImageOnly = false,
+  }) async {
     try {
       final picked = await UniversalFilePicker.pickFile(
-        accept: isImageOnly ? 'image/*' : 'image/*,application/pdf,.pdf,.jpg,.jpeg,.png,.webp',
-        allowedExtensions: isImageOnly ? ['jpg', 'jpeg', 'png', 'webp'] : ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
+        accept: isImageOnly
+            ? 'image/*'
+            : 'image/*,application/pdf,.pdf,.jpg,.jpeg,.png,.webp',
+        allowedExtensions: isImageOnly
+            ? ['jpg', 'jpeg', 'png', 'webp']
+            : ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
       );
 
       if (picked == null) return;
@@ -713,8 +864,11 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
       final userId = currentUser?.id ?? userPassport;
 
       final cleanKey = docKey.toLowerCase().replaceAll(' ', '_');
-      final ext = picked.name.contains('.') ? picked.name.split('.').last : (isImageOnly ? 'jpg' : 'pdf');
-      final filename = '${cleanKey}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+      final ext = picked.name.contains('.')
+          ? picked.name.split('.').last
+          : (isImageOnly ? 'jpg' : 'pdf');
+      final filename =
+          '${cleanKey}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
       // Detect correct MIME type so browser renders PDF/images properly
       final contentType = _mimeFromExtension(ext);
@@ -744,7 +898,9 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Upload failed: ${e.toString().replaceAll('Exception: ', '')}'),
+            content: Text(
+              'Upload failed: ${e.toString().replaceAll('Exception: ', '')}',
+            ),
             backgroundColor: AppColors.errorRed,
           ),
         );
@@ -783,8 +939,20 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
       _errorMessage = null;
     });
 
-    final refNumber = 'TRV-${DateTime.now().millisecondsSinceEpoch.toRadixString(16).toUpperCase()}';
     final currentUser = SupabaseService.currentUser;
+
+    // RLS requires an authenticated user — block early and surface a clear message
+    if (currentUser == null) {
+      setState(() {
+        _isSubmitting = false;
+        _errorMessage =
+            'You must be signed in to submit a visa application. Please log in and try again.';
+      });
+      return;
+    }
+
+    final refNumber =
+        'TRV-${DateTime.now().millisecondsSinceEpoch.toRadixString(16).toUpperCase()}';
 
     final app = VisaApplicationModel(
       id: '',
@@ -799,13 +967,17 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
       fullName: _fullNameCtrl.text.trim(),
       email: _emailCtrl.text.trim(),
       phone: _phoneCtrl.text.trim(),
-      nationality: _nationalityCtrl.text.trim().isNotEmpty ? _nationalityCtrl.text.trim() : 'Egyptian',
+      nationality: _nationalityCtrl.text.trim().isNotEmpty
+          ? _nationalityCtrl.text.trim()
+          : 'Egyptian',
       passportNumber: _passportNumberCtrl.text.trim(),
       dateOfBirth: _dob,
       documents: _uploadedDocuments,
       status: VisaApplicationStatus.pending,
       estimatedFee: widget.service.price,
-      adminNotes: _purposeNotesCtrl.text.trim().isNotEmpty ? _purposeNotesCtrl.text.trim() : null,
+      adminNotes: _purposeNotesCtrl.text.trim().isNotEmpty
+          ? _purposeNotesCtrl.text.trim()
+          : null,
       createdAt: DateTime.now(),
     );
 
@@ -832,6 +1004,32 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
   void _nextStep() {
     if (_currentStep == 3) {
       if (!_formKeyApplicant.currentState!.validate()) return;
+    }
+    if (_currentStep == 4) {
+      // Validate that all required document slots for this visa have been uploaded
+      final requiredMissing = widget.service.effectiveDocumentSlots
+          .where((slot) => slot.required && !_uploadedDocuments.containsKey(slot.key))
+          .toList();
+
+      if (requiredMissing.isNotEmpty) {
+        final isAr = context.isArabic;
+        final missingNames = requiredMissing
+            .map((s) => s.localizedLabel(isAr))
+            .join(isAr ? '، ' : ', ');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isAr
+                  ? 'يرجى رفع المستندات المطلوبة التالية أولاً: $missingNames'
+                  : 'Please upload the following required documents first: $missingNames',
+            ),
+            backgroundColor: AppColors.errorRed,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        return;
+      }
     }
     if (_currentStep < 5) {
       setState(() => _currentStep++);
@@ -873,7 +1071,10 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                     color: AppColors.royalBlueFaded,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(widget.service.flagEmoji, style: const TextStyle(fontSize: 22)),
+                  child: Text(
+                    widget.service.flagEmoji,
+                    style: const TextStyle(fontSize: 22),
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -884,11 +1085,17 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                         isArabic
                             ? 'طلب تأشيرة ${widget.service.localizedCountry(isArabic)}'
                             : 'Visa Application: ${widget.service.country}',
-                        style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold, color: AppColors.navyDark),
+                        style: AppTextStyles.h5.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.navyDark,
+                        ),
                       ),
                       Text(
                         '${widget.service.visaType} • \$${widget.service.price.toInt()} • ${widget.service.processingTime}',
-                        style: const TextStyle(color: AppColors.gray600, fontSize: 12),
+                        style: const TextStyle(
+                          color: AppColors.gray600,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -923,7 +1130,12 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                 children: [
                   if (_currentStep > 0)
                     TextButton.icon(
-                      icon: Icon(isArabic ? Icons.arrow_forward_rounded : Icons.arrow_back_rounded, size: 16),
+                      icon: Icon(
+                        isArabic
+                            ? Icons.arrow_forward_rounded
+                            : Icons.arrow_back_rounded,
+                        size: 16,
+                      ),
                       label: Text(isArabic ? 'السابق' : 'Back'),
                       onPressed: _prevStep,
                     )
@@ -931,21 +1143,35 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                     const SizedBox.shrink(),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _currentStep == 5 ? AppColors.gold : AppColors.navy,
-                      foregroundColor: _currentStep == 5 ? AppColors.navy : AppColors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      backgroundColor: _currentStep == 5
+                          ? AppColors.gold
+                          : AppColors.navy,
+                      foregroundColor: _currentStep == 5
+                          ? AppColors.navy
+                          : AppColors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 28,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     onPressed: _isSubmitting ? null : _nextStep,
                     child: _isSubmitting
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.navy),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.navy,
+                            ),
                           )
                         : Text(
                             _currentStep == 5
-                                ? (isArabic ? 'تأكيد وإرسال الطلب' : 'Submit Application')
+                                ? (isArabic
+                                      ? 'تأكيد وإرسال الطلب'
+                                      : 'Submit Application')
                                 : (isArabic ? 'التالي' : 'Continue'),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
@@ -979,16 +1205,23 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
           return Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: isCurrent
                       ? AppColors.royalBlue
-                      : (isPassed ? AppColors.successGreen : AppColors.surfaceLight),
+                      : (isPassed
+                            ? AppColors.successGreen
+                            : AppColors.surfaceLight),
                   borderRadius: BorderRadius.circular(100),
                   border: Border.all(
                     color: isCurrent
                         ? AppColors.royalBlue
-                        : (isPassed ? AppColors.successGreen : AppColors.borderLight),
+                        : (isPassed
+                              ? AppColors.successGreen
+                              : AppColors.borderLight),
                   ),
                 ),
                 child: Row(
@@ -1001,7 +1234,9 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: isCurrent ? AppColors.white : AppColors.gray600,
+                          color: isCurrent
+                              ? AppColors.white
+                              : AppColors.gray600,
                         ),
                       ),
                     const SizedBox(width: 6),
@@ -1009,8 +1244,12 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                       stepLabels[idx],
                       style: TextStyle(
                         fontSize: 11,
-                        fontWeight: isCurrent ? FontWeight.bold : FontWeight.w500,
-                        color: isCurrent || isPassed ? AppColors.white : AppColors.gray700,
+                        fontWeight: isCurrent
+                            ? FontWeight.bold
+                            : FontWeight.w500,
+                        color: isCurrent || isPassed
+                            ? AppColors.white
+                            : AppColors.gray700,
                       ),
                     ),
                   ],
@@ -1056,12 +1295,16 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isArabic ? 'الخطوة 1: تأكيد دولة الوجهة' : 'Step 1: Confirm Destination Country',
+          isArabic
+              ? 'الخطوة 1: تأكيد دولة الوجهة'
+              : 'Step 1: Confirm Destination Country',
           style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
         Text(
-          isArabic ? 'الوجهة المحددة لطلب التأشيرة:' : 'Selected destination country for visa application:',
+          isArabic
+              ? 'الوجهة المحددة لطلب التأشيرة:'
+              : 'Selected destination country for visa application:',
           style: const TextStyle(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 18),
@@ -1074,7 +1317,10 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
           ),
           child: Row(
             children: [
-              Text(widget.service.flagEmoji, style: const TextStyle(fontSize: 36)),
+              Text(
+                widget.service.flagEmoji,
+                style: const TextStyle(fontSize: 36),
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -1082,16 +1328,25 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                   children: [
                     Text(
                       widget.service.localizedCountry(isArabic),
-                      style: AppTextStyles.h4.copyWith(color: AppColors.navyDark),
+                      style: AppTextStyles.h4.copyWith(
+                        color: AppColors.navyDark,
+                      ),
                     ),
                     Text(
                       '${widget.service.region} • ${widget.service.processingTime}',
-                      style: const TextStyle(color: AppColors.gray600, fontSize: 13),
+                      style: const TextStyle(
+                        color: AppColors.gray600,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.check_circle_rounded, color: AppColors.royalBlue, size: 28),
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.royalBlue,
+                size: 28,
+              ),
             ],
           ),
         ),
@@ -1102,16 +1357,30 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
   // STEP 2: Select Visa Type
   Widget _step2VisaType(bool isArabic) {
     final types = [
-      ('Tourist Visa', 'For leisure holidays, sightseeing, and family trips.', '🏖️'),
-      ('Business / Conference', 'For meetings, trade delegations, and exhibitions.', '💼'),
-      ('Express Fast-Track Visa', 'Priority appointment and rapid consulate submission.', '⚡'),
+      (
+        'Tourist Visa',
+        'For leisure holidays, sightseeing, and family trips.',
+        '🏖️',
+      ),
+      (
+        'Business / Conference',
+        'For meetings, trade delegations, and exhibitions.',
+        '💼',
+      ),
+      (
+        'Express Fast-Track Visa',
+        'Priority appointment and rapid consulate submission.',
+        '⚡',
+      ),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isArabic ? 'الخطوة 2: اختيار نوع وفئة التأشيرة' : 'Step 2: Select Visa Type & Category',
+          isArabic
+              ? 'الخطوة 2: اختيار نوع وفئة التأشيرة'
+              : 'Step 2: Select Visa Type & Category',
           style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
@@ -1126,7 +1395,9 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isSel ? AppColors.royalBlueFaded : AppColors.surfaceLight,
+                  color: isSel
+                      ? AppColors.royalBlueFaded
+                      : AppColors.surfaceLight,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isSel ? AppColors.royalBlue : AppColors.borderLight,
@@ -1141,14 +1412,27 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(t.$1, style: AppTextStyles.labelLG.copyWith(fontWeight: FontWeight.bold)),
+                          Text(
+                            t.$1,
+                            style: AppTextStyles.labelLG.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 2),
-                          Text(t.$2, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                          Text(
+                            t.$2,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     Icon(
-                      isSel ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+                      isSel
+                          ? Icons.radio_button_checked_rounded
+                          : Icons.radio_button_off_rounded,
                       color: isSel ? AppColors.royalBlue : AppColors.gray400,
                     ),
                   ],
@@ -1167,7 +1451,9 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isArabic ? 'الخطوة 3: معلومات وجدول السفر' : 'Step 3: Travel Information',
+          isArabic
+              ? 'الخطوة 3: معلومات وجدول السفر'
+              : 'Step 3: Travel Information',
           style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
@@ -1179,7 +1465,12 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(isArabic ? 'تاريخ السفر المتوقع *' : 'Expected Travel Date *', style: AppTextStyles.labelMD),
+                  Text(
+                    isArabic
+                        ? 'تاريخ السفر المتوقع *'
+                        : 'Expected Travel Date *',
+                    style: AppTextStyles.labelMD,
+                  ),
                   const SizedBox(height: 6),
                   InkWell(
                     onTap: () async {
@@ -1192,7 +1483,10 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                       if (picked != null) setState(() => _travelDate = picked);
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.surfaceLight,
                         borderRadius: BorderRadius.circular(10),
@@ -1200,9 +1494,16 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.calendar_today_rounded, size: 16, color: AppColors.royalBlue),
+                          const Icon(
+                            Icons.calendar_today_rounded,
+                            size: 16,
+                            color: AppColors.royalBlue,
+                          ),
                           const SizedBox(width: 8),
-                          Text(_dateFormat.format(_travelDate), style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(
+                            _dateFormat.format(_travelDate),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ],
                       ),
                     ),
@@ -1215,20 +1516,30 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(isArabic ? 'تاريخ العودة المتوقع' : 'Return Date (Optional)', style: AppTextStyles.labelMD),
+                  Text(
+                    isArabic
+                        ? 'تاريخ العودة المتوقع'
+                        : 'Return Date (Optional)',
+                    style: AppTextStyles.labelMD,
+                  ),
                   const SizedBox(height: 6),
                   InkWell(
                     onTap: () async {
                       final picked = await showDatePicker(
                         context: context,
-                        initialDate: _returnDate ?? _travelDate.add(const Duration(days: 14)),
+                        initialDate:
+                            _returnDate ??
+                            _travelDate.add(const Duration(days: 14)),
                         firstDate: _travelDate,
                         lastDate: DateTime.now().add(const Duration(days: 400)),
                       );
                       if (picked != null) setState(() => _returnDate = picked);
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.surfaceLight,
                         borderRadius: BorderRadius.circular(10),
@@ -1236,11 +1547,21 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.event_repeat_rounded, size: 16, color: AppColors.gray600),
+                          const Icon(
+                            Icons.event_repeat_rounded,
+                            size: 16,
+                            color: AppColors.gray600,
+                          ),
                           const SizedBox(width: 8),
                           Text(
-                            _returnDate != null ? _dateFormat.format(_returnDate!) : 'Select Date',
-                            style: TextStyle(fontWeight: _returnDate != null ? FontWeight.bold : FontWeight.normal),
+                            _returnDate != null
+                                ? _dateFormat.format(_returnDate!)
+                                : 'Select Date',
+                            style: TextStyle(
+                              fontWeight: _returnDate != null
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
                           ),
                         ],
                       ),
@@ -1254,7 +1575,10 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
         const SizedBox(height: 18),
 
         // Purpose of Travel Dropdown
-        Text(isArabic ? 'الغرض الأساسي من السفر *' : 'Purpose of Travel *', style: AppTextStyles.labelMD),
+        Text(
+          isArabic ? 'الغرض الأساسي من السفر *' : 'Purpose of Travel *',
+          style: AppTextStyles.labelMD,
+        ),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
           value: _purpose,
@@ -1263,13 +1587,20 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
             fillColor: AppColors.surfaceLight,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           ),
-          items: _purposes.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+          items: _purposes
+              .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+              .toList(),
           onChanged: (val) => setState(() => _purpose = val ?? 'Tourism'),
         ),
         const SizedBox(height: 16),
 
         // Additional travel notes
-        Text(isArabic ? 'ملاحظات إضافية أو خط سير الرحلة' : 'Additional Travel Notes / Itinerary Details', style: AppTextStyles.labelMD),
+        Text(
+          isArabic
+              ? 'ملاحظات إضافية أو خط سير الرحلة'
+              : 'Additional Travel Notes / Itinerary Details',
+          style: AppTextStyles.labelMD,
+        ),
         const SizedBox(height: 6),
         TextFormField(
           controller: _purposeNotesCtrl,
@@ -1289,8 +1620,12 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
 
   // STEP 4: Applicant Information
   Widget _step4ApplicantInfo(bool isArabic, bool isMobile) {
-    final profileBytes = _uploadedFileBytes['Personal Photo'] ?? _uploadedFileBytes['Profile Picture'];
-    final profileUrl = _uploadedDocuments['Personal Photo'] ?? _uploadedDocuments['Profile Picture'];
+    final profileBytes =
+        _uploadedFileBytes['Personal Photo'] ??
+        _uploadedFileBytes['Profile Picture'];
+    final profileUrl =
+        _uploadedDocuments['Personal Photo'] ??
+        _uploadedDocuments['Profile Picture'];
 
     return Form(
       key: _formKeyApplicant,
@@ -1298,7 +1633,9 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isArabic ? 'الخطوة 4: البيانات الشخصية وصورة الحساب' : 'Step 4: Applicant Personal Information & Profile Photo',
+            isArabic
+                ? 'الخطوة 4: البيانات الشخصية وصورة الحساب'
+                : 'Step 4: Applicant Personal Information & Profile Photo',
             style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -1311,7 +1648,9 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
               color: AppColors.surfaceLight,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: profileUrl != null ? AppColors.successGreen : AppColors.royalBlue.withValues(alpha: 0.3),
+                color: profileUrl != null
+                    ? AppColors.successGreen
+                    : AppColors.royalBlue.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -1323,23 +1662,38 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                       backgroundColor: AppColors.royalBlueFaded,
                       backgroundImage: profileBytes != null
                           ? MemoryImage(profileBytes)
-                          : (profileUrl != null ? NetworkImage(profileUrl) as ImageProvider : null),
+                          : (profileUrl != null
+                                ? NetworkImage(profileUrl) as ImageProvider
+                                : null),
                       child: profileBytes == null && profileUrl == null
-                          ? const Icon(Icons.person_rounded, size: 36, color: AppColors.royalBlue)
+                          ? const Icon(
+                              Icons.person_rounded,
+                              size: 36,
+                              color: AppColors.royalBlue,
+                            )
                           : null,
                     ),
                     Positioned(
                       bottom: 0,
                       right: 0,
                       child: InkWell(
-                        onTap: _isUploadingDoc ? null : () => _handlePickAndUploadDocument('Personal Photo', isImageOnly: true),
+                        onTap: _isUploadingDoc
+                            ? null
+                            : () => _handlePickAndUploadDocument(
+                                'Personal Photo',
+                                isImageOnly: true,
+                              ),
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: const BoxDecoration(
                             color: AppColors.navy,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.camera_alt_rounded, size: 14, color: AppColors.white),
+                          child: const Icon(
+                            Icons.camera_alt_rounded,
+                            size: 14,
+                            color: AppColors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -1351,18 +1705,30 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isArabic ? 'الصورة الشخصية للتقديم (Image Profile)' : 'Applicant Profile Picture',
-                        style: AppTextStyles.labelMD.copyWith(fontWeight: FontWeight.bold),
+                        isArabic
+                            ? 'الصورة الشخصية للتقديم (Image Profile)'
+                            : 'Applicant Profile Picture',
+                        style: AppTextStyles.labelMD.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         profileUrl != null
-                            ? (isArabic ? 'تم رفع وحفظ الصورة في Supabase Storage' : 'Profile photo stored in Supabase Storage')
-                            : (isArabic ? 'صورة رسمية حديثة بخلفية بيضاء (JPG / PNG)' : 'Recent clear photo with white background (JPG / PNG)'),
+                            ? (isArabic
+                                  ? 'تم رفع وحفظ الصورة في Supabase Storage'
+                                  : 'Profile photo stored in Supabase Storage')
+                            : (isArabic
+                                  ? 'صورة رسمية حديثة بخلفية بيضاء (JPG / PNG)'
+                                  : 'Recent clear photo with white background (JPG / PNG)'),
                         style: TextStyle(
                           fontSize: 12,
-                          color: profileUrl != null ? AppColors.successGreen : AppColors.textSecondary,
-                          fontWeight: profileUrl != null ? FontWeight.w600 : FontWeight.normal,
+                          color: profileUrl != null
+                              ? AppColors.successGreen
+                              : AppColors.textSecondary,
+                          fontWeight: profileUrl != null
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                       ),
                     ],
@@ -1370,19 +1736,41 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                 ),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: profileUrl != null ? AppColors.surfaceLight : AppColors.royalBlue,
-                    foregroundColor: profileUrl != null ? AppColors.navyDark : AppColors.white,
-                    side: profileUrl != null ? const BorderSide(color: AppColors.borderLight) : null,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    backgroundColor: profileUrl != null
+                        ? AppColors.surfaceLight
+                        : AppColors.royalBlue,
+                    foregroundColor: profileUrl != null
+                        ? AppColors.navyDark
+                        : AppColors.white,
+                    side: profileUrl != null
+                        ? const BorderSide(color: AppColors.borderLight)
+                        : null,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
-                  icon: Icon(profileUrl != null ? Icons.change_circle_outlined : Icons.upload_rounded, size: 14),
+                  icon: Icon(
+                    profileUrl != null
+                        ? Icons.change_circle_outlined
+                        : Icons.upload_rounded,
+                    size: 14,
+                  ),
                   label: Text(
                     profileUrl != null
                         ? (isArabic ? 'تغيير' : 'Change')
                         : (isArabic ? 'رفع الصورة' : 'Upload Photo'),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  onPressed: _isUploadingDoc ? null : () => _handlePickAndUploadDocument('Personal Photo', isImageOnly: true),
+                  onPressed: _isUploadingDoc
+                      ? null
+                      : () => _handlePickAndUploadDocument(
+                          'Personal Photo',
+                          isImageOnly: true,
+                        ),
                 ),
               ],
             ),
@@ -1392,13 +1780,18 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
           TextFormField(
             controller: _fullNameCtrl,
             decoration: InputDecoration(
-              labelText: isArabic ? 'الاسم الكامل بالإنجليزية (كما في الجواز) *' : 'Full Name (as written in Passport) *',
+              labelText: isArabic
+                  ? 'الاسم الكامل بالإنجليزية (كما في الجواز) *'
+                  : 'Full Name (as written in Passport) *',
               prefixIcon: const Icon(Icons.person_outline_rounded),
               filled: true,
               fillColor: AppColors.surfaceLight,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            validator: (v) => v == null || v.trim().isEmpty ? 'Full name is required' : null,
+            validator: (v) =>
+                v == null || v.trim().isEmpty ? 'Full name is required' : null,
           ),
           const SizedBox(height: 12),
 
@@ -1410,13 +1803,19 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: isArabic ? 'البريد الإلكتروني *' : 'Email Address *',
+                    labelText: isArabic
+                        ? 'البريد الإلكتروني *'
+                        : 'Email Address *',
                     prefixIcon: const Icon(Icons.email_outlined),
                     filled: true,
                     fillColor: AppColors.surfaceLight,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  validator: (v) => v == null || !v.contains('@') ? 'Valid email required' : null,
+                  validator: (v) => v == null || !v.contains('@')
+                      ? 'Valid email required'
+                      : null,
                 ),
               ),
               const SizedBox(width: 12),
@@ -1425,13 +1824,19 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    labelText: isArabic ? 'رقم الهاتف / واتساب *' : 'Phone / WhatsApp *',
+                    labelText: isArabic
+                        ? 'رقم الهاتف / واتساب *'
+                        : 'Phone / WhatsApp *',
                     prefixIcon: const Icon(Icons.phone_outlined),
                     filled: true,
                     fillColor: AppColors.surfaceLight,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  validator: (v) => v == null || v.trim().length < 7 ? 'Valid phone required' : null,
+                  validator: (v) => v == null || v.trim().length < 7
+                      ? 'Valid phone required'
+                      : null,
                 ),
               ),
             ],
@@ -1449,9 +1854,13 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                     prefixIcon: const Icon(Icons.flag_outlined),
                     filled: true,
                     fillColor: AppColors.surfaceLight,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Nationality is required' : null,
+                  validator: (v) => v == null || v.trim().isEmpty
+                      ? 'Nationality is required'
+                      : null,
                 ),
               ),
               const SizedBox(width: 12),
@@ -1459,13 +1868,19 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                 child: TextFormField(
                   controller: _passportNumberCtrl,
                   decoration: InputDecoration(
-                    labelText: isArabic ? 'رقم جواز السفر *' : 'Passport Number *',
+                    labelText: isArabic
+                        ? 'رقم جواز السفر *'
+                        : 'Passport Number *',
                     prefixIcon: const Icon(Icons.badge_outlined),
                     filled: true,
                     fillColor: AppColors.surfaceLight,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Passport number is required' : null,
+                  validator: (v) => v == null || v.trim().isEmpty
+                      ? 'Passport number is required'
+                      : null,
                 ),
               ),
             ],
@@ -1473,7 +1888,10 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
           const SizedBox(height: 12),
 
           // Date of Birth
-          Text(isArabic ? 'تاريخ الميلاد *' : 'Date of Birth *', style: AppTextStyles.labelMD),
+          Text(
+            isArabic ? 'تاريخ الميلاد *' : 'Date of Birth *',
+            style: AppTextStyles.labelMD,
+          ),
           const SizedBox(height: 6),
           InkWell(
             onTap: () async {
@@ -1494,9 +1912,16 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.cake_outlined, size: 16, color: AppColors.royalBlue),
+                  const Icon(
+                    Icons.cake_outlined,
+                    size: 16,
+                    color: AppColors.royalBlue,
+                  ),
                   const SizedBox(width: 8),
-                  Text(_dateFormat.format(_dob), style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    _dateFormat.format(_dob),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
             ),
@@ -1512,48 +1937,30 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
     return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
   }
 
+  IconData _getSlotIcon(VisaDocumentSlot slot) {
+    if (slot.imageOnly) return Icons.account_box_rounded;
+    final k = slot.key.toLowerCase();
+    if (k.contains('passport') || k.contains('جواز')) return Icons.badge_rounded;
+    if (k.contains('photo') || k.contains('صورة') || k.contains('صوره')) return Icons.account_box_rounded;
+    if (k.contains('bank') || k.contains('بنك') || k.contains('حساب')) return Icons.account_balance_wallet_outlined;
+    if (k.contains('hr') || k.contains('work') || k.contains('عمل') || k.contains('employ')) return Icons.business_center_outlined;
+    if (k.contains('flight') || k.contains('hotel') || k.contains('طيران') || k.contains('فندق') || k.contains('حجز')) return Icons.flight_takeoff_rounded;
+    if (k.contains('insurance') || k.contains('تأمين')) return Icons.health_and_safety_outlined;
+    if (k.contains('invitation') || k.contains('دعوة')) return Icons.mail_outline_rounded;
+    return Icons.attachment_rounded;
+  }
+
   // STEP 5: Upload Documents & Images to Supabase Storage
   Widget _step5DocumentsUpload(bool isArabic) {
-    final docsList = [
-      (
-        'Passport',
-        isArabic ? 'جواز السفر (ملف PDF أو صورة الجواز)' : 'Passport (PDF File or Image Scan)',
-        isArabic ? 'صورة واضحة أو ملف PDF لصفحة البيانات بجواز السفر (ساري 6 أشهر فأكثر) *' : 'Clear scan or PDF of the passport bio page (6+ months validity) *',
-        Icons.badge_rounded,
-        false, // can be pdf or image
-        true,  // required
-      ),
-      (
-        'Personal Photo',
-        isArabic ? 'الصورة الشخصية (Profile Picture)' : 'Personal Profile Photo',
-        isArabic ? 'صورة شخصية حديثة بخلفية بيضاء بدقة عالية (JPG / PNG) *' : 'Recent high-resolution color portrait with white background *',
-        Icons.account_box_rounded,
-        true,  // image only
-        true,  // required
-      ),
-      (
-        'Bank Statement',
-        isArabic ? 'كشف الحساب البنكي' : 'Bank Statement',
-        isArabic ? 'كشف حساب رسمي لآخر 3-6 أشهر بصيغة PDF أو صور' : 'Official bank statement for the last 3-6 months (PDF or scans)',
-        Icons.account_balance_wallet_outlined,
-        false,
-        false,
-      ),
-      (
-        'Supporting Document',
-        isArabic ? 'مستند إضافي / حجز / خطاب عمل' : 'Supporting Proof (Employment / Reservation)',
-        isArabic ? 'خطاب جهة العمل أو السجل التجاري أو حجز الطيران/الفندق' : 'Employment letter, commercial registration, or flight/hotel voucher',
-        Icons.attachment_rounded,
-        false,
-        false,
-      ),
-    ];
+    final slots = widget.service.effectiveDocumentSlots;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isArabic ? 'الخطوة 5: رفع المستندات والجواز والصورة إلى Supabase' : 'Step 5: Upload Passport, Profile Photo & Documents',
+          isArabic
+              ? 'الخطوة 5: رفع المستندات والجواز والصورة إلى Supabase'
+              : 'Step 5: Upload Passport, Profile Photo & Documents',
           style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
@@ -1573,14 +1980,19 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
             decoration: BoxDecoration(
               color: AppColors.royalBlueFaded,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.royalBlue.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: AppColors.royalBlue.withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               children: [
                 const SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.royalBlue),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: AppColors.royalBlue,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -1588,7 +2000,11 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                     isArabic
                         ? 'جاري رفع $_uploadingDocName إلى سحابة Supabase Storage...'
                         : 'Uploading $_uploadingDocName to Supabase Storage...',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.royalBlueDark),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.royalBlueDark,
+                    ),
                   ),
                 ),
               ],
@@ -1596,13 +2012,21 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
           ),
 
         // List of Document Cards
-        ...docsList.map((doc) {
-          final key = doc.$1;
-          final title = doc.$2;
-          final subtitle = doc.$3;
-          final icon = doc.$4;
-          final isImageOnly = doc.$5;
-          final isRequired = doc.$6;
+        ...slots.map((slot) {
+          final key = slot.key;
+          final title = slot.localizedLabel(isArabic);
+          final subtitle = slot.localizedDescription(isArabic).isNotEmpty
+              ? slot.localizedDescription(isArabic)
+              : (slot.imageOnly
+                  ? (isArabic
+                      ? 'صورة شخصية حديثة بدقة عالية (JPG / PNG)'
+                      : 'Recent high-resolution photo (JPG/PNG)')
+                  : (isArabic
+                      ? 'ملف PDF أو صورة واضحة ومقروءة'
+                      : 'PDF file or clear image scan'));
+          final icon = _getSlotIcon(slot);
+          final isImageOnly = slot.imageOnly;
+          final isRequired = slot.required;
 
           final isUploaded = _uploadedDocuments.containsKey(key);
           final url = _uploadedDocuments[key];
@@ -1614,10 +2038,14 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
             margin: const EdgeInsets.only(bottom: 14),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isUploaded ? AppColors.successGreen.withValues(alpha: 0.05) : AppColors.surfaceLight,
+              color: isUploaded
+                  ? AppColors.successGreen.withValues(alpha: 0.05)
+                  : AppColors.surfaceLight,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isUploaded ? AppColors.successGreen : AppColors.borderLight,
+                color: isUploaded
+                    ? AppColors.successGreen
+                    : AppColors.borderLight,
                 width: isUploaded ? 1.5 : 1.0,
               ),
             ),
@@ -1628,7 +2056,10 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Thumbnail or Icon Preview
-                    if (isUploaded && fileBytes != null && (isImageOnly || (fileName != null && !fileName.endsWith('.pdf'))))
+                    if (isUploaded &&
+                        fileBytes != null &&
+                        (isImageOnly ||
+                            (fileName != null && !fileName.endsWith('.pdf'))))
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Image.memory(
@@ -1643,12 +2074,16 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: isUploaded ? AppColors.successGreen.withValues(alpha: 0.15) : AppColors.royalBlueFaded,
+                          color: isUploaded
+                              ? AppColors.successGreen.withValues(alpha: 0.15)
+                              : AppColors.royalBlueFaded,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
                           isUploaded ? Icons.check_circle_rounded : icon,
-                          color: isUploaded ? AppColors.successGreen : AppColors.royalBlue,
+                          color: isUploaded
+                              ? AppColors.successGreen
+                              : AppColors.royalBlue,
                           size: 24,
                         ),
                       ),
@@ -1664,19 +2099,31 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                               Expanded(
                                 child: Text(
                                   title,
-                                  style: AppTextStyles.labelLG.copyWith(fontWeight: FontWeight.bold, color: AppColors.navyDark),
+                                  style: AppTextStyles.labelLG.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.navyDark,
+                                  ),
                                 ),
                               ),
                               if (isRequired && !isUploaded)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.gold.withValues(alpha: 0.15),
+                                    color: AppColors.gold.withValues(
+                                      alpha: 0.15,
+                                    ),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     isArabic ? 'مطلوب' : 'Required',
-                                    style: const TextStyle(color: AppColors.goldDark, fontSize: 10, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                      color: AppColors.goldDark,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                             ],
@@ -1684,7 +2131,10 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                           const SizedBox(height: 4),
                           Text(
                             subtitle,
-                            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
                           ),
                           if (isUploaded) ...[
                             const SizedBox(height: 8),
@@ -1694,19 +2144,34 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.successGreen.withValues(alpha: 0.12),
+                                    color: AppColors.successGreen.withValues(
+                                      alpha: 0.12,
+                                    ),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.cloud_done_rounded, size: 12, color: AppColors.successGreen),
+                                      const Icon(
+                                        Icons.cloud_done_rounded,
+                                        size: 12,
+                                        color: AppColors.successGreen,
+                                      ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        isArabic ? 'تم الرفع إلى Supabase' : 'Uploaded to Supabase',
-                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.successGreen),
+                                        isArabic
+                                            ? 'تم الرفع إلى Supabase'
+                                            : 'Uploaded to Supabase',
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.successGreen,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -1714,14 +2179,21 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                                 if (fileName != null)
                                   Text(
                                     fileName,
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.navyDark),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.navyDark,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 if (fileSize != null)
                                   Text(
                                     '(${_formatFileSize(fileSize)})',
-                                    style: const TextStyle(fontSize: 11, color: AppColors.gray600),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.gray600,
+                                    ),
                                   ),
                               ],
                             ),
@@ -1741,10 +2213,18 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                   children: [
                     if (isUploaded) ...[
                       TextButton.icon(
-                        icon: const Icon(Icons.delete_outline_rounded, size: 16, color: AppColors.errorRed),
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          size: 16,
+                          color: AppColors.errorRed,
+                        ),
                         label: Text(
                           isArabic ? 'إزالة' : 'Remove',
-                          style: const TextStyle(color: AppColors.errorRed, fontSize: 12, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            color: AppColors.errorRed,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         onPressed: () => _removeUploadedDocument(key),
                       ),
@@ -1754,31 +2234,64 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                           backgroundColor: AppColors.white,
                           foregroundColor: AppColors.royalBlue,
                           side: const BorderSide(color: AppColors.royalBlue),
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                         ),
                         icon: const Icon(Icons.refresh_rounded, size: 14),
                         label: Text(
                           isArabic ? 'تغيير الملف' : 'Replace File',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        onPressed: _isUploadingDoc ? null : () => _handlePickAndUploadDocument(key, isImageOnly: isImageOnly),
+                        onPressed: _isUploadingDoc
+                            ? null
+                            : () => _handlePickAndUploadDocument(
+                                key,
+                                isImageOnly: isImageOnly,
+                              ),
                       ),
                     ] else
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.navy,
                           foregroundColor: AppColors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                        icon: Icon(isImageOnly ? Icons.add_photo_alternate_rounded : Icons.upload_file_rounded, size: 16),
+                        icon: Icon(
+                          isImageOnly
+                              ? Icons.add_photo_alternate_rounded
+                              : Icons.upload_file_rounded,
+                          size: 16,
+                        ),
                         label: Text(
                           isImageOnly
-                              ? (isArabic ? 'اختيار ورفع الصورة' : 'Upload Profile Photo')
-                              : (isArabic ? 'اختيار ورفع الملف' : 'Upload File / Image'),
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                              ? (isArabic
+                                    ? 'اختيار ورفع الصورة'
+                                    : 'Upload Profile Photo')
+                              : (isArabic
+                                    ? 'اختيار ورفع الملف'
+                                    : 'Upload File / Image'),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        onPressed: _isUploadingDoc ? null : () => _handlePickAndUploadDocument(key, isImageOnly: isImageOnly),
+                        onPressed: _isUploadingDoc
+                            ? null
+                            : () => _handlePickAndUploadDocument(
+                                key,
+                                isImageOnly: isImageOnly,
+                              ),
                       ),
                   ],
                 ),
@@ -1792,14 +2305,20 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
 
   // STEP 6: Review Application
   Widget _step6Review(bool isArabic) {
-    final profileBytes = _uploadedFileBytes['Personal Photo'] ?? _uploadedFileBytes['Profile Picture'];
-    final profileUrl = _uploadedDocuments['Personal Photo'] ?? _uploadedDocuments['Profile Picture'];
+    final profileBytes =
+        _uploadedFileBytes['Personal Photo'] ??
+        _uploadedFileBytes['Profile Picture'];
+    final profileUrl =
+        _uploadedDocuments['Personal Photo'] ??
+        _uploadedDocuments['Profile Picture'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isArabic ? 'الخطوة 6: مراجعة وتأكيد بيانات الطلب والمستندات' : 'Step 6: Review Application & Uploaded Files',
+          isArabic
+              ? 'الخطوة 6: مراجعة وتأكيد بيانات الطلب والمستندات'
+              : 'Step 6: Review Application & Uploaded Files',
           style: AppTextStyles.h5.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
@@ -1812,13 +2331,19 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
               color: AppColors.errorRed.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(_errorMessage!, style: const TextStyle(color: AppColors.errorRed, fontSize: 12)),
+            child: Text(
+              _errorMessage!,
+              style: const TextStyle(color: AppColors.errorRed, fontSize: 12),
+            ),
           ),
 
         _reviewSection(
           title: isArabic ? 'بيانات التأشيرة' : 'Visa Specifications',
           items: [
-            ('Destination', '${CountryFlagHelper.getFlag(_destination)} $_destination'),
+            (
+              'Destination',
+              '${CountryFlagHelper.getFlag(_destination)} $_destination',
+            ),
             ('Visa Type', _visaType),
             ('Estimated Service Fee', '\$${widget.service.price.toInt()}'),
           ],
@@ -1829,7 +2354,12 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
           title: isArabic ? 'جدول السفر' : 'Travel Schedule',
           items: [
             ('Expected Travel Date', _dateFormat.format(_travelDate)),
-            ('Return Date', _returnDate != null ? _dateFormat.format(_returnDate!) : 'Not Specified'),
+            (
+              'Return Date',
+              _returnDate != null
+                  ? _dateFormat.format(_returnDate!)
+                  : 'Not Specified',
+            ),
             ('Travel Purpose', _purpose),
           ],
         ),
@@ -1851,14 +2381,20 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                 children: [
                   Text(
                     isArabic ? 'بيانات مقدم الطلب' : 'Applicant Details',
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.navyDark, fontSize: 13),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.navyDark,
+                      fontSize: 13,
+                    ),
                   ),
                   if (profileBytes != null || profileUrl != null)
                     CircleAvatar(
                       radius: 20,
                       backgroundImage: profileBytes != null
                           ? MemoryImage(profileBytes)
-                          : (profileUrl != null ? NetworkImage(profileUrl) as ImageProvider : null),
+                          : (profileUrl != null
+                                ? NetworkImage(profileUrl) as ImageProvider
+                                : null),
                     ),
                 ],
               ),
@@ -1886,14 +2422,25 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isArabic ? 'المستندات المحفوظة على Supabase Storage' : 'Attached Documents (Supabase Storage)',
-                style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.navyDark, fontSize: 13),
+                isArabic
+                    ? 'المستندات المحفوظة على Supabase Storage'
+                    : 'Attached Documents (Supabase Storage)',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navyDark,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 8),
               if (_uploadedDocuments.isEmpty)
                 Text(
-                  isArabic ? 'لم يتم رفع مستندات بعد' : 'No documents uploaded yet.',
-                  style: const TextStyle(color: AppColors.errorRed, fontSize: 12),
+                  isArabic
+                      ? 'لم يتم رفع مستندات بعد'
+                      : 'No documents uploaded yet.',
+                  style: const TextStyle(
+                    color: AppColors.errorRed,
+                    fontSize: 12,
+                  ),
                 )
               else
                 ..._uploadedDocuments.entries.map((e) {
@@ -1906,22 +2453,36 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 14),
+                            const Icon(
+                              Icons.check_circle_rounded,
+                              color: AppColors.successGreen,
+                              size: 14,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               '${e.key}: ',
-                              style: const TextStyle(color: AppColors.navyDark, fontWeight: FontWeight.bold, fontSize: 12),
+                              style: const TextStyle(
+                                color: AppColors.navyDark,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
                             ),
                             Text(
                               fileName,
-                              style: const TextStyle(color: AppColors.gray700, fontSize: 12),
+                              style: const TextStyle(
+                                color: AppColors.gray700,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),
                         if (size != null)
                           Text(
                             _formatFileSize(size),
-                            style: const TextStyle(color: AppColors.gray600, fontSize: 11),
+                            style: const TextStyle(
+                              color: AppColors.gray600,
+                              fontSize: 11,
+                            ),
                           ),
                       ],
                     ),
@@ -1940,13 +2501,18 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: AppColors.gray600, fontSize: 12)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(
+            label,
+            style: const TextStyle(color: AppColors.gray600, fontSize: 12),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          ),
         ],
       ),
     );
   }
-
 
   // STEP 7: Success Screen
   Widget _step7Success(bool isArabic) {
@@ -1956,16 +2522,27 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(height: 20),
-        const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 68),
+        const Icon(
+          Icons.check_circle_rounded,
+          color: AppColors.successGreen,
+          size: 68,
+        ),
         const SizedBox(height: 16),
         Text(
-          isArabic ? 'تم إرسال طلب التأشيرة بنجاح!' : 'Visa Application Submitted!',
-          style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold, color: AppColors.navyDark),
+          isArabic
+              ? 'تم إرسال طلب التأشيرة بنجاح!'
+              : 'Visa Application Submitted!',
+          style: AppTextStyles.h4.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.navyDark,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
-          isArabic ? 'رقم طلب التأشيرة المرجعي:' : 'Your Visa Application Reference:',
+          isArabic
+              ? 'رقم طلب التأشيرة المرجعي:'
+              : 'Your Visa Application Reference:',
           style: const TextStyle(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
@@ -1993,8 +2570,14 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
-            isArabic ? 'الحالة الحالية: قيد الانتظار والمراجعة' : 'Initial Status: pending',
-            style: const TextStyle(color: AppColors.goldDark, fontWeight: FontWeight.bold, fontSize: 12),
+            isArabic
+                ? 'الحالة الحالية: قيد الانتظار والمراجعة'
+                : 'Initial Status: pending',
+            style: const TextStyle(
+              color: AppColors.goldDark,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -2003,7 +2586,11 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
               ? 'تم تسجيل طلبك وحفظ مستنداتك في قاعدة البيانات. سيقوم مستشار التأشيرات بالتواصل مع حضرتك لاستكمال الموعد وإجراءات التقديم.'
               : 'Your application and documents have been registered in Supabase. A dedicated visa specialist will contact you shortly to review and process your file.',
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.6),
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 13,
+            height: 1.6,
+          ),
         ),
         const SizedBox(height: 24),
         TravellaButton(
@@ -2016,7 +2603,10 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
     );
   }
 
-  Widget _reviewSection({required String title, required List<(String, String)> items}) {
+  Widget _reviewSection({
+    required String title,
+    required List<(String, String)> items,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -2027,7 +2617,14 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.navyDark, fontSize: 13)),
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.navyDark,
+              fontSize: 13,
+            ),
+          ),
           const SizedBox(height: 8),
           ...items.map((item) {
             return Padding(
@@ -2035,8 +2632,20 @@ class _VisaApplicationFlowDialogState extends State<VisaApplicationFlowDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(item.$1, style: const TextStyle(color: AppColors.gray600, fontSize: 12)),
-                  Text(item.$2, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  Text(
+                    item.$1,
+                    style: const TextStyle(
+                      color: AppColors.gray600,
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    item.$2,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             );

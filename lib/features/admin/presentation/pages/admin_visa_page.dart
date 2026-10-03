@@ -58,6 +58,24 @@ class _AdminVisaPageState extends State<AdminVisaPage>
     );
   }
 
+  void _openDocSlotsDialog(VisaServiceModel service) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => _VisaDocSlotsDialog(
+        service: service,
+        onSave: (updated) async {
+          final success = await context
+              .read<AdminVisaCubit>()
+              .updateVisaService(updated);
+          if (success && mounted) {
+            Navigator.of(dialogContext).pop();
+          }
+        },
+      ),
+    );
+  }
+
   void _showApplicationDetailsDialog(VisaApplicationModel app) {
     showDialog(
       context: context,
@@ -471,11 +489,47 @@ class _AdminVisaPageState extends State<AdminVisaPage>
                                     textDirection: TextDirection.rtl,
                                   ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  'Processing: ${service.processingTime} • ${service.requirements.length} Requirements listed • Fee: \$${service.price.toInt()}',
-                                  style: AppTextStyles.caption.copyWith(
-                                    color: AppColors.gray600,
-                                  ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Processing: ${service.processingTime} • Fee: \$${service.price.toInt()}',
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: AppColors.gray600,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.royalBlue.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.upload_file_rounded,
+                                            size: 11,
+                                            color: AppColors.royalBlue,
+                                          ),
+                                          const SizedBox(width: 3),
+                                          Text(
+                                            '${service.effectiveDocumentSlots.length} Upload Docs (${service.effectiveDocumentSlots.where((s) => s.required).length} req)',
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.royalBlue,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -545,6 +599,15 @@ class _AdminVisaPageState extends State<AdminVisaPage>
                             onPressed: () => context
                                 .read<AdminVisaCubit>()
                                 .toggleActive(service),
+                          ),
+                          // Manage Document Slots Button
+                          IconButton(
+                            tooltip: 'Manage Required Upload Documents',
+                            icon: const Icon(
+                              Icons.folder_shared_outlined,
+                              color: AppColors.navyDark,
+                            ),
+                            onPressed: () => _openDocSlotsDialog(service),
                           ),
                           IconButton(
                             icon: const Icon(
@@ -1231,6 +1294,7 @@ class _VisaFormDialogState extends State<_VisaFormDialog> {
   late TextEditingController _flagCtrl;
   late bool _active;
   late List<String> _requirements;
+  late List<VisaDocumentSlot> _documentSlots;
   bool _isSaving = false;
 
   @override
@@ -1258,6 +1322,9 @@ class _VisaFormDialogState extends State<_VisaFormDialog> {
             'Bank Statement (last 3 months)',
             'Confirmed Flight & Hotel Reservation',
           ],
+    );
+    _documentSlots = List<VisaDocumentSlot>.from(
+      s?.effectiveDocumentSlots ?? VisaDocumentSlot.defaultSlots,
     );
   }
 
@@ -1432,10 +1499,13 @@ class _VisaFormDialogState extends State<_VisaFormDialog> {
                         ),
                       ),
                       const SizedBox(height: 18),
+                      // Required Documents Upload Slots Section
+                      _buildDocumentSlotsSection(),
+                      const SizedBox(height: 18),
                       // Dynamic Visa Requirements Editor
                       AdminBulletListEditor(
-                        label: 'Visa Application Requirements *',
-                        hint: 'Add requirement (e.g. Bank Statement)',
+                        label: 'General Embassy Guidelines / Notes',
+                        hint: 'Add guideline note (e.g. Processing can vary by embassy)',
                         items: _requirements,
                         onChanged: (items) => _requirements = items,
                       ),
@@ -1491,16 +1561,11 @@ class _VisaFormDialogState extends State<_VisaFormDialog> {
                                     ? _descArCtrl.text.trim()
                                     : null,
                                 flagEmoji: _flagCtrl.text.trim(),
-                                requirements: _requirements
-                                    .asMap()
-                                    .entries
-                                    .map(
-                                      (e) => VisaRequirementModel(
-                                        id: '',
-                                        visaServiceId: widget.service?.id ?? '',
-                                        requirement: e.value,
-                                      ),
-                                    )
+                                documentSlots: _documentSlots,
+                                requirements: _documentSlots
+                                    .map((slot) => slot.toRequirementModel(
+                                          widget.service?.id ?? '',
+                                        ))
                                     .toList(),
                                 active: _active,
                                 createdAt:
@@ -1517,6 +1582,1052 @@ class _VisaFormDialogState extends State<_VisaFormDialog> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDocumentSlotsSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.royalBlueFaded.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.royalBlue.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.upload_file_rounded,
+                    color: AppColors.royalBlue,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Required Upload Documents (${_documentSlots.length})',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.navyDark,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.royalBlue,
+                  foregroundColor: AppColors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text(
+                  'Add Document',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () => _showAddOrEditSlotDialog(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'حدد الملفات والمستندات التي يجب على العميل رفعها عند التقديم لهذه التأشيرة.',
+            style: TextStyle(fontSize: 11, color: AppColors.gray600),
+          ),
+          const SizedBox(height: 12),
+
+          // Quick Presets
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              const Text(
+                'Quick Add:',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navyDark,
+                ),
+              ),
+              ...VisaDocumentSlot.presetOptions.map((preset) {
+                final isAdded = _documentSlots.any((s) => s.key == preset.key);
+                return ActionChip(
+                  avatar: Icon(
+                    isAdded ? Icons.check : Icons.add_circle_outline,
+                    size: 14,
+                    color: isAdded ? AppColors.successGreen : AppColors.royalBlue,
+                  ),
+                  label: Text(
+                    preset.labelAr ?? preset.label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isAdded ? AppColors.gray600 : AppColors.navyDark,
+                      fontWeight: isAdded ? FontWeight.normal : FontWeight.bold,
+                    ),
+                  ),
+                  backgroundColor: isAdded
+                      ? AppColors.surfaceLight
+                      : AppColors.white,
+                  side: BorderSide(
+                    color: isAdded
+                        ? AppColors.borderLight
+                        : AppColors.royalBlue.withValues(alpha: 0.4),
+                  ),
+                  onPressed: isAdded
+                      ? null
+                      : () {
+                          setState(() {
+                            _documentSlots.add(preset);
+                          });
+                        },
+                );
+              }),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Document Slots List
+          if (_documentSlots.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(14),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.borderLight),
+              ),
+              child: const Text(
+                'No upload documents configured yet. Click "Add Document" or pick from presets above.',
+                style: TextStyle(color: AppColors.gray600, fontSize: 12),
+              ),
+            )
+          else
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _documentSlots.length,
+              onReorder: (oldIndex, newIndex) {
+                setState(() {
+                  if (newIndex > oldIndex) newIndex -= 1;
+                  final item = _documentSlots.removeAt(oldIndex);
+                  _documentSlots.insert(newIndex, item);
+                });
+              },
+              itemBuilder: (context, idx) {
+                final slot = _documentSlots[idx];
+                return Container(
+                  key: ValueKey(slot.key + idx.toString()),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: slot.required
+                          ? AppColors.gold.withValues(alpha: 0.5)
+                          : AppColors.borderLight,
+                      width: slot.required ? 1.5 : 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.drag_indicator,
+                        color: AppColors.gray400,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    slot.label,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: AppColors.navyDark,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: slot.required
+                                        ? AppColors.gold.withValues(alpha: 0.15)
+                                        : AppColors.gray200,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    slot.required ? 'Required *' : 'Optional',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: slot.required
+                                          ? AppColors.goldDark
+                                          : AppColors.gray600,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: slot.imageOnly
+                                        ? AppColors.royalBlueFaded
+                                        : AppColors.surfaceLight,
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: AppColors.borderLight),
+                                  ),
+                                  child: Text(
+                                    slot.imageOnly ? 'Image Only' : 'PDF / Image',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: AppColors.navyDark,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (slot.labelAr != null && slot.labelAr!.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  slot.labelAr!,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.gray600,
+                                  ),
+                                  textDirection: TextDirection.rtl,
+                                ),
+                              ),
+                            if (slot.description != null &&
+                                slot.description!.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  slot.description!,
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    color: AppColors.gray500,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: AppColors.royalBlue,
+                        ),
+                        onPressed: () => _showAddOrEditSlotDialog(
+                          slotToEdit: slot,
+                          slotIndex: idx,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          size: 18,
+                          color: AppColors.error,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _documentSlots.removeAt(idx);
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddOrEditSlotDialog({VisaDocumentSlot? slotToEdit, int? slotIndex}) {
+    final isEditing = slotToEdit != null;
+    final nameCtrl = TextEditingController(text: slotToEdit?.label ?? '');
+    final nameArCtrl = TextEditingController(text: slotToEdit?.labelAr ?? '');
+    final descCtrl = TextEditingController(text: slotToEdit?.description ?? '');
+    final descArCtrl =
+        TextEditingController(text: slotToEdit?.descriptionAr ?? '');
+    bool req = slotToEdit?.required ?? true;
+    bool imgOnly = slotToEdit?.imageOnly ?? false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            isEditing ? 'Edit Document Requirement' : 'Add Required Document',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.navyDark,
+            ),
+          ),
+          content: Container(
+            constraints: const BoxConstraints(maxWidth: 450),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    controller: nameCtrl,
+                    decoration: InputDecoration(
+                      labelText: 'Document Name (English) *',
+                      hintText: 'e.g. Bank Statement (Last 6 Months)',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: nameArCtrl,
+                    textDirection: TextDirection.rtl,
+                    decoration: InputDecoration(
+                      labelText: 'اسم المستند (بالعربي)',
+                      hintText: 'مثال: كشف حساب بنكي لآخر 6 أشهر',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: descCtrl,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      labelText: 'Instructions / Details (English)',
+                      hintText: 'e.g. Must be officially stamped by the bank',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: descArCtrl,
+                    textDirection: TextDirection.rtl,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      labelText: 'التعليمات والشروط (بالعربي)',
+                      hintText: 'مثال: يجب أن يكون مختوماً رسمياً من البنك',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text(
+                      'Mandatory / Required (إلزامي للعميل)',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    value: req,
+                    activeColor: AppColors.gold,
+                    onChanged: (v) => setModalState(() => req = v),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text(
+                      'Image Only (صور فقط - بدون PDF)',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'فعّل هذا الخيار إذا كان المستند صورة شخصية فقط',
+                      style: TextStyle(fontSize: 11, color: AppColors.gray600),
+                    ),
+                    value: imgOnly,
+                    activeColor: AppColors.royalBlue,
+                    onChanged: (v) => setModalState(() => imgOnly = v),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.navy,
+                foregroundColor: AppColors.white,
+              ),
+              onPressed: () {
+                final label = nameCtrl.text.trim();
+                if (label.isEmpty) return;
+
+                final key = isEditing
+                    ? slotToEdit.key
+                    : label
+                        .toLowerCase()
+                        .replaceAll(RegExp(r'[^a-z0-9]'), '_');
+
+                final newSlot = VisaDocumentSlot(
+                  key: key.isEmpty
+                      ? 'doc_${DateTime.now().millisecondsSinceEpoch}'
+                      : key,
+                  label: label,
+                  labelAr: nameArCtrl.text.trim().isNotEmpty
+                      ? nameArCtrl.text.trim()
+                      : null,
+                  description: descCtrl.text.trim().isNotEmpty
+                      ? descCtrl.text.trim()
+                      : null,
+                  descriptionAr: descArCtrl.text.trim().isNotEmpty
+                      ? descArCtrl.text.trim()
+                      : null,
+                  imageOnly: imgOnly,
+                  required: req,
+                );
+
+                setState(() {
+                  if (isEditing && slotIndex != null) {
+                    _documentSlots[slotIndex] = newSlot;
+                  } else {
+                    _documentSlots.add(newSlot);
+                  }
+                });
+                Navigator.of(ctx).pop();
+              },
+              child: Text(isEditing ? 'Save' : 'Add Document'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Document Slots Standalone Management Dialog ──────────────────────────────
+
+class _VisaDocSlotsDialog extends StatefulWidget {
+  final VisaServiceModel service;
+  final Future<void> Function(VisaServiceModel updated) onSave;
+
+  const _VisaDocSlotsDialog({
+    required this.service,
+    required this.onSave,
+  });
+
+  @override
+  State<_VisaDocSlotsDialog> createState() => _VisaDocSlotsDialogState();
+}
+
+class _VisaDocSlotsDialogState extends State<_VisaDocSlotsDialog> {
+  late List<VisaDocumentSlot> _slots;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _slots = List<VisaDocumentSlot>.from(widget.service.effectiveDocumentSlots);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: AppColors.white,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 680, maxHeight: 750),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Dialog Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.royalBlueFaded,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        widget.service.flagEmoji,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Required Upload Documents: ${widget.service.country}',
+                          style: AppTextStyles.h5.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.navyDark,
+                          ),
+                        ),
+                        Text(
+                          'إدارة المستندات والملفات المطلوبة لتأشيرة ${widget.service.localizedCountry(true)}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.gray600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+
+            // Main Content Area
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header with Add Button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Document List (${_slots.length} configured)',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: AppColors.navyDark,
+                          ),
+                        ),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.royalBlue,
+                            foregroundColor: AppColors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
+                          ),
+                          icon: const Icon(Icons.add, size: 16),
+                          label: const Text(
+                            'Add Document',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          onPressed: () => _showAddOrEditDialog(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Quick Presets
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        const Text(
+                          'Quick Add:',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.navyDark,
+                          ),
+                        ),
+                        ...VisaDocumentSlot.presetOptions.map((preset) {
+                          final isAdded = _slots.any((s) => s.key == preset.key);
+                          return ActionChip(
+                            avatar: Icon(
+                              isAdded ? Icons.check : Icons.add_circle_outline,
+                              size: 14,
+                              color: isAdded
+                                  ? AppColors.successGreen
+                                  : AppColors.royalBlue,
+                            ),
+                            label: Text(
+                              preset.labelAr ?? preset.label,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: isAdded
+                                    ? AppColors.gray600
+                                    : AppColors.navyDark,
+                                fontWeight: isAdded
+                                    ? FontWeight.normal
+                                    : FontWeight.bold,
+                              ),
+                            ),
+                            backgroundColor: isAdded
+                                ? AppColors.surfaceLight
+                                : AppColors.white,
+                            side: BorderSide(
+                              color: isAdded
+                                  ? AppColors.borderLight
+                                  : AppColors.royalBlue.withValues(alpha: 0.4),
+                            ),
+                            onPressed: isAdded
+                                ? null
+                                : () {
+                                    setState(() {
+                                      _slots.add(preset);
+                                    });
+                                  },
+                          );
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // List of Slots
+                    if (_slots.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceLight,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.borderLight),
+                        ),
+                        child: const Text(
+                          'No documents configured for this visa. Users will not be asked to upload files.',
+                          style: TextStyle(color: AppColors.gray600),
+                        ),
+                      )
+                    else
+                      ReorderableListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _slots.length,
+                        onReorder: (oldIndex, newIndex) {
+                          setState(() {
+                            if (newIndex > oldIndex) newIndex -= 1;
+                            final item = _slots.removeAt(oldIndex);
+                            _slots.insert(newIndex, item);
+                          });
+                        },
+                        itemBuilder: (context, idx) {
+                          final slot = _slots[idx];
+                          return Container(
+                            key: ValueKey(slot.key + idx.toString()),
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: slot.required
+                                    ? AppColors.gold.withValues(alpha: 0.5)
+                                    : AppColors.borderLight,
+                                width: slot.required ? 1.5 : 1.0,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.drag_indicator,
+                                  color: AppColors.gray400,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              slot.label,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                                color: AppColors.navyDark,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: slot.required
+                                                  ? AppColors.gold
+                                                      .withValues(alpha: 0.15)
+                                                  : AppColors.gray200,
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              slot.required
+                                                  ? 'Required *'
+                                                  : 'Optional',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                color: slot.required
+                                                    ? AppColors.goldDark
+                                                    : AppColors.gray600,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: slot.imageOnly
+                                                  ? AppColors.royalBlueFaded
+                                                  : AppColors.surfaceLight,
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                              border: Border.all(
+                                                color: AppColors.borderLight,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              slot.imageOnly
+                                                  ? 'Image Only'
+                                                  : 'PDF / Image',
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                color: AppColors.navyDark,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (slot.labelAr != null &&
+                                          slot.labelAr!.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 3),
+                                          child: Text(
+                                            slot.labelAr!,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: AppColors.gray600,
+                                            ),
+                                            textDirection: TextDirection.rtl,
+                                          ),
+                                        ),
+                                      if (slot.description != null &&
+                                          slot.description!.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 2),
+                                          child: Text(
+                                            slot.description!,
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              color: AppColors.gray500,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    size: 18,
+                                    color: AppColors.royalBlue,
+                                  ),
+                                  onPressed: () => _showAddOrEditDialog(
+                                    slotToEdit: slot,
+                                    slotIndex: idx,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline_rounded,
+                                    size: 18,
+                                    color: AppColors.error,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _slots.removeAt(idx);
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const Divider(height: 24),
+
+            // Footer Actions
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.navy,
+                    foregroundColor: AppColors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                  ),
+                  onPressed: _isSaving
+                      ? null
+                      : () async {
+                          setState(() => _isSaving = true);
+                          final updated = widget.service.copyWith(
+                            documentSlots: _slots,
+                            requirements: _slots
+                                .map((s) => s.toRequirementModel(
+                                      widget.service.id,
+                                    ))
+                                .toList(),
+                          );
+                          await widget.onSave(updated);
+                          if (mounted) setState(() => _isSaving = false);
+                        },
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.white,
+                          ),
+                        )
+                      : const Text('Save Documents to Supabase'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAddOrEditDialog({VisaDocumentSlot? slotToEdit, int? slotIndex}) {
+    final isEditing = slotToEdit != null;
+    final nameCtrl = TextEditingController(text: slotToEdit?.label ?? '');
+    final nameArCtrl = TextEditingController(text: slotToEdit?.labelAr ?? '');
+    final descCtrl = TextEditingController(text: slotToEdit?.description ?? '');
+    final descArCtrl =
+        TextEditingController(text: slotToEdit?.descriptionAr ?? '');
+    bool req = slotToEdit?.required ?? true;
+    bool imgOnly = slotToEdit?.imageOnly ?? false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            isEditing ? 'Edit Document' : 'Add Required Document',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.navyDark,
+            ),
+          ),
+          content: Container(
+            constraints: const BoxConstraints(maxWidth: 450),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    controller: nameCtrl,
+                    decoration: InputDecoration(
+                      labelText: 'Document Name (English) *',
+                      hintText: 'e.g. Bank Statement (Last 6 Months)',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: nameArCtrl,
+                    textDirection: TextDirection.rtl,
+                    decoration: InputDecoration(
+                      labelText: 'اسم المستند (بالعربي)',
+                      hintText: 'مثال: كشف حساب بنكي لآخر 6 أشهر',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: descCtrl,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      labelText: 'Instructions / Details (English)',
+                      hintText: 'e.g. Must be officially stamped by the bank',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: descArCtrl,
+                    textDirection: TextDirection.rtl,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      labelText: 'التعليمات والشروط (بالعربي)',
+                      hintText: 'مثال: يجب أن يكون مختوماً رسمياً من البنك',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text(
+                      'Mandatory / Required (إلزامي للعميل)',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    value: req,
+                    activeColor: AppColors.gold,
+                    onChanged: (v) => setModalState(() => req = v),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text(
+                      'Image Only (صور فقط - بدون PDF)',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'فعّل هذا الخيار إذا كان المستند صورة شخصية فقط',
+                      style: TextStyle(fontSize: 11, color: AppColors.gray600),
+                    ),
+                    value: imgOnly,
+                    activeColor: AppColors.royalBlue,
+                    onChanged: (v) => setModalState(() => imgOnly = v),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.navy,
+                foregroundColor: AppColors.white,
+              ),
+              onPressed: () {
+                final label = nameCtrl.text.trim();
+                if (label.isEmpty) return;
+
+                final key = isEditing
+                    ? slotToEdit.key
+                    : label
+                        .toLowerCase()
+                        .replaceAll(RegExp(r'[^a-z0-9]'), '_');
+
+                final newSlot = VisaDocumentSlot(
+                  key: key.isEmpty
+                      ? 'doc_${DateTime.now().millisecondsSinceEpoch}'
+                      : key,
+                  label: label,
+                  labelAr: nameArCtrl.text.trim().isNotEmpty
+                      ? nameArCtrl.text.trim()
+                      : null,
+                  description: descCtrl.text.trim().isNotEmpty
+                      ? descCtrl.text.trim()
+                      : null,
+                  descriptionAr: descArCtrl.text.trim().isNotEmpty
+                      ? descArCtrl.text.trim()
+                      : null,
+                  imageOnly: imgOnly,
+                  required: req,
+                );
+
+                setState(() {
+                  if (isEditing && slotIndex != null) {
+                    _slots[slotIndex] = newSlot;
+                  } else {
+                    _slots.add(newSlot);
+                  }
+                });
+                Navigator.of(ctx).pop();
+              },
+              child: Text(isEditing ? 'Save' : 'Add Document'),
+            ),
+          ],
         ),
       ),
     );

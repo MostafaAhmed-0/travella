@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/visa_model.dart';
 import '../services/supabase_service.dart';
@@ -69,7 +70,22 @@ class VisaRemoteDataSourceImpl implements VisaRemoteDataSource {
           .insert(map)
           .select('*, visa_requirements(*)')
           .single();
-      return VisaServiceModel.fromJson(response);
+      final created = VisaServiceModel.fromJson(response);
+
+      // Persist document requirements if present
+      final slots = service.effectiveDocumentSlots;
+      if (slots.isNotEmpty) {
+        final reqRows = slots.map((slot) => {
+          'visa_service_id': created.id,
+          'requirement': jsonEncode(slot.toJson()),
+          'requirement_ar': slot.labelAr ?? slot.label,
+        }).toList();
+
+        await _client.from(SupabaseService.tableVisaRequirements).insert(reqRows);
+        return await getVisaServiceById(created.id) ?? created;
+      }
+
+      return created;
     } catch (e) {
       throw Exception(SupabaseService.handleError(e));
     }
@@ -79,13 +95,31 @@ class VisaRemoteDataSourceImpl implements VisaRemoteDataSource {
   Future<VisaServiceModel> updateVisaService(VisaServiceModel service) async {
     try {
       final map = service.toJson()..remove('id');
-      final response = await _client
+      await _client
           .from(SupabaseService.tableVisaServices)
           .update(map)
-          .eq('id', service.id)
-          .select('*, visa_requirements(*)')
-          .single();
-      return VisaServiceModel.fromJson(response);
+          .eq('id', service.id);
+
+      // Clear existing requirements for this visa
+      await _client
+          .from(SupabaseService.tableVisaRequirements)
+          .delete()
+          .eq('visa_service_id', service.id);
+
+      // Insert updated document slots
+      final slots = service.effectiveDocumentSlots;
+      if (slots.isNotEmpty) {
+        final reqRows = slots.map((slot) => {
+          'visa_service_id': service.id,
+          'requirement': jsonEncode(slot.toJson()),
+          'requirement_ar': slot.labelAr ?? slot.label,
+        }).toList();
+
+        await _client.from(SupabaseService.tableVisaRequirements).insert(reqRows);
+      }
+
+      final refreshed = await getVisaServiceById(service.id);
+      return refreshed ?? service;
     } catch (e) {
       throw Exception(SupabaseService.handleError(e));
     }
