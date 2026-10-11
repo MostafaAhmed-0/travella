@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -6,8 +7,13 @@ import '../../../../core/routing/app_routes.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/localization/app_locales.dart';
 import '../../../../core/localization/app_translations.dart';
+import '../../../../core/utils/external_link_helper.dart';
+import '../../../../data/models/site_settings_model.dart';
+import '../../../features/site_settings/presentation/cubit/site_settings_cubit.dart';
+import 'social_links_bar.dart';
+import 'policy_dialogs.dart';
 
-/// App footer shown on all public pages with full bilingual support
+/// App footer shown on all public pages with dynamic site_settings and verified social media links
 class AppFooter extends StatelessWidget {
   const AppFooter({super.key});
 
@@ -48,12 +54,12 @@ class AppFooter extends StatelessWidget {
                     const SizedBox(width: 20),
                     _FooterLink(
                       label: context.isArabic ? 'سياسة الخصوصية' : 'Privacy Policy',
-                      onTap: () {},
+                      onTap: () => PolicyDialogs.showPrivacyPolicy(context, isArabic: context.isArabic),
                     ),
                     const SizedBox(width: 20),
                     _FooterLink(
                       label: context.isArabic ? 'شروط الخدمة' : 'Terms of Service',
-                      onTap: () {},
+                      onTap: () => PolicyDialogs.showTermsOfService(context, isArabic: context.isArabic),
                     ),
                   ],
                 ),
@@ -217,15 +223,11 @@ class _BrandColumn extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        // Social icons
-        Row(
-          children: [
-            _SocialIcon(icon: Icons.facebook, onTap: () {}),
-            const SizedBox(width: 12),
-            _SocialIcon(icon: Icons.camera_alt_rounded, onTap: () {}),
-            const SizedBox(width: 12),
-            _SocialIcon(icon: Icons.play_arrow_rounded, onTap: () {}),
-          ],
+        // Dynamic Social icons reading from site_settings (hides if empty, opens new tab)
+        const SocialLinksBar(
+          variant: SocialLinksVariant.footer,
+          iconSize: 16,
+          spacing: 10,
         ),
       ],
     );
@@ -237,6 +239,13 @@ class _ContactColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SiteSettingsCubit?>()?.state.settings ??
+        SiteSettingsModel.initial();
+
+    final address = context.isArabic
+        ? (settings.cairoAddressAr.isNotEmpty ? settings.cairoAddressAr : context.tr('footer_cairo_address'))
+        : (settings.cairoAddress.isNotEmpty ? settings.cairoAddress : context.tr('footer_cairo_address'));
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -245,13 +254,21 @@ class _ContactColumn extends StatelessWidget {
           style: AppTextStyles.h6.copyWith(color: AppColors.white),
         ),
         const SizedBox(height: 16),
-        const _ContactItem(icon: Icons.email_rounded, text: 'info@travella.com'),
+        _ContactItem(
+          icon: Icons.email_rounded,
+          text: settings.supportEmail,
+          onTap: () => ExternalLinkHelper.openEmail(settings.supportEmail),
+        ),
         const SizedBox(height: 10),
-        const _ContactItem(icon: Icons.phone_rounded, text: '+20 100 123 4567'),
+        _ContactItem(
+          icon: Icons.phone_rounded,
+          text: settings.phoneNumber,
+          onTap: () => ExternalLinkHelper.openPhone(settings.phoneNumber),
+        ),
         const SizedBox(height: 10),
         _ContactItem(
           icon: Icons.location_on_rounded,
-          text: context.tr('footer_cairo_address'),
+          text: address,
         ),
       ],
     );
@@ -299,6 +316,7 @@ class _FooterLinkState extends State<_FooterLink> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
@@ -314,64 +332,57 @@ class _FooterLinkState extends State<_FooterLink> {
   }
 }
 
-class _ContactItem extends StatelessWidget {
+class _ContactItem extends StatefulWidget {
   final IconData icon;
   final String text;
+  final VoidCallback? onTap;
 
-  const _ContactItem({required this.icon, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: AppColors.gold, size: 16),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            text,
-            style: AppTextStyles.bodySM.copyWith(color: AppColors.textOnDarkMuted),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SocialIcon extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _SocialIcon({required this.icon, required this.onTap});
+  const _ContactItem({
+    required this.icon,
+    required this.text,
+    this.onTap,
+  });
 
   @override
-  State<_SocialIcon> createState() => _SocialIconState();
+  State<_ContactItem> createState() => _ContactItemState();
 }
 
-class _SocialIconState extends State<_SocialIcon> {
+class _ContactItemState extends State<_ContactItem> {
   bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
+    final isClickable = widget.onTap != null;
+
+    final content = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          widget.icon,
+          color: _hovered && isClickable ? AppColors.white : AppColors.gold,
+          size: 16,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            widget.text,
+            style: AppTextStyles.bodySM.copyWith(
+              color: _hovered && isClickable ? AppColors.gold : AppColors.textOnDarkMuted,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (!isClickable) return content;
+
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
         onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: _hovered ? AppColors.gold : AppColors.gray700,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            widget.icon,
-            color: _hovered ? AppColors.navyDark : AppColors.gray300,
-            size: 18,
-          ),
-        ),
+        child: content,
       ),
     );
   }

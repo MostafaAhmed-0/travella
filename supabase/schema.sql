@@ -540,3 +540,55 @@ CREATE POLICY "Admins delete storage images"
         bucket_id IN ('tour-images', 'destination-images', 'hotel-images', 'gallery-images', 'blog-images', 'partner-logos')
         AND public.is_admin()
     );
+
+-- ── 15. SITE SETTINGS TABLE ───────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.site_settings (
+    id TEXT PRIMARY KEY DEFAULT 'default',
+    site_name TEXT NOT NULL DEFAULT 'Travella Tour & Travel',
+    site_name_ar TEXT NOT NULL DEFAULT 'ترافيلا للسياحة والسفر',
+    support_email TEXT NOT NULL DEFAULT 'info@travella.com',
+    phone_number TEXT NOT NULL DEFAULT '+20 100 123 4567',
+    cairo_address TEXT NOT NULL DEFAULT 'Zamalek, Cairo, Egypt',
+    cairo_address_ar TEXT NOT NULL DEFAULT 'الزمالك، القاهرة، جمهورية مصر العربية',
+    facebook_url TEXT NOT NULL DEFAULT 'https://facebook.com/travella',
+    instagram_url TEXT NOT NULL DEFAULT 'https://instagram.com/travella',
+    whatsapp_number TEXT NOT NULL DEFAULT '+20 100 123 4567',
+    youtube_url TEXT NOT NULL DEFAULT 'https://youtube.com/@travella',
+    tiktok_url TEXT NOT NULL DEFAULT 'https://tiktok.com/@travella',
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Seed default site_settings row
+INSERT INTO public.site_settings (
+    id, site_name, site_name_ar, support_email, phone_number,
+    cairo_address, cairo_address_ar, facebook_url, instagram_url,
+    whatsapp_number, youtube_url, tiktok_url
+) VALUES (
+    'default',
+    'Travella Tour & Travel',
+    'ترافيلا للسياحة والسفر',
+    'info@travella.com',
+    '+20 100 123 4567',
+    'Zamalek, Cairo, Egypt',
+    'الزمالك، القاهرة، جمهورية مصر العربية',
+    'https://facebook.com/travella',
+    'https://instagram.com/travella',
+    '+20 100 123 4567',
+    'https://youtube.com/@travella',
+    'https://tiktok.com/@travella'
+) ON CONFLICT (id) DO NOTHING;
+
+-- Site Settings Policies
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public can view site settings" ON public.site_settings;
+CREATE POLICY "Public can view site settings"
+    ON public.site_settings FOR SELECT
+    USING (true);
+
+DROP POLICY IF EXISTS "Admins can update site settings" ON public.site_settings;
+CREATE POLICY "Admins can update site settings"
+    ON public.site_settings FOR ALL
+    USING (public.is_admin() OR public.is_staff_or_admin())
+    WITH CHECK (public.is_admin() OR public.is_staff_or_admin());
+

@@ -157,6 +157,13 @@ class _HajjUmrahSectionState extends State<HajjUmrahSection> {
                 ),
               ),
             ),
+            const SizedBox(height: 28),
+            TravellaButton(
+              label: 'Explore All Pilgrimage Programs',
+              variant: TravellaButtonVariant.gold,
+              trailingIcon: Icons.arrow_forward_rounded,
+              onPressed: () => context.goNamed(AppRoutes.hajjUmrahName),
+            ),
           ],
         ),
       ),

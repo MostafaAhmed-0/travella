@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
+import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/animations/animation_widgets.dart';
 import '../../../../data/models/blog_model.dart';
@@ -147,6 +149,15 @@ class _GallerySectionState extends State<GallerySection> {
                   );
                 },
               ),
+            const SizedBox(height: 36),
+            Center(
+              child: TravellaButton(
+                label: 'View Full Gallery',
+                variant: TravellaButtonVariant.secondary,
+                trailingIcon: Icons.arrow_forward_rounded,
+                onPressed: () => context.goNamed(AppRoutes.galleryName),
+              ),
+            ),
           ],
         ),
       ),

@@ -11,6 +11,9 @@ import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/localization/app_translations.dart';
+import '../../../../core/utils/external_link_helper.dart';
+import '../../../site_settings/presentation/cubit/site_settings_cubit.dart';
+import '../../../../data/models/site_settings_model.dart';
 import '../../../../data/models/booking_model.dart';
 import '../../../../data/models/tour_model.dart';
 import '../../../../data/repositories/tour_repository.dart';
@@ -329,21 +332,21 @@ class _BookingPageState extends State<BookingPage> {
     final message =
         'Hello Travella Concierge! 🌟\nI have just submitted booking inquiry reference *$ref* for *$tour* ($guestsStr on $dateStr).\nPlease confirm my itinerary details.';
 
-    final uri = Uri.parse(
-      'https://wa.me/201000000000?text=${Uri.encodeComponent(message)}',
+    final settings = context.read<SiteSettingsCubit?>()?.state.settings ??
+        SiteSettingsModel.initial();
+
+    final launched = await ExternalLinkHelper.openWhatsApp(
+      rawPhoneOrUrl: settings.whatsappNumber,
+      message: message,
     );
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not launch WhatsApp. Reference code copied!'),
-            backgroundColor: AppColors.royalBlue,
-          ),
-        );
-      }
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not launch WhatsApp. Reference code copied!'),
+          backgroundColor: AppColors.royalBlue,
+        ),
+      );
     }
   }
 

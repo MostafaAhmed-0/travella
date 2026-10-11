@@ -247,7 +247,10 @@ class _DestinationCardState extends State<_DestinationCard> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
-        onTap: () => context.goNamed(AppRoutes.destinationsName),
+        onTap: () => context.goNamed(
+          AppRoutes.destinationsName,
+          queryParameters: {'search': dest.title},
+        ),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,

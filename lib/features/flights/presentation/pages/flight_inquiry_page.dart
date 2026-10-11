@@ -9,6 +9,9 @@ import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/localization/app_translations.dart';
+import '../../../../core/utils/external_link_helper.dart';
+import '../../../site_settings/presentation/cubit/site_settings_cubit.dart';
+import '../../../../data/models/site_settings_model.dart';
 import '../../../../shared/presentation/widgets/app_navbar.dart';
 import '../../../../shared/presentation/widgets/app_footer.dart';
 import '../../../bookings/presentation/cubit/booking_cubit.dart';
@@ -831,9 +834,14 @@ class _FlightInquiryPageState extends State<FlightInquiryPage> {
               ),
               ElevatedButton.icon(
                 onPressed: () {
-                  final msg = Uri.encodeComponent(
-                      'Hello Travella, I just submitted flight inquiry $_submissionReference (${_data.origin} to ${_data.destination}).');
-                  launchUrl(Uri.parse('https://wa.me/201000000000?text=$msg'), mode: LaunchMode.externalApplication);
+                  final msg =
+                      'Hello Travella, I just submitted flight inquiry $_submissionReference (${_data.origin} to ${_data.destination}).';
+                  final settings = context.read<SiteSettingsCubit?>()?.state.settings ??
+                      SiteSettingsModel.initial();
+                  ExternalLinkHelper.openWhatsApp(
+                    rawPhoneOrUrl: settings.whatsappNumber,
+                    message: msg,
+                  );
                 },
                 icon: const Icon(Icons.chat_bubble_rounded, size: 18),
                 label: Text(isArabic ? 'متابعة عبر واتساب' : 'Instant WhatsApp Assistance'),

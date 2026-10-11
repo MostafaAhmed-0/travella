@@ -93,9 +93,9 @@ class AppRouter {
           name: AppRoutes.toursName,
           pageBuilder: (context, state) => buildPageTransition(
             key: state.pageKey,
-            child: DestinationsPage(
-              initialQuery: state.uri.queryParameters['search'] ??
-                  state.uri.queryParameters['destination'],
+            child: InternationalToursPage(
+              initialDestination: state.uri.queryParameters['destination'] ??
+                  state.uri.queryParameters['search'],
             ),
           ),
         ),

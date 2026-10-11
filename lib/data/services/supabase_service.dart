@@ -84,6 +84,7 @@ class SupabaseService {
   static const String tablePartners = 'partners';
   static const String tableTransferVehicles = 'transfer_vehicles';
   static const String tableTransferBookings = 'transfer_bookings';
+  static const String tableSiteSettings = 'site_settings';
 
   // ── Error Handler ──────────────────────────────────────────────────────────
   static String handleError(Object e) {

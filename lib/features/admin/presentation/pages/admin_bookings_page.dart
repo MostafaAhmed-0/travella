@@ -46,7 +46,11 @@ class _AdminBookingsPageState extends State<AdminBookingsPage> {
 
     final uri = Uri.parse('https://wa.me/$cleanPhone?text=$text');
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+        webOnlyWindowName: '_blank',
+      );
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

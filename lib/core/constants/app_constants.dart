@@ -14,11 +14,11 @@ class AppConstants {
   static const String appAddress = 'Your City, Country';
   static const String appWhatsapp = '+1234567890';
 
-  // Social Links
+  // Social Links (Defaults — Live links stored and editable via site_settings)
   static const String instagramUrl = 'https://instagram.com/travella';
   static const String facebookUrl = 'https://facebook.com/travella';
-  static const String twitterUrl = 'https://twitter.com/travella';
-  static const String youtubeUrl = 'https://youtube.com/travella';
+  static const String youtubeUrl = 'https://youtube.com/@travella';
+  static const String tiktokUrl = 'https://tiktok.com/@travella';
 
   // Supabase
   static const String supabaseUrl = String.fromEnvironment(

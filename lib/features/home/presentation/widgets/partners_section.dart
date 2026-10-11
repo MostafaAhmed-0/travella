@@ -3,6 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/responsive/app_breakpoints.dart';
 import '../../../../core/localization/app_translations.dart';
+import '../../../../core/utils/external_link_helper.dart';
 import '../../../../data/models/partner_model.dart';
 import '../../../../data/repositories/partner_repository.dart';
 
@@ -138,7 +139,16 @@ class _PartnersSectionState extends State<PartnersSection>
   }
 
   Widget _buildPartnerChip(String name, double width) {
-    return Container(
+    PartnerModel? matched;
+    try {
+      matched = _partners.firstWhere((p) => p.name == name);
+    } catch (_) {
+      matched = null;
+    }
+
+    final hasWebsite = matched?.website != null && matched!.website!.trim().isNotEmpty;
+
+    final content = Container(
       width: width,
       margin: const EdgeInsets.symmetric(horizontal: 12),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
@@ -163,8 +173,24 @@ class _PartnersSectionState extends State<PartnersSection>
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (hasWebsite) ...[
+            const SizedBox(width: 6),
+            const Icon(Icons.open_in_new_rounded, size: 12, color: AppColors.gold),
+          ],
         ],
       ),
     );
+
+    if (hasWebsite) {
+      return MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => ExternalLinkHelper.openExternalUrl(matched!.website!),
+          child: content,
+        ),
+      );
+    }
+
+    return content;
   }
 }

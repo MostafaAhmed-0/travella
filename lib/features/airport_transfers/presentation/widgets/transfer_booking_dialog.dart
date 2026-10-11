@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/localization/app_translations.dart';
+import '../../../../core/utils/external_link_helper.dart';
+import '../../../site_settings/presentation/cubit/site_settings_cubit.dart';
+import '../../../../data/models/site_settings_model.dart';
 import '../../../../data/models/airport_transfer_model.dart';
 import '../cubit/transfers_cubit.dart';
 import '../cubit/transfers_state.dart';
@@ -95,15 +98,18 @@ class _TransferBookingDialogState extends State<TransferBookingDialog> {
   }
 
   Future<void> _openWhatsApp() async {
-    final msg = Uri.encodeComponent(
-      'Hello Travella! I just booked an airport transfer (Ref: ${_bookingId ?? "Pending"}). '
-      'Vehicle: ${widget.vehicle.vehicleName}, Date: ${DateFormat('yyyy-MM-dd').format(widget.state.pickupDate)}, '
-      'From: ${widget.state.pickupLocation} To: ${widget.state.dropoffLocation}.',
+    final msg =
+        'Hello Travella! I just booked an airport transfer (Ref: ${_bookingId ?? "Pending"}). '
+        'Vehicle: ${widget.vehicle.vehicleName}, Date: ${DateFormat('yyyy-MM-dd').format(widget.state.pickupDate)}, '
+        'From: ${widget.state.pickupLocation} To: ${widget.state.dropoffLocation}.';
+
+    final settings = context.read<SiteSettingsCubit?>()?.state.settings ??
+        SiteSettingsModel.initial();
+
+    await ExternalLinkHelper.openWhatsApp(
+      rawPhoneOrUrl: settings.whatsappNumber,
+      message: msg,
     );
-    final uri = Uri.parse('https://wa.me/201000000000?text=$msg');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
   }
 
   @override

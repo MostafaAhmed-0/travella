@@ -313,17 +313,32 @@ class _VisaServicesSectionState extends State<VisaServicesSection> {
                 ],
               ),
               if (!isMobile)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.gold.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.gold),
-                  ),
-                  child: Text(
-                    'Fee from \$${country.fee.toInt()}',
-                    style: AppTextStyles.labelLG.copyWith(color: AppColors.gold, fontWeight: FontWeight.w700),
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.gold.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.gold),
+                      ),
+                      child: Text(
+                        'Fee from \$${country.fee.toInt()}',
+                        style: AppTextStyles.labelLG.copyWith(color: AppColors.gold, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    TravellaButton(
+                      label: 'Apply for Visa',
+                      variant: TravellaButtonVariant.gold,
+                      size: TravellaButtonSize.sm,
+                      trailingIcon: Icons.arrow_forward_rounded,
+                      onPressed: () => context.goNamed(
+                        AppRoutes.visaServicesName,
+                        queryParameters: {'country': country.countryName},
+                      ),
+                    ),
+                  ],
                 ),
             ],
           ),

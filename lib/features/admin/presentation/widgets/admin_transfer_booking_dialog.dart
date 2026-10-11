@@ -53,14 +53,22 @@ class _AdminTransferBookingDialogState extends State<AdminTransferBookingDialog>
     );
     final uri = Uri.parse('https://wa.me/$cleanPhone?text=$msg');
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+        webOnlyWindowName: '_blank',
+      );
     }
   }
 
   Future<void> _sendEmail() async {
     final uri = Uri.parse('mailto:${widget.booking.email}?subject=Travella%20Transfer%20Booking%20Confirmation');
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+        webOnlyWindowName: '_blank',
+      );
     }
   }
 

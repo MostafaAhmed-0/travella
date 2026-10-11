@@ -15,6 +15,8 @@ import 'package:travella/data/repositories/blog_repository.dart';
 import 'package:travella/data/repositories/testimonial_repository.dart';
 import 'package:travella/data/repositories/partner_repository.dart';
 import 'package:travella/data/repositories/storage_repository.dart';
+import 'package:travella/data/repositories/site_settings_repository.dart';
+import 'package:travella/features/site_settings/presentation/cubit/site_settings_cubit.dart';
 import 'package:travella/data/repositories/airport_transfer_repository.dart';
 import 'package:travella/data/services/supabase_service.dart';
 import 'package:travella/features/auth/presentation/cubit/auth_cubit.dart';
@@ -52,10 +54,12 @@ class _TravellaAppState extends State<TravellaApp> {
   late final PartnerRepository _partnerRepository;
   late final StorageRepository _storageRepository;
   late final AirportTransferRepository _transferRepository;
+  late final SiteSettingsRepository _siteSettingsRepository;
 
   // Root Cubits
   late final AuthCubit _authCubit;
   late final BookingCubit _bookingCubit;
+  late final SiteSettingsCubit _siteSettingsCubit;
 
   // GoRouter instance with role-based auth protection
   late final GoRouter _router;
@@ -77,10 +81,12 @@ class _TravellaAppState extends State<TravellaApp> {
     _partnerRepository = PartnerRepository();
     _storageRepository = StorageRepositoryImpl();
     _transferRepository = AirportTransferRepository();
+    _siteSettingsRepository = SiteSettingsRepositoryImpl();
 
     // Instantiate Cubits
     _authCubit = AuthCubit(authRepository: _authRepository);
     _bookingCubit = BookingCubit(bookingRepository: _bookingRepository);
+    _siteSettingsCubit = SiteSettingsCubit(repository: _siteSettingsRepository);
 
     // Create Router with AuthCubit guard
     _router = AppRouter.createRouter(_authCubit);
@@ -94,6 +100,7 @@ class _TravellaAppState extends State<TravellaApp> {
     _localeManager.dispose();
     _authCubit.close();
     _bookingCubit.close();
+    _siteSettingsCubit.close();
     super.dispose();
   }
 
@@ -113,11 +120,13 @@ class _TravellaAppState extends State<TravellaApp> {
         RepositoryProvider<PartnerRepository>.value(value: _partnerRepository),
         RepositoryProvider<StorageRepository>.value(value: _storageRepository),
         RepositoryProvider<AirportTransferRepository>.value(value: _transferRepository),
+        RepositoryProvider<SiteSettingsRepository>.value(value: _siteSettingsRepository),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider<AuthCubit>.value(value: _authCubit),
           BlocProvider<BookingCubit>.value(value: _bookingCubit),
+          BlocProvider<SiteSettingsCubit>.value(value: _siteSettingsCubit),
         ],
         child: ListenableBuilder(
           listenable: _localeManager,
