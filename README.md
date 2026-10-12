@@ -1,57 +1,146 @@
 <div align="center">
 
+<img src="screenshots/Screenshot1.png" alt="Travella — Explore A Brighter World" width="100%"/>
+
+<br/>
+<br/>
+
 # ✈️ Travella — Tour & Travel
 
-### *Explore A Brighter World*
+### *Explore A Brighter World With Us*
 
-A full-featured travel agency web application built with **Flutter** & **Supabase** — offering tours, flights, hotels, visa services, airport transfers, and Hajj & Umrah packages.
+A full-featured, production-ready travel agency web application built with **Flutter** & **Supabase** — offering tours, flights, hotels, visa services, airport transfers, and Hajj & Umrah packages, backed by a powerful admin CMS.
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=for-the-badge&logo=dart)](https://dart.dev)
-[![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com)
-[![BLoC](https://img.shields.io/badge/BLoC-State_Management-FF6F00?style=for-the-badge)](https://bloclibrary.dev)
+<br/>
+
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+[![BLoC](https://img.shields.io/badge/BLoC%2FCubit-State_Management-FF6F00?style=for-the-badge&logo=flutter&logoColor=white)](https://bloclibrary.dev)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
 </div>
 
 ---
 
-## 📸 Screenshots
+## 🌟 Overview
 
-### 🏠 Home Page
-![Home Page](screenshots/01_home.png)
+**Travella** is a fully functional, multi-platform travel agency platform with a sleek public website and a comprehensive admin CMS — all powered by Flutter Web and Supabase. Customers can browse destinations, book tours, request visas, find hotels, arrange airport transfers, and book Hajj & Umrah packages — while admins manage everything from a polished dashboard.
 
-### 🌍 World Destinations
-![Destinations](screenshots/02_destinations.png)
+---
 
-### 🗺️ International Tour Packages
-![Tours](screenshots/03_tours.png)
+## 📸 Public Website
 
-### ✈️ Flights Booking
-![Flights](screenshots/06_flights.png)
+### 🏠 Hero — Explore A Brighter World
+![Home Page](screenshots/Screenshot1.png)
 
-### 🚗 Airport Transfers
-![Airport Transfers](screenshots/07_airport_transfers.png)
+<br/>
 
-### 🛂 Visa Services
-![Visa Services](screenshots/05_visa_services.png)
+### 🌍 World Destinations — Explore Extraordinary Places
+![Destinations](screenshots/Screensho3t.png)
 
-### 🕌 Hajj & Umrah Packages
-![Hajj & Umrah](screenshots/08_hajj_umrah.png)
+<br/>
 
-### 🏨 Hotels
-![Hotels](screenshots/04_hotels.png)
+### 🇪🇬 Domestic Tours — Egypt's Timeless Wonders
+![Domestic Tours](screenshots/Screenshot4.png)
 
-### 🖼️ Gallery
-![Gallery](screenshots/09_gallery.png)
+<br/>
 
-### 📰 Blog
-![Blog](screenshots/10_blog.png)
+### 🗺️ International Tours — Travel Beyond Borders
+![International Tours](screenshots/Screenshot5.png)
+
+<br/>
+
+### ✈️ Flights — World-Class Flights & Bespoke Routes
+![Flights](screenshots/Screenshot20.png)
+
+<br/>
+
+### 🏨 Hotels — Stay Somewhere Amazing
+![Hotels](screenshots/Screenshot21.png)
+
+<br/>
+
+### 🚗 Airport Transfers — Seamless Airport & Luxury Private Transfers
+![Airport Transfers](screenshots/Screenshot22.png)
+
+<br/>
+
+### 🛂 Visa Services — Fast-Track Visa Consultation
+![Visa Services](screenshots/Screenshot.6png.png)
+
+<br/>
+
+### 🕌 Hajj & Umrah — Spiritual Journeys, Carefully Arranged
+![Hajj & Umrah](screenshots/Screenshot9.png)
+
+<br/>
+
+### 📞 Contact — Submit a Travel Inquiry
+![Contact](screenshots/Screenshot23.png)
+
+---
+
+## 🖥️ Admin CMS
+
+### 🔐 Admin Login — Secure Role-Protected Portal
+![Admin Login](screenshots/Screenshot.png)
+
+<br/>
+
+### 📊 Admin Dashboard — Full Overview at a Glance
+![Admin Dashboard](screenshots/Screenshot10.png)
+
+<br/>
+
+### 🗺️ Tour Management — Create, Edit & Publish Packages
+![Tour Management](screenshots/Screenshot11.png)
+
+<br/>
+
+### 🛂 Visa Applications — Review & Update Application Status
+![Visa Applications](screenshots/Screenshot12.png)
+
+<br/>
+
+### 📋 Visa Application Details — Full Applicant Profile & Documents
+![Visa Application Details](screenshots/Screenshot13.png)
+
+<br/>
+
+### 🌐 Visa Services Catalog — Manage Country Visa Listings
+![Visa Catalog](screenshots/Screenshot14.png)
+
+<br/>
+
+### 🕌 Hajj & Umrah Packages — Spiritual Package Management
+![Hajj & Umrah Admin](screenshots/Screenshot15.png)
+
+<br/>
+
+### 🖼️ Media Gallery — Supabase Storage Management
+![Gallery Admin](screenshots/Screenshot16.png)
+
+<br/>
+
+### 🚗 Airport Transfers Fleet — Vehicle & Pricing Management
+![Transfers Admin](screenshots/Screenshot17.png)
+
+<br/>
+
+### 📅 Bookings & Inquiries — Review Client Reservations
+![Bookings Admin](screenshots/Screenshot18.png)
+
+<br/>
+
+### 🔍 Booking Details — Full Record, Status & Quick Actions
+![Booking Details](screenshots/Screenshot19.png)
 
 ---
 
 ## ✨ Features
 
-### 🌐 Public Pages
+### 🌐 Public Website
 
 | Feature | Description |
 |---|---|
@@ -60,22 +149,32 @@ A full-featured travel agency web application built with **Flutter** & **Supabas
 | 🗺️ **International Tours** | Curated global packages with duration, ratings, search & sort |
 | 🇪🇬 **Domestic Tours** | Egypt-specific tour packages |
 | ✈️ **Flights** | Flight inquiry form with Round-Trip/One-Way, cabin class, date & passenger selection |
-| 🏨 **Hotels** | Hotel listings with search & filtering |
+| 🏨 **Hotels** | Hotel listings with search, star rating & amenity filtering |
 | 🚗 **Airport Transfers** | VIP chauffeur booking — Airport→Hotel, Hotel→Airport, Airport→Airport, Custom |
-| 🛂 **Visa Services** | Visa application assistance with type, purpose & processing time filters |
+| 🛂 **Visa Services** | Visa application assistance with country selection & documentation checklist |
 | 🕌 **Hajj & Umrah** | Premium spiritual pilgrimage packages with Hajj & Umrah tabs |
 | 🖼️ **Gallery** | Photo gallery of destinations and tours |
 | 📰 **Blog** | Travel articles and destination guides |
-| 📞 **Contact** | Contact form and company information |
-| 📋 **Booking** | Complete booking system for tours |
+| 📞 **Contact** | Inquiry form with WhatsApp integration and office information |
+| 📋 **Booking** | Complete booking system for tours with traveler details |
 
-### 🔐 Authentication & Admin
+### 🔐 Admin CMS
 
 | Feature | Description |
 |---|---|
-| 🔑 **Auth** | Supabase-powered login with role-based access control |
-| 📊 **Admin Dashboard** | Full admin panel for managing all content |
-| 🗂️ **Admin Modules** | Tours, Destinations, Hotels, Visa, Hajj/Umrah, Gallery, Blog, Testimonials, Partners, Transfers, Bookings, Customers, Settings |
+| 🔑 **Auth** | Supabase-powered login with role-based access control (Admin / Staff) |
+| 📊 **Dashboard** | Live stats for tours, bookings, destinations, revenue, gallery & blog |
+| 🗺️ **Tours** | Create, edit, price, feature & publish domestic/international packages |
+| 📍 **Destinations** | Manage world destination catalog |
+| 🏨 **Hotels** | Hotel listings management |
+| 🛂 **Visa Services** | Manage visa catalog + review applicant submissions with status updates |
+| 🕌 **Hajj & Umrah** | Manage pilgrimage package catalog |
+| 🖼️ **Gallery** | Upload & categorize media assets via Supabase Storage |
+| 📰 **Blogs** | Create and manage travel articles |
+| 🚗 **Airport Transfers** | Manage vehicle fleet and handle transfer requests |
+| 📅 **Bookings** | Review, confirm, complete or cancel customer bookings with WhatsApp chat |
+| 👥 **Customers** | Customer directory management |
+| ⚙️ **Settings** | Dynamic site configuration |
 
 ---
 
@@ -197,8 +296,6 @@ The app supports **Arabic** 🇸🇦 and **English** 🇬🇧 with full RTL/LTR 
 
 ## 📁 Database Schema
 
-The app connects to Supabase with the following main tables:
-
 | Table | Purpose |
 |---|---|
 | `destinations` | World destinations data |
@@ -223,7 +320,7 @@ The app connects to Supabase with the following main tables:
 |---|---|
 | **Guest** | All public pages |
 | **User** | Public pages + Booking |
-| **Admin** | Full admin dashboard + all management modules |
+| **Admin / Staff** | Full admin dashboard + all management modules |
 
 ---
 
